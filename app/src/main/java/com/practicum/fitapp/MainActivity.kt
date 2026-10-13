@@ -7,14 +7,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -109,6 +113,48 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             else -> "Ожирение"
         }
         Text(text = "Категория: $category", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(32.dp))
+        Text(text = "Дневник питания", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+
+// Изменяемый список блюд. mutableStateListOf — как mutableStateOf,
+// только для списков: изменение списка тоже вызывает рекомпозицию.
+        val meals = remember { mutableStateListOf(
+            "Овсянка — 350 ккал",
+            "Куриная грудка — 200 ккал"
+        ) }
+
+        var newMeal by remember { mutableStateOf("") }
+
+        OutlinedTextField(
+            value = newMeal,
+            onValueChange = { newMeal = it },
+            label = { Text("Новое блюдо") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                if (newMeal.isNotBlank()) {
+                    meals.add(newMeal)
+                    newMeal = ""   // очищаем поле после добавления
+                }
+            }
+        ) {
+            Text("Добавить")
+        }
+
+        LazyColumn {
+            items(meals) { meal ->
+                Text(
+                    text = meal,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+        }
     }
 }
 
