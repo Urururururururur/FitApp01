@@ -16,7 +16,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +40,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.practicum.fitapp.ui.theme.FitAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,27 +52,61 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FitAppTheme {
-                // Храним текущий экран. null — главный, "second" — второй.
-                var currentScreen by remember { mutableStateOf<String?>(null) }
+                val navController = rememberNavController()
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    when (currentScreen) {
-                        null -> {
-                            Column(
-                                modifier = Modifier
-                                    .padding(innerPadding)
-                                    .verticalScroll(rememberScrollState())
-                            ) {
-                                Greeting(name = "Андрей")
-                                Button(onClick = { currentScreen = "second" }) {
-                                    Text("Перейти на второй экран")
-                                }
-                            }
+                // Следим за текущим экраном, чтобы подсветить активную вкладку в меню
+                val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationBarItem(
+                                selected = currentRoute == "training",
+                                onClick = { navController.navigate("training") },
+                                icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                                label = { Text("Тренировка") }
+                            )
+                            NavigationBarItem(
+                                selected = currentRoute == "nutrition",
+                                onClick = { navController.navigate("nutrition") },
+                                icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+                                label = { Text("Питание") }
+                            )
+                            NavigationBarItem(
+                                selected = currentRoute == "profile",
+                                onClick = { navController.navigate("profile") },
+                                icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                                label = { Text("Профиль") }
+                            )
                         }
-                        else -> SecondScreen(onBack = { currentScreen = null })
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = "training",
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+                        composable("training") { TrainingScreen() }
+                        composable("nutrition") { NutritionScreen() }
+                        composable("profile") { ProfileScreen() }
                     }
                 }
             }
+        }
+    }
+}
+@Composable
+fun MainScreen(onGoToSecond: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Greeting(name = "Андрей")
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onGoToSecond) {
+            Text("Перейти на второй экран")
         }
     }
 }
