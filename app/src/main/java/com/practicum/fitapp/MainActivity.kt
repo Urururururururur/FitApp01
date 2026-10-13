@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +43,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+/**
+ * Считает индекс массы тела.
+ * weightKg — вес в килограммах
+ * heightM  — рост в метрах
+ * Возвращает число с двумя знаками после запятой.
+ */
+fun calculateBmi(weightKg: Double, heightM: Double): Double {
+    val bmi = weightKg / (heightM * heightM)
+    return Math.round(bmi * 100.0) / 100.0
+}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -68,6 +79,29 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         Button(onClick = { count++ }) {
             Text("Сделал подход")
         }
+        // Стейт для ввода веса и роста (храним как строку — так удобнее для TextField)
+        var weightInput by remember { mutableStateOf("70") }
+        var heightInput by remember { mutableStateOf("1.75") }
+
+// Поле ввода веса
+        OutlinedTextField(
+            value = weightInput,
+            onValueChange = { weightInput = it },
+            label = { Text("Вес, кг") }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+// Поле ввода роста
+        OutlinedTextField(
+            value = heightInput,
+            onValueChange = { heightInput = it },
+            label = { Text("Рост, м") }
+        )
+        val weight = weightInput.toDoubleOrNull() ?: 0.0
+        val height = heightInput.toDoubleOrNull() ?: 0.0
+        val bmi = if (height > 0) calculateBmi(weight, height) else 0.0
+        Text(text = "ИМТ: $bmi", fontSize = 20.sp)
     }
 }
 
