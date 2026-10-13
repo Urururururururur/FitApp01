@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -38,13 +40,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val userName = "Андрей"
             FitAppTheme {
+                // Храним текущий экран. null — главный, "second" — второй.
+                var currentScreen by remember { mutableStateOf<String?>(null) }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = userName,
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    when (currentScreen) {
+                        null -> {
+                            Column(
+                                modifier = Modifier
+                                    .padding(innerPadding)
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                Greeting(name = "Андрей")
+                                Button(onClick = { currentScreen = "second" }) {
+                                    Text("Перейти на второй экран")
+                                }
+                            }
+                        }
+                        else -> SecondScreen(onBack = { currentScreen = null })
+                    }
                 }
             }
         }
@@ -154,8 +169,8 @@ fun MealListSection() {
             Text("Добавить")
         }
         Spacer(modifier = Modifier.height(8.dp))
-        LazyColumn {
-            items(meals) { meal ->
+        Column {
+            meals.forEach { meal ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
