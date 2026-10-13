@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -61,98 +64,108 @@ fun calculateBmi(weightKg: Double, heightM: Double): Double {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "FitApp",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = "FitApp", fontSize = 32.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Привет, $name!")
+
         Spacer(modifier = Modifier.height(32.dp))
+        WorkoutCounterSection()
 
-// Создаём state: счётчик подходов, изначально 0
-        var count by remember { mutableStateOf(0) }
+        Spacer(modifier = Modifier.height(32.dp))
+        BmiSection()
 
+        Spacer(modifier = Modifier.height(32.dp))
+        MealListSection()
+    }
+}
+@Composable
+fun WorkoutCounterSection() {
+    var count by remember { mutableStateOf(0) }
+
+    Column {
         Text(text = "Подходов: $count", fontSize = 24.sp)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { count++ }) {
             Text("Сделал подход")
         }
-        // Стейт для ввода веса и роста (храним как строку — так удобнее для TextField)
-        var weightInput by remember { mutableStateOf("70") }
-        var heightInput by remember { mutableStateOf("1.75") }
+    }
+}
 
-// Поле ввода веса
+@Composable
+fun BmiSection() {
+    var weightInput by remember { mutableStateOf("70") }
+    var heightInput by remember { mutableStateOf("1.75") }
+
+    val weight = weightInput.toDoubleOrNull() ?: 0.0
+    val height = heightInput.toDoubleOrNull() ?: 0.0
+    val bmi = if (height > 0) calculateBmi(weight, height) else 0.0
+    val category = when {
+        bmi < 18.5 -> "Недостаточный вес"
+        bmi < 25 -> "Норма"
+        bmi < 30 -> "Избыточный вес"
+        else -> "Ожирение"
+    }
+
+    Column {
         OutlinedTextField(
             value = weightInput,
             onValueChange = { weightInput = it },
             label = { Text("Вес, кг") }
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
-// Поле ввода роста
         OutlinedTextField(
             value = heightInput,
             onValueChange = { heightInput = it },
             label = { Text("Рост, м") }
         )
-        val weight = weightInput.toDoubleOrNull() ?: 0.0
-        val height = heightInput.toDoubleOrNull() ?: 0.0
-        val bmi = if (height > 0) calculateBmi(weight, height) else 0.0
-        Text(text = "ИМТ: $bmi", fontSize = 20.sp)
-        val category = when {
-            bmi < 18.5 -> "Недостаточный вес"
-            bmi < 25 -> "Норма"
-            bmi < 30 -> "Избыточный вес"
-            else -> "Ожирение"
-        }
-        Text(text = "Категория: $category", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(text = "Дневник питания", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "ИМТ: $bmi", fontSize = 20.sp)
+        Text(text = "Категория: $category", fontSize = 18.sp)
+    }
+}
 
-// Изменяемый список блюд. mutableStateListOf — как mutableStateOf,
-// только для списков: изменение списка тоже вызывает рекомпозицию.
-        val meals = remember { mutableStateListOf(
-            "Овсянка — 350 ккал",
-            "Куриная грудка — 200 ккал"
-        ) }
+@Composable
+fun MealListSection() {
+    val meals = remember { mutableStateListOf(
+        "Овсянка — 350 ккал",
+        "Куриная грудка — 200 ккал"
+    ) }
+    var newMeal by remember { mutableStateOf("") }
 
-        var newMeal by remember { mutableStateOf("") }
-
+    Column {
         OutlinedTextField(
             value = newMeal,
             onValueChange = { newMeal = it },
             label = { Text("Новое блюдо") },
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
         Button(
             onClick = {
                 if (newMeal.isNotBlank()) {
                     meals.add(newMeal)
-                    newMeal = ""   // очищаем поле после добавления
+                    newMeal = ""
                 }
             }
         ) {
             Text("Добавить")
         }
-
+        Spacer(modifier = Modifier.height(8.dp))
         LazyColumn {
             items(meals) { meal ->
-                Text(
-                    text = meal,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = meal, fontSize = 18.sp)
+                    TextButton(onClick = { meals.remove(meal) }) {
+                        Text("✕")
+                    }
+                }
             }
         }
     }
