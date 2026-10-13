@@ -102,6 +102,13 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         val height = heightInput.toDoubleOrNull() ?: 0.0
         val bmi = if (height > 0) calculateBmi(weight, height) else 0.0
         Text(text = "ИМТ: $bmi", fontSize = 20.sp)
+        val category = when {
+            bmi < 18.5 -> "Недостаточный вес"
+            bmi < 25 -> "Норма"
+            bmi < 30 -> "Избыточный вес"
+            else -> "Ожирение"
+        }
+        Text(text = "Категория: $category", fontSize = 18.sp)
     }
 }
 
