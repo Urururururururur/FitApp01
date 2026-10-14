@@ -3,7 +3,7 @@ package com.practicum.fitapp.presentation.nutrition
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.fitapp.data.local.ProductEntity
-import com.practicum.fitapp.data.repository.ProductRepository
+import com.practicum.fitapp.data.repository.NutritionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
-    private val repository: ProductRepository
+    private val repository: NutritionRepository
 ) : ViewModel() {
 
     val products: StateFlow<List<ProductEntity>> = repository

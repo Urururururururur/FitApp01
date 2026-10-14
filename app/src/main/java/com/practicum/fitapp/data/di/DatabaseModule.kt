@@ -3,8 +3,9 @@ package com.practicum.fitapp.data.di
 import android.content.Context
 import androidx.room.Room
 import com.practicum.fitapp.data.local.FitAppDatabase
+import com.practicum.fitapp.data.local.MealEntryDao
 import com.practicum.fitapp.data.local.ProductDao
-import com.practicum.fitapp.data.repository.ProductRepository
+import com.practicum.fitapp.data.repository.NutritionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,7 +37,12 @@ object DatabaseModule {
     fun provideProductDao(db: FitAppDatabase): ProductDao = db.productDao()
 
     @Provides
+    fun provideMealEntryDao(db: FitAppDatabase): MealEntryDao = db.mealEntryDao()
+
+    @Provides
     @Singleton
-    fun provideProductRepository(dao: ProductDao): ProductRepository =
-        ProductRepository(dao)
+    fun provideNutritionRepository(
+        productDao: ProductDao,
+        mealEntryDao: MealEntryDao
+    ): NutritionRepository = NutritionRepository(productDao, mealEntryDao)
 }

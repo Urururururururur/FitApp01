@@ -17,10 +17,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     version = 3,
     exportSchema = false
 )
+
 abstract class FitAppDatabase : RoomDatabase() {
 
     /** Точка доступа к таблице products. */
     abstract fun productDao(): ProductDao
+    abstract fun mealEntryDao(): MealEntryDao
 
     companion object {
         @Volatile
@@ -68,7 +70,6 @@ abstract class FitAppDatabase : RoomDatabase() {
                     FitAppDatabase::class.java,
                     "fitapp_database"
                 )
-                    .addMigrations(MIGRATION_1_2)   // ← регистрируем миграцию
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                     .also { INSTANCE = it }
