@@ -26,6 +26,7 @@ class NutritionViewModel @Inject constructor(
 
     fun addProduct(
         name: String,
+        category: String,
         calories: Int,
         protein: Double,
         fat: Double,
@@ -37,6 +38,7 @@ class NutritionViewModel @Inject constructor(
             repository.addProduct(
                 ProductEntity(
                     name = name,
+                    category = category,
                     caloriesPer100g = calories,
                     proteinPer100g = protein,
                     fatPer100g = fat,

@@ -42,6 +42,7 @@ fun NutritionScreen(
     var newProtein by remember { mutableStateOf("") }
     var newFat by remember { mutableStateOf("") }
     var newCarbs by remember { mutableStateOf("") }
+    var newCategory by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -101,18 +102,27 @@ fun NutritionScreen(
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = newCategory,
+            onValueChange = { newCategory = it },
+            label = { Text("Категория (например: мясо, овощи)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {
                 if (newName.isNotBlank()) {
                     viewModel.addProduct(
                         name = newName,
+                        category = newCategory.ifBlank { "Прочее" },
                         calories = newCalories.toIntOrNull() ?: 0,
                         protein = newProtein.toDoubleOrNull() ?: 0.0,
                         fat = newFat.toDoubleOrNull() ?: 0.0,
                         carbs = newCarbs.toDoubleOrNull() ?: 0.0
                     )
                     newName = ""
+                    newCategory = ""
                     newCalories = ""
                     newProtein = ""
                     newFat = ""
@@ -132,7 +142,7 @@ fun NutritionScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${product.name} — ${product.caloriesPer100g} ккал\n" +
+                    text = "${product.name} (${product.category}) — ${product.caloriesPer100g} ккал\n" +
                             "Б: ${product.proteinPer100g}  Ж: ${product.fatPer100g}  У: ${product.carbsPer100g}",
                     fontSize = 16.sp
                 )
