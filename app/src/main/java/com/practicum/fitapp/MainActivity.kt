@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
@@ -20,45 +19,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.practicum.fitapp.data.local.FitAppDatabase
-import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.ui.theme.FitAppTheme
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Тестовая проверка, что Room работает.
-// Позже уберём — код должен быть только в ViewModel.
-        lifecycleScope.launch {
-            val db = FitAppDatabase.getInstance(applicationContext)
-            val dao = db.productDao()
-
-            // Вставляем тестовый продукт
-            dao.insert(
-                ProductEntity(
-                    name = "Яблоко",
-                    caloriesPer100g = 52,
-                    proteinPer100g = 0.3,
-                    fatPer100g = 0.2,
-                    carbsPer100g = 14.0
-                )
-            )
-
-            // Читаем первые значения из потока и логируем
-            val products = dao.getAll().first()
-            android.util.Log.d("FitAppDB", "Продуктов в базе: ${products.size}")
-            products.forEach { p ->
-                android.util.Log.d("FitAppDB", "${p.id}: ${p.name} — ${p.caloriesPer100g} ккал")
-            }
-        }
         setContent {
             FitAppTheme {
                 val navController = rememberNavController()
