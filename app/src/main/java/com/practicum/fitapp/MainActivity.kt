@@ -7,9 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -39,6 +42,12 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         NavigationBar {
                             NavigationBarItem(
+                                selected = currentRoute == "community",
+                                onClick = { navController.navigate("community") },
+                                icon = { Icon(Icons.Default.Star, contentDescription = null) },
+                                label = { Text("Сообщество") }
+                            )
+                            NavigationBarItem(
                                 selected = currentRoute == "training",
                                 onClick = { navController.navigate("training") },
                                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
@@ -49,6 +58,12 @@ class MainActivity : ComponentActivity() {
                                 onClick = { navController.navigate("nutrition") },
                                 icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
                                 label = { Text("Питание") }
+                            )
+                            NavigationBarItem(
+                                selected = currentRoute == "journal",
+                                onClick = { navController.navigate("journal") },
+                                icon = { Icon(Icons.Default.List, contentDescription = null) },
+                                label = { Text("Журнал") }
                             )
                             NavigationBarItem(
                                 selected = currentRoute == "profile",
@@ -64,8 +79,10 @@ class MainActivity : ComponentActivity() {
                         startDestination = "training",
                         modifier = Modifier.padding(innerPadding)
                     ) {
+                        composable("community") { CommunityScreen() }
                         composable("training") { TrainingScreen() }
                         composable("nutrition") { NutritionScreen() }
+                        composable("journal") { JournalScreen() }
                         composable("profile") { ProfileScreen() }
                     }
                 }
