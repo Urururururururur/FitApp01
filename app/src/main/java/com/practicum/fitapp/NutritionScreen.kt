@@ -25,13 +25,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 
 @Composable
-fun NutritionScreen() {
-    val meals = remember { mutableStateListOf(
-        "Овсянка — 350 ккал",
-        "Куриная грудка — 200 ккал"
-    ) }
+fun NutritionScreen(
+    viewModel: NutritionViewModel = hiltViewModel()
+) {
+    // Подписываемся на StateFlow из ViewModel.
+    // collectAsStateWithLifecycle превращает Flow в Compose-state.
+    val products by viewModel.products.collectAsStateWithLifecycle()
+
     var newMeal by remember { mutableStateOf("") }
 
     Column(
@@ -48,7 +53,7 @@ fun NutritionScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Сегодня съедено: ${meals.size} блюд",
+            text = "Сегодня съедено: ${products.size} блюд",
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -56,7 +61,7 @@ fun NutritionScreen() {
         OutlinedTextField(
             value = newMeal,
             onValueChange = { newMeal = it },
-            label = { Text("Новое блюдо") },
+            label = { Text("Название продукта") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -64,7 +69,7 @@ fun NutritionScreen() {
         Button(
             onClick = {
                 if (newMeal.isNotBlank()) {
-                    meals.add(newMeal)
+                    viewModel.addProduct(name = newMeal, calories = 100)
                     newMeal = ""
                 }
             }
@@ -74,14 +79,17 @@ fun NutritionScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        meals.forEach { meal ->
+        products.forEach { product ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = meal, fontSize = 18.sp)
-                TextButton(onClick = { meals.remove(meal) }) {
+                Text(
+                    text = "${product.name} — ${product.caloriesPer100g} ккал",
+                    fontSize = 18.sp
+                )
+                TextButton(onClick = { viewModel.deleteProduct(product) }) {
                     Text("✕")
                 }
             }
