@@ -37,7 +37,11 @@ fun NutritionScreen(
     // collectAsStateWithLifecycle превращает Flow в Compose-state.
     val products by viewModel.products.collectAsStateWithLifecycle()
 
-    var newMeal by remember { mutableStateOf("") }
+    var newName by remember { mutableStateOf("") }
+    var newCalories by remember { mutableStateOf("") }
+    var newProtein by remember { mutableStateOf("") }
+    var newFat by remember { mutableStateOf("") }
+    var newCarbs by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -59,18 +63,60 @@ fun NutritionScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = newMeal,
-            onValueChange = { newMeal = it },
-            label = { Text("Название продукта") },
+            value = newName,
+            onValueChange = { newName = it },
+            label = { Text("Название") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
 
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = newCalories,
+                onValueChange = { newCalories = it },
+                label = { Text("Ккал/100г") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = newProtein,
+                onValueChange = { newProtein = it },
+                label = { Text("Белки") },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = newFat,
+                onValueChange = { newFat = it },
+                label = { Text("Жиры") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = newCarbs,
+                onValueChange = { newCarbs = it },
+                label = { Text("Углеводы") },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
         Button(
             onClick = {
-                if (newMeal.isNotBlank()) {
-                    viewModel.addProduct(name = newMeal, calories = 100)
-                    newMeal = ""
+                if (newName.isNotBlank()) {
+                    viewModel.addProduct(
+                        name = newName,
+                        calories = newCalories.toIntOrNull() ?: 0,
+                        protein = newProtein.toDoubleOrNull() ?: 0.0,
+                        fat = newFat.toDoubleOrNull() ?: 0.0,
+                        carbs = newCarbs.toDoubleOrNull() ?: 0.0
+                    )
+                    newName = ""
+                    newCalories = ""
+                    newProtein = ""
+                    newFat = ""
+                    newCarbs = ""
                 }
             }
         ) {
@@ -86,8 +132,9 @@ fun NutritionScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${product.name} — ${product.caloriesPer100g} ккал",
-                    fontSize = 18.sp
+                    text = "${product.name} — ${product.caloriesPer100g} ккал\n" +
+                            "Б: ${product.proteinPer100g}  Ж: ${product.fatPer100g}  У: ${product.carbsPer100g}",
+                    fontSize = 16.sp
                 )
                 TextButton(onClick = { viewModel.deleteProduct(product) }) {
                     Text("✕")

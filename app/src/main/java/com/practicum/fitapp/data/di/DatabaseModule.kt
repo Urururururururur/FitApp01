@@ -27,7 +27,9 @@ object DatabaseModule {
             context,
             FitAppDatabase::class.java,
             "fitapp_database"
-        ).build()
+        )
+            .addMigrations(FitAppDatabase.MIGRATION_1_2)
+            .build()
     }
 
     @Provides

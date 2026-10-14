@@ -24,16 +24,23 @@ class NutritionViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun addProduct(name: String, calories: Int) {
+    fun addProduct(
+        name: String,
+        calories: Int,
+        protein: Double,
+        fat: Double,
+        carbs: Double
+    ) {
         if (name.isBlank()) return
+
         viewModelScope.launch {
             repository.addProduct(
                 ProductEntity(
                     name = name,
                     caloriesPer100g = calories,
-                    proteinPer100g = 0.0,
-                    fatPer100g = 0.0,
-                    carbsPer100g = 0.0
+                    proteinPer100g = protein,
+                    fatPer100g = fat,
+                    carbsPer100g = carbs
                 )
             )
         }

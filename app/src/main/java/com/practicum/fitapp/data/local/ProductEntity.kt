@@ -13,6 +13,9 @@ data class ProductEntity(
     val id: Long = 0,
 
     val name: String,
+    // Новое поле: категория продукта. Значение по умолчанию — пустая строка,
+    // чтобы старые записи в БД не сломались.
+    val category: String = "Прочее",
 
     val caloriesPer100g: Int,
 
