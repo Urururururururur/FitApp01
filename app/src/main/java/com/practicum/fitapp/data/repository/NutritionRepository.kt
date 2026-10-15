@@ -36,10 +36,6 @@ class NutritionRepository(
     fun getEntriesByDate(date: Long): Flow<List<MealEntryEntity>> =
         mealEntryDao.getByDate(date)
 
-    /** Сумма калорий за день. */
-    fun getTotalCaloriesByDate(date: Long): Flow<Double> =
-        mealEntryDao.getTotalCaloriesByDate(date)
-
     /** Все даты, за которые есть записи. */
     fun getAllDates(): Flow<List<Long>> = mealEntryDao.getAllDates()
 

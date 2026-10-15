@@ -40,7 +40,7 @@ fun NutritionScreen(
     // Читаем данные из ViewModel
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
     val entries by viewModel.entriesForDay.collectAsStateWithLifecycle()
-    val totalCalories by viewModel.totalCalories.collectAsStateWithLifecycle()
+    val summary by viewModel.dailySummary.collectAsStateWithLifecycle()
     val products by viewModel.products.collectAsStateWithLifecycle()
     val availableDates by viewModel.availableDates.collectAsStateWithLifecycle()
 
@@ -95,13 +95,21 @@ fun NutritionScreen(
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Калорий: ${"%.1f".format(summary.calories)} ккал",
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Б: ${"%.1f".format(summary.protein)} г  " +
+                            "Ж: ${"%.1f".format(summary.fat)} г  " +
+                            "У: ${"%.1f".format(summary.carbs)} г",
+                    fontSize = 14.sp
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "Калорий: ${"%.1f".format(totalCalories)} ккал", fontSize = 16.sp)
-                Text(text = "Записей: ${entries.size}", fontSize = 14.sp)
+                Text(text = "Записей: ${summary.entriesCount}", fontSize = 13.sp)
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         // ==================== Список записей за день ====================
         Text(

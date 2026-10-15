@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
@@ -65,12 +66,34 @@ class NutritionViewModel @Inject constructor(
         )
 
     /** Сумма калорий за выбранный день. */
-    val totalCalories: StateFlow<Double> = _selectedDate
-        .flatMapLatest { date -> repository.getTotalCaloriesByDate(date) }
+    /** Сводка за выбранный день: калории + БЖУ + количество записей. */
+    val dailySummary: StateFlow<DailySummary> = entriesForDay
+        .map { entries ->
+            var calories = 0.0
+            var protein = 0.0
+            var fat = 0.0
+            var carbs = 0.0
+
+            entries.forEach { entry ->
+                val factor = entry.grams / 100.0
+                calories += entry.productCalories * factor
+                protein += entry.productProtein * factor
+                fat += entry.productFat * factor
+                carbs += entry.productCarbs * factor
+            }
+
+            DailySummary(
+                calories = calories,
+                protein = protein,
+                fat = fat,
+                carbs = carbs,
+                entriesCount = entries.size
+            )
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0.0
+            initialValue = DailySummary()
         )
 
     /** Список всех дат, где есть записи. */
@@ -121,6 +144,9 @@ class NutritionViewModel @Inject constructor(
                     productId = product.id,
                     productName = product.name,
                     productCalories = product.caloriesPer100g,
+                    productProtein = product.proteinPer100g,
+                    productFat = product.fatPer100g,
+                    productCarbs = product.carbsPer100g,
                     grams = grams
                 )
             )

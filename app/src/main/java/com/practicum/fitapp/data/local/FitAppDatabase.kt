@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  */
 @Database(
     entities = [ProductEntity::class, MealEntryEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 
@@ -62,7 +62,17 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_entries_date ON meal_entries(date)")
             }
         }
-
+        /**
+         * Миграция с 3 на 4.
+         * Добавляет колонки БЖУ в meal_entries.
+         */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE meal_entries ADD COLUMN productProtein REAL NOT NULL DEFAULT 0.0")
+                db.execSQL("ALTER TABLE meal_entries ADD COLUMN productFat REAL NOT NULL DEFAULT 0.0")
+                db.execSQL("ALTER TABLE meal_entries ADD COLUMN productCarbs REAL NOT NULL DEFAULT 0.0")
+            }
+        }
         fun getInstance(context: Context): FitAppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -70,7 +80,7 @@ abstract class FitAppDatabase : RoomDatabase() {
                     FitAppDatabase::class.java,
                     "fitapp_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { INSTANCE = it }
             }

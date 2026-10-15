@@ -12,14 +12,6 @@ interface MealEntryDao {
     @Query("SELECT * FROM meal_entries WHERE date = :date ORDER BY id DESC")
     fun getByDate(date: Long): Flow<List<MealEntryEntity>>
 
-    /** Сумма калорий за день. Возвращает число или 0, если записей нет. */
-    @Query("""
-        SELECT COALESCE(SUM(grams * productCalories / 100.0), 0.0)
-        FROM meal_entries
-        WHERE date = :date
-    """)
-    fun getTotalCaloriesByDate(date: Long): Flow<Double>
-
     /** Список всех дат, в которые были записи. */
     @Query("SELECT DISTINCT date FROM meal_entries ORDER BY date DESC")
     fun getAllDates(): Flow<List<Long>>

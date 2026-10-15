@@ -29,7 +29,11 @@ object DatabaseModule {
             FitAppDatabase::class.java,
             "fitapp_database"
         )
-            .addMigrations(FitAppDatabase.MIGRATION_1_2, FitAppDatabase.MIGRATION_2_3)
+            .addMigrations(
+                FitAppDatabase.MIGRATION_1_2,
+                FitAppDatabase.MIGRATION_2_3,
+                FitAppDatabase.MIGRATION_3_4
+            )
             .build()
     }
 

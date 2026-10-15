@@ -24,5 +24,9 @@ data class MealEntryEntity(
     val productId: Long,
     val productName: String,
     val productCalories: Int,
+    // Новые денормализованные поля БЖУ:
+    val productProtein: Double = 0.0,
+    val productFat: Double = 0.0,
+    val productCarbs: Double = 0.0,
     val grams: Double
 )
