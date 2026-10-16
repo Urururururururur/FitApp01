@@ -13,8 +13,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  * version — номер версии схемы. Меняется при изменении таблиц.
  */
 @Database(
-    entities = [ProductEntity::class, MealEntryEntity::class],
-    version = 4,
+    entities = [
+        ProductEntity::class,
+        MealEntryEntity::class,
+        ExerciseEntity::class,
+        WorkoutEntity::class,
+        WorkoutExerciseEntity::class,
+        SetEntity::class
+    ],
+    version = 5,
     exportSchema = false
 )
 
@@ -29,8 +36,7 @@ abstract class FitAppDatabase : RoomDatabase() {
         private var INSTANCE: FitAppDatabase? = null
 
         /**
-         * Миграция с версии 1 на версию 2.
-         * Добавляет колонку category в таблицу products.
+         * Миграция
          */
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -73,6 +79,72 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE meal_entries ADD COLUMN productCarbs REAL NOT NULL DEFAULT 0.0")
             }
         }
+        /**
+         * Миграция с 4 на 5.
+         * Создаёт четыре таблицы: exercises, workouts, workout_exercises, sets.
+         * Порядок создания важен: сначала parents, потом children (FK).
+         */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 1. Упражнения (нет FK, создаём первым)
+                db.execSQL("""
+            CREATE TABLE IF NOT EXISTS exercises (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                muscleGroups TEXT NOT NULL,
+                category TEXT NOT NULL,
+                isBuiltIn INTEGER NOT NULL,
+                description TEXT NOT NULL
+            )
+        """.trimIndent())
+
+                // 2. Тренировки
+                db.execSQL("""
+            CREATE TABLE IF NOT EXISTS workouts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                date INTEGER NOT NULL,
+                endDate INTEGER,
+                name TEXT NOT NULL,
+                note TEXT NOT NULL,
+                isCompleted INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+                // 3. Упражнения в тренировке (зависит от exercises и workouts)
+                db.execSQL("""
+            CREATE TABLE IF NOT EXISTS workout_exercises (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                workoutId INTEGER NOT NULL,
+                exerciseId INTEGER NOT NULL,
+                orderInWorkout INTEGER NOT NULL,
+                note TEXT NOT NULL,
+                FOREIGN KEY(workoutId) REFERENCES workouts(id) ON DELETE CASCADE,
+                FOREIGN KEY(exerciseId) REFERENCES exercises(id) ON DELETE CASCADE
+            )
+        """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_workout_exercises_workoutId ON workout_exercises(workoutId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_workout_exercises_exerciseId ON workout_exercises(exerciseId)")
+
+                // 4. Подходы (зависит от workout_exercises)
+                db.execSQL("""
+            CREATE TABLE IF NOT EXISTS sets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                workoutExerciseId INTEGER NOT NULL,
+                weight REAL,
+                reps INTEGER,
+                distance REAL,
+                duration INTEGER,
+                intensity TEXT NOT NULL,
+                orderInExercise INTEGER NOT NULL,
+                FOREIGN KEY(workoutExerciseId) REFERENCES workout_exercises(id) ON DELETE CASCADE
+            )
+        """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_sets_workoutExerciseId ON sets(workoutExerciseId)")
+            }
+        }
+
+
         fun getInstance(context: Context): FitAppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -80,7 +152,7 @@ abstract class FitAppDatabase : RoomDatabase() {
                     FitAppDatabase::class.java,
                     "fitapp_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                     .also { INSTANCE = it }
             }
