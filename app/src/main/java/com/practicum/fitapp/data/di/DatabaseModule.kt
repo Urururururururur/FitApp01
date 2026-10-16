@@ -5,7 +5,11 @@ import androidx.room.Room
 import com.practicum.fitapp.data.local.FitAppDatabase
 import com.practicum.fitapp.data.local.MealEntryDao
 import com.practicum.fitapp.data.local.ProductDao
+import com.practicum.fitapp.data.local.SetDao
+import com.practicum.fitapp.data.local.WorkoutDao
+import com.practicum.fitapp.data.local.WorkoutExerciseDao
 import com.practicum.fitapp.data.repository.NutritionRepository
+import com.practicum.fitapp.data.repository.TrainingRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,4 +54,21 @@ object DatabaseModule {
         productDao: ProductDao,
         mealEntryDao: MealEntryDao
     ): NutritionRepository = NutritionRepository(productDao, mealEntryDao)
+
+    @Provides
+    fun provideWorkoutDao(db: FitAppDatabase): WorkoutDao = db.workoutDao()
+
+    @Provides
+    fun provideWorkoutExerciseDao(db: FitAppDatabase): WorkoutExerciseDao = db.workoutExerciseDao()
+
+    @Provides
+    fun provideSetDao(db: FitAppDatabase): SetDao = db.setDao()
+
+    @Provides
+    @Singleton
+    fun provideTrainingRepository(
+        workoutDao: WorkoutDao,
+        workoutExerciseDao: WorkoutExerciseDao,
+        setDao: SetDao
+    ): TrainingRepository = TrainingRepository(workoutDao, workoutExerciseDao, setDao)
 }
