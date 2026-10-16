@@ -1,5 +1,6 @@
 package com.practicum.fitapp.data.repository
 
+import com.practicum.fitapp.data.local.ExerciseDao
 import com.practicum.fitapp.data.local.ExerciseEntity
 import com.practicum.fitapp.data.local.SetDao
 import com.practicum.fitapp.data.local.SetEntity
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.Flow
 class TrainingRepository(
     private val workoutDao: WorkoutDao,
     private val workoutExerciseDao: WorkoutExerciseDao,
-    private val setDao: SetDao
+    private val setDao: SetDao,
+    private val exerciseDao: ExerciseDao
 ) {
 
     // ==================== Тренировки ====================
@@ -83,4 +85,21 @@ class TrainingRepository(
 
     suspend fun nextSetOrder(workoutExerciseId: Long): Int =
         setDao.nextOrder(workoutExerciseId)
+
+    // ==================== Справочник упражнений ====================
+
+    fun getAllExercises(): Flow<List<ExerciseEntity>> = exerciseDao.getAll()
+
+    fun getBuiltInExercises(): Flow<List<ExerciseEntity>> = exerciseDao.getBuiltIn()
+
+    fun getUserExercises(): Flow<List<ExerciseEntity>> = exerciseDao.getUserCreated()
+
+    suspend fun countBuiltInExercises(): Int = exerciseDao.countBuiltIn()
+
+    suspend fun insertExercises(exercises: List<ExerciseEntity>) = exerciseDao.insertAll(exercises)
+
+    suspend fun insertExercise(exercise: ExerciseEntity): Long = exerciseDao.insert(exercise)
+
+    suspend fun deleteUserExercise(id: Long) = exerciseDao.deleteUserCreated(id)
+
 }

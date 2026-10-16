@@ -37,6 +37,8 @@ abstract class FitAppDatabase : RoomDatabase() {
 
     abstract fun setDao(): SetDao
 
+    abstract fun exerciseDao(): ExerciseDao
+
     companion object {
         @Volatile
         private var INSTANCE: FitAppDatabase? = null

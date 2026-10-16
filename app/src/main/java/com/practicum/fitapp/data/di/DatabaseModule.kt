@@ -2,6 +2,7 @@ package com.practicum.fitapp.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.practicum.fitapp.data.local.ExerciseDao
 import com.practicum.fitapp.data.local.FitAppDatabase
 import com.practicum.fitapp.data.local.MealEntryDao
 import com.practicum.fitapp.data.local.ProductDao
@@ -65,10 +66,13 @@ object DatabaseModule {
     fun provideSetDao(db: FitAppDatabase): SetDao = db.setDao()
 
     @Provides
+    fun provideExerciseDao(db: FitAppDatabase): ExerciseDao = db.exerciseDao()
+    @Provides
     @Singleton
     fun provideTrainingRepository(
         workoutDao: WorkoutDao,
         workoutExerciseDao: WorkoutExerciseDao,
-        setDao: SetDao
-    ): TrainingRepository = TrainingRepository(workoutDao, workoutExerciseDao, setDao)
+        setDao: SetDao,
+        exerciseDao: ExerciseDao
+    ): TrainingRepository = TrainingRepository(workoutDao, workoutExerciseDao, setDao, exerciseDao)
 }
