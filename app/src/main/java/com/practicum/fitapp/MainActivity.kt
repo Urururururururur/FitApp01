@@ -81,11 +81,35 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("community") { CommunityScreen() }
-                        composable("training") { TrainingScreen() }
+                        composable("training") {
+                            TrainingScreen(
+                                onWorkoutClick = { workoutId ->
+                                    navController.navigate("workout_details/$workoutId")
+                                }
+                            )
+                        }
                         composable("nutrition") { NutritionScreen() }
                         composable("journal") { JournalScreen() }
                         composable("profile") { ProfileScreen() }
+                        composable("training") {
+                            TrainingScreen(
+                                onWorkoutClick = { workoutId ->
+                                    navController.navigate("workout_details/$workoutId")
+                                }
+                            )
+                        }
+                        composable(
+                            route = "workout_details/{workoutId}",
+                            arguments = listOf(androidx.navigation.navArgument("workoutId") { type = androidx.navigation.NavType.LongType })
+                        ) { backStackEntry ->
+                            val workoutId = backStackEntry.arguments?.getLong("workoutId") ?: 0L
+                            WorkoutDetailsScreen(
+                                workoutId = workoutId,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                     }
+
                 }
             }
         }

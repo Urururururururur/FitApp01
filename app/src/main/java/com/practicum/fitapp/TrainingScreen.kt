@@ -31,7 +31,9 @@ import java.time.LocalDate
 import androidx.compose.foundation.lazy.items
 
 @Composable
+
 fun TrainingScreen(
+    onWorkoutClick: (Long) -> Unit,
     viewModel: TrainingViewModel = hiltViewModel()
 ) {
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
@@ -94,7 +96,8 @@ fun TrainingScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 4.dp)
+                        .clickable { onWorkoutClick(workout.id) },
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
