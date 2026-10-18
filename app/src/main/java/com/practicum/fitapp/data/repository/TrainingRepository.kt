@@ -35,7 +35,8 @@ class TrainingRepository(
     fun getAllWorkoutDates(): Flow<List<Long>> = workoutDao.getAllWorkoutDates()
 
     suspend fun insertWorkout(workout: WorkoutEntity): Long = workoutDao.insert(workout)
-
+    suspend fun getLastSet(workoutExerciseId: Long): SetEntity? =
+        setDao.getLastSet(workoutExerciseId)
     suspend fun updateWorkout(
         id: Long,
         name: String,

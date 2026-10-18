@@ -3,6 +3,7 @@ package com.practicum.fitapp.presentation.training
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.fitapp.data.local.Intensity
 import com.practicum.fitapp.data.local.SetEntity
 import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import com.practicum.fitapp.data.repository.TrainingRepository
@@ -42,10 +43,21 @@ class ExerciseViewModel @Inject constructor(
     /** Добавить пустой подход. */
     fun addSet() {
         viewModelScope.launch {
+            // 1. Ищем последний подход
+            val lastSet = repository.getLastSet(workoutExerciseId)
+
+            // 2. Определяем следующий порядковый номер
             val nextOrder = repository.nextSetOrder(workoutExerciseId)
+
+            // 3. Создаём новый подход, копируя значения (если есть)
             repository.insertSet(
                 SetEntity(
                     workoutExerciseId = workoutExerciseId,
+                    weight = lastSet?.weight,
+                    reps = lastSet?.reps,
+                    distance = lastSet?.distance,
+                    duration = lastSet?.duration,
+                    intensity = lastSet?.intensity ?: Intensity.NORMAL.name,
                     orderInExercise = nextOrder
                 )
             )

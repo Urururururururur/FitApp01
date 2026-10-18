@@ -15,7 +15,14 @@ interface SetDao {
         ORDER BY orderInExercise
     """)
     fun getByWorkoutExercise(workoutExerciseId: Long): Flow<List<SetEntity>>
-
+    /** Получить последний подход (с максимальным orderInExercise). */
+    @Query("""
+    SELECT * FROM sets 
+    WHERE workoutExerciseId = :workoutExerciseId 
+    ORDER BY orderInExercise DESC 
+    LIMIT 1
+""")
+    suspend fun getLastSet(workoutExerciseId: Long): SetEntity?
     @Insert
     suspend fun insert(set: SetEntity): Long
 

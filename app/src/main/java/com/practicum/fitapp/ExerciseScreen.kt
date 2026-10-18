@@ -74,10 +74,20 @@ fun ExerciseScreen(
                         ) {
                             // Поля ввода: Вес и Повторения
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                // Вес
+                                TextButton(
+                                    onClick = {
+                                        val newWeight = (set.weight ?: 0.0) - 2.5
+                                        viewModel.updateSet(set.copy(weight = maxOf(newWeight, 0.0)))
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Text("−", fontSize = 20.sp)
+                                }
+
                                 OutlinedTextField(
                                     value = set.weight?.toString() ?: "",
                                     onValueChange = { newValue ->
@@ -89,7 +99,34 @@ fun ExerciseScreen(
                                     singleLine = true
                                 )
 
+                                TextButton(
+                                    onClick = {
+                                        val newWeight = (set.weight ?: 0.0) + 2.5
+                                        viewModel.updateSet(set.copy(weight = newWeight))
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Text("+", fontSize = 20.sp)
+                                }
+                            }
+
                                 // Повторения
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        val newReps = (set.reps ?: 0) - 1
+                                        viewModel.updateSet(set.copy(reps = maxOf(newReps, 0)))
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Text("−", fontSize = 20.sp)
+                                }
+
                                 OutlinedTextField(
                                     value = set.reps?.toString() ?: "",
                                     onValueChange = { newValue ->
@@ -100,6 +137,17 @@ fun ExerciseScreen(
                                     modifier = Modifier.width(80.dp),
                                     singleLine = true
                                 )
+
+                                TextButton(
+                                    onClick = {
+                                        val newReps = (set.reps ?: 0) + 1
+                                        viewModel.updateSet(set.copy(reps = newReps))
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Text("+", fontSize = 20.sp)
+                                }
                             }
 
                             // Кнопка удаления
