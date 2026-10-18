@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import com.practicum.fitapp.data.local.ExerciseEntity
+import com.practicum.fitapp.data.local.WorkoutExerciseEntity
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WorkoutDetailsViewModel @Inject constructor(
@@ -27,4 +30,45 @@ class WorkoutDetailsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
+    /** Упражнения в тренировке (связи). */
+    val workoutExercises: StateFlow<List<WorkoutExerciseEntity>> = repository
+        .getWorkoutExercises(workoutId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    /** Упражнения с раскрытием данных из справочника. */
+    val exercisesForWorkout: StateFlow<List<ExerciseEntity>> = repository
+        .getExercisesForWorkout(workoutId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    /** Все упражнения из справочника — для диалога выбора. */
+    val allExercises: StateFlow<List<ExerciseEntity>> = repository
+        .getAllExercises()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    /** Добавить упражнение в текущую тренировку. */
+    fun addExercise(exercise: ExerciseEntity) {
+        viewModelScope.launch {
+            // Получаем следующий порядковый номер
+            val nextOrder = repository.nextWorkoutExerciseOrder(workoutId)
+
+            // Создаём связь
+            repository.insertWorkoutExercise(
+                WorkoutExerciseEntity(
+                    workoutId = workoutId,
+                    exerciseId = exercise.id,
+                    orderInWorkout = nextOrder
+                )
+            )
+        }
+    }
 }
