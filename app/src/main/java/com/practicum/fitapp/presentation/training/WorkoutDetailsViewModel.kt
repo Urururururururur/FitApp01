@@ -3,16 +3,17 @@ package com.practicum.fitapp.presentation.training
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.fitapp.data.local.ExerciseEntity
 import com.practicum.fitapp.data.local.WorkoutEntity
+import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import com.practicum.fitapp.data.repository.TrainingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
-import com.practicum.fitapp.data.local.ExerciseEntity
-import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
 
 @HiltViewModel
 class WorkoutDetailsViewModel @Inject constructor(
@@ -40,8 +41,8 @@ class WorkoutDetailsViewModel @Inject constructor(
         )
 
     /** Упражнения с раскрытием данных из справочника. */
-    val exercisesForWorkout: StateFlow<List<ExerciseEntity>> = repository
-        .getExercisesForWorkout(workoutId)
+    val exercisesWithId: StateFlow<List<WorkoutExerciseWithExercise>> = repository
+        .getExercisesWithId(workoutId)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

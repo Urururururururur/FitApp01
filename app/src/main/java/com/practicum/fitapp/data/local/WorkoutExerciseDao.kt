@@ -7,7 +7,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkoutExerciseDao {
-
+    @Query("""
+    SELECT we.id AS workoutExerciseId, e.*
+    FROM workout_exercises we
+    JOIN exercises e ON e.id = we.exerciseId
+    WHERE we.workoutId = :workoutId
+    ORDER BY we.orderInWorkout
+""")
+    fun getExercisesWithId(workoutId: Long): Flow<List<WorkoutExerciseWithExercise>>
     /** Все упражнения тренировки, отсортированные по порядку. */
     @Query("""
         SELECT * FROM workout_exercises 
@@ -23,6 +30,9 @@ interface WorkoutExerciseDao {
         WHERE we.workoutId = :workoutId
         ORDER BY we.orderInWorkout
     """)
+
+
+
     fun getExercisesForWorkout(workoutId: Long): Flow<List<ExerciseEntity>>
 
     /** Вставить. Возвращает id. */
@@ -44,4 +54,6 @@ interface WorkoutExerciseDao {
     /** Найти следующий свободный порядок внутри тренировки. */
     @Query("SELECT COALESCE(MAX(orderInWorkout), -1) + 1 FROM workout_exercises WHERE workoutId = :workoutId")
     suspend fun nextOrder(workoutId: Long): Int
+    @Query("SELECT * FROM workout_exercises WHERE id = :id")
+    fun getById(id: Long): Flow<WorkoutExerciseEntity?>
 }

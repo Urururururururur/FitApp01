@@ -9,6 +9,7 @@ import com.practicum.fitapp.data.local.WorkoutEntity
 import com.practicum.fitapp.data.local.WorkoutExerciseDao
 import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import kotlinx.coroutines.flow.Flow
+import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
 
 /**
  * Repository для раздела «Тренировки».
@@ -20,8 +21,11 @@ class TrainingRepository(
     private val setDao: SetDao,
     private val exerciseDao: ExerciseDao
 ) {
-
+    fun getWorkoutExerciseById(id: Long): Flow<WorkoutExerciseEntity?> =
+        workoutExerciseDao.getById(id)
     // ==================== Тренировки ====================
+    fun getExercisesWithId(workoutId: Long): Flow<List<WorkoutExerciseWithExercise>> =
+        workoutExerciseDao.getExercisesWithId(workoutId)
 
     fun getWorkoutsByDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutEntity>> =
         workoutDao.getWorkoutsByDay(startOfDay, endOfDay)

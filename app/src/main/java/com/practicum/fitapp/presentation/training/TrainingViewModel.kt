@@ -60,6 +60,7 @@ class TrainingViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+
     // Метод изменения выбранной даты
     fun setSelectedDate(date: LocalDate) {
         _selectedDate.value = date

@@ -100,11 +100,30 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             route = "workout_details/{workoutId}",
-                            arguments = listOf(androidx.navigation.navArgument("workoutId") { type = androidx.navigation.NavType.LongType })
+                            arguments = listOf(androidx.navigation.navArgument("workoutId") {
+                                type = androidx.navigation.NavType.LongType
+                            })
                         ) { backStackEntry ->
                             val workoutId = backStackEntry.arguments?.getLong("workoutId") ?: 0L
                             WorkoutDetailsScreen(
                                 workoutId = workoutId,
+                                onBack = { navController.popBackStack() },
+                                onExerciseClick = { workoutExerciseId ->
+                                    navController.navigate("exercise/$workoutExerciseId")
+                                }
+                            )
+                        }
+                        composable(
+                            route = "exercise/{workoutExerciseId}",
+                            arguments = listOf(
+                                androidx.navigation.navArgument("workoutExerciseId") {
+                                    type = androidx.navigation.NavType.LongType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val workoutExerciseId = backStackEntry.arguments?.getLong("workoutExerciseId") ?: 0L
+                            ExerciseScreen(
+                                workoutExerciseId = workoutExerciseId,
                                 onBack = { navController.popBackStack() }
                             )
                         }
