@@ -51,6 +51,19 @@ class ExerciseViewModel @Inject constructor(
             )
         }
     }
+    /** Обновить подход. */
+    fun updateSet(set: SetEntity) {
+        viewModelScope.launch {
+            repository.updateSet(
+                id = set.id,
+                weight = set.weight,
+                reps = set.reps,
+                distance = set.distance,
+                duration = set.duration,
+                intensity = set.intensity
+            )
+        }
+    }
 
     /** Удалить подход. */
     fun deleteSet(id: Long) {

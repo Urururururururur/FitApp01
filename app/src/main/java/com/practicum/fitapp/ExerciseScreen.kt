@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.presentation.training.ExerciseViewModel
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,18 +72,39 @@ fun ExerciseScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text(
-                                    text = "${set.weight ?: 0.0} кг × ${set.reps ?: 0}",
-                                    fontSize = 16.sp
+                            // Поля ввода: Вес и Повторения
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Вес
+                                OutlinedTextField(
+                                    value = set.weight?.toString() ?: "",
+                                    onValueChange = { newValue ->
+                                        val newWeight = newValue.toDoubleOrNull()
+                                        viewModel.updateSet(set.copy(weight = newWeight))
+                                    },
+                                    label = { Text("Вес, кг", fontSize = 10.sp) },
+                                    modifier = Modifier.width(80.dp),
+                                    singleLine = true
                                 )
-                                Text(
-                                    text = "Интенсивность: ${set.intensity}",
-                                    fontSize = 12.sp
+
+                                // Повторения
+                                OutlinedTextField(
+                                    value = set.reps?.toString() ?: "",
+                                    onValueChange = { newValue ->
+                                        val newReps = newValue.toIntOrNull()
+                                        viewModel.updateSet(set.copy(reps = newReps))
+                                    },
+                                    label = { Text("Повторы", fontSize = 10.sp) },
+                                    modifier = Modifier.width(80.dp),
+                                    singleLine = true
                                 )
                             }
+
+                            // Кнопка удаления
                             TextButton(onClick = { viewModel.deleteSet(set.id) }) {
-                                Text("✕")
+                                Text("✕", color = Color.Red)
                             }
                         }
                     }
