@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
 import com.practicum.fitapp.data.local.WorkoutStatus
+import com.practicum.fitapp.data.local.ExerciseStats
 
 
 @HiltViewModel
@@ -50,9 +51,19 @@ class WorkoutDetailsViewModel @Inject constructor(
             )
         }
     }
-
     // Достаём workoutId из URL
     private val workoutId: Long = checkNotNull(savedStateHandle["workoutId"])
+
+    /** Статистика по каждому упражнению в тренировке. */
+    val exerciseStats: StateFlow<List<ExerciseStats>> = repository
+        .getExerciseStats(workoutId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+
 
     // Загружаем тренировку по ID
     val workout: StateFlow<WorkoutEntity?> = repository.getWorkoutById(workoutId)

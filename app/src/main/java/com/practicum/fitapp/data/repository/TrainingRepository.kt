@@ -10,6 +10,7 @@ import com.practicum.fitapp.data.local.WorkoutExerciseDao
 import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import kotlinx.coroutines.flow.Flow
 import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
+import com.practicum.fitapp.data.local.ExerciseStats
 
 /**
  * Repository для раздела «Тренировки».
@@ -50,6 +51,9 @@ class TrainingRepository(
     /** Список "сырых" строк групп мышц — для дальнейшего парсинга в Kotlin. */
     fun getMuscleGroupsRaw(workoutId: Long): Flow<List<String>> =
         workoutDao.getMuscleGroupsRaw(workoutId)
+
+    fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>> =
+        workoutDao.getExerciseStats(workoutId)
 
     // ==================== Упражнения в тренировке ====================
 

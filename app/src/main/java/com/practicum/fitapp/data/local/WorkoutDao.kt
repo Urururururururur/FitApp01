@@ -59,4 +59,21 @@ interface WorkoutDao {
         WHERE we.workoutId = :workoutId
     """)
     fun getMuscleGroupsRaw(workoutId: Long): Flow<List<String>>
+
+    @Query("""
+    SELECT 
+        we.id AS workoutExerciseId,
+        COALESCE(MAX(s.weight), 0.0) AS maxWeight,
+        COALESCE(SUM(s.weight * s.reps), 0.0) AS totalWeight,
+        COALESCE(SUM(s.reps), 0) AS totalReps
+    FROM workout_exercises we
+    LEFT JOIN sets s ON s.workoutExerciseId = we.id
+    WHERE we.workoutId = :workoutId
+    GROUP BY we.id
+""")
+    fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>>
 }
+/**
+ * Статистика по каждому упражнению в тренировке.
+ * Возвращает: id связи, максимальный вес, суммарный вес, суммарные повторения.
+ */

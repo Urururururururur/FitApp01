@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,29 +27,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.practicum.fitapp.presentation.training.WorkoutDetailsViewModel
-import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.ui.graphics.Color
 import com.practicum.fitapp.data.local.WorkoutStatus
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.delay
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
+import com.practicum.fitapp.presentation.training.WorkoutDetailsViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +55,7 @@ fun WorkoutDetailsScreen(
 ) {
     var showExercisePicker by remember { mutableStateOf(false) }
     val workout by viewModel.workout.collectAsStateWithLifecycle()
+    val exerciseStats by viewModel.exerciseStats.collectAsStateWithLifecycle()
     val exercisesWithId by viewModel.exercisesWithId.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -205,6 +200,15 @@ fun WorkoutDetailsScreen(
                                     text = item.exercise.muscleGroupList.joinToString(", ") { it.displayName },
                                     fontSize = 12.sp
                                 )
+                                val stat = exerciseStats.find { it.workoutExerciseId == item.workoutExerciseId }
+                                if (stat != null && stat.totalReps > 0) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Макс: ${"%.0f".format(stat.maxWeight)} кг · Всего: ${"%.0f".format(stat.totalWeight)} кг · ${stat.totalReps} повт.",
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
+                                    )
+                                }
                             }
                         }
                     }
