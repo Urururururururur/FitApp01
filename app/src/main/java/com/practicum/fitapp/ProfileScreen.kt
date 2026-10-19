@@ -21,6 +21,7 @@ import com.practicum.fitapp.data.local.ActivityLevel
 import com.practicum.fitapp.data.local.FitnessGoal
 import com.practicum.fitapp.data.local.Gender
 import com.practicum.fitapp.presentation.profile.ProfileViewModel
+import com.practicum.fitapp.presentation.calculator.NutritionCalculator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +40,11 @@ fun ProfileScreen(
     var goal by remember { mutableStateOf(FitnessGoal.MAINTAIN.name) }
 
     var showSavedMessage by remember { mutableStateOf(false) }
+    // Расчёт плана: используем сохранённый профиль (или текущее состояние формы)
+    val currentProfile = profile
+    val plan = if (currentProfile != null) {
+        NutritionCalculator.calculatePlan(currentProfile)
+    } else null
 
     // Когда профиль загрузился — заполняем поля его данными
     LaunchedEffect(profile) {
@@ -183,6 +189,51 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp
             )
+        }
+        if (plan != null) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Твоя норма",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Калорий: ${"%.0f".format(plan.targetCalories)} ккал/день",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Б: ${"%.0f".format(plan.proteinGrams)} г · " +
+                                "Ж: ${"%.0f".format(plan.fatGrams)} г · " +
+                                "У: ${"%.0f".format(plan.carbsGrams)} г",
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Базовый метаболизм (BMR): ${"%.0f".format(plan.bmr)} ккал",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Суточный расход (TDEE): ${"%.0f".format(plan.tdee)} ккал",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
