@@ -46,6 +46,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,10 +103,36 @@ fun WorkoutDetailsScreen(
                 item {
                     val statusEnum = WorkoutStatus.valueOf(workout!!.status)
 
+                    // Таймер (обновляется каждую секунду, если тренировка идёт)
+                    var elapsedSeconds by remember { mutableLongStateOf(0L) }
+
+                    LaunchedEffect(workout!!.status) {
+                        if (statusEnum == WorkoutStatus.IN_PROGRESS) {
+                            val startTime = workout!!.date
+                            while (true) {
+                                elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000
+                                delay(1000)
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Показываем таймер
                     if (statusEnum == WorkoutStatus.IN_PROGRESS) {
-                        // Если тренировка идёт, показываем красную кнопку "Закончить"
+                        Text(
+                            text = "Идёт: ${formatDuration(elapsedSeconds)}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1976D2),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    // Кнопки управления
+                    if (statusEnum == WorkoutStatus.IN_PROGRESS) {
                         Button(
                             onClick = { viewModel.finishWorkout() },
                             modifier = Modifier.fillMaxWidth(),
@@ -111,7 +141,6 @@ fun WorkoutDetailsScreen(
                             Text("ЗАКОНЧИТЬ ТРЕНИРОВКУ", fontSize = 16.sp)
                         }
                     } else if (statusEnum == WorkoutStatus.WAITING) {
-                        // Если ожидание, показываем зеленую кнопку "Начать"
                         Button(
                             onClick = { viewModel.startWorkout() },
                             modifier = Modifier.fillMaxWidth(),
@@ -120,7 +149,6 @@ fun WorkoutDetailsScreen(
                             Text("НАЧАТЬ ТРЕНИРОВКУ", fontSize = 16.sp)
                         }
                     } else if (statusEnum == WorkoutStatus.COMPLETED) {
-                        // Если выполнена, просто пишем текст
                         Text(
                             text = "Тренировка завершена",
                             color = Color(0xFF2E7D32),
@@ -211,8 +239,21 @@ fun WorkoutDetailsScreen(
                             Text("Отмена")
                         }
                     }
+
                 )
             }
         }
+    }
+}
+/** Форматирует секунды в "ЧЧ:ММ:СС" (или "ММ:СС", если меньше часа). */
+private fun formatDuration(seconds: Long): String {
+    val hours = seconds / 3600
+    val minutes = (seconds % 3600) / 60
+    val secs = seconds % 60
+
+    return if (hours > 0) {
+        "%02d:%02d:%02d".format(hours, minutes, secs)
+    } else {
+        "%02d:%02d".format(minutes, secs)
     }
 }
