@@ -23,7 +23,7 @@ data class WorkoutEntity(
 
     val note: String = "",
 
-    val isCompleted: Boolean = false,
+    val status: String = WorkoutStatus.WAITING.name,
 
     // Техническое: когда запись создана в БД
     val createdAt: Long = System.currentTimeMillis()

@@ -29,6 +29,7 @@ import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.training.TrainingViewModel
 import java.time.LocalDate
 import androidx.compose.foundation.lazy.items
+import com.practicum.fitapp.data.local.WorkoutStatus
 
 @Composable
 
@@ -106,10 +107,15 @@ fun TrainingScreen(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        val statusEnum = com.practicum.fitapp.data.local.WorkoutStatus.valueOf(workout.status)
                         Text(
-                            text = if (workout.isCompleted) "Выполнена" else "Ожидание",
+                            text = statusEnum.displayName,
                             fontSize = 12.sp,
-                            color = if (workout.isCompleted) Color(0xFF2E7D32) else Color.Gray
+                            color = when (statusEnum) {
+                                com.practicum.fitapp.data.local.WorkoutStatus.COMPLETED -> Color(0xFF2E7D32) // Зеленый
+                                com.practicum.fitapp.data.local.WorkoutStatus.IN_PROGRESS -> Color(0xFF1976D2) // Синий
+                                com.practicum.fitapp.data.local.WorkoutStatus.WAITING -> Color.Gray
+                            }
                         )
                     }
                 }

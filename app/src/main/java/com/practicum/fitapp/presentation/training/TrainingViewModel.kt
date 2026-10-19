@@ -74,8 +74,7 @@ class TrainingViewModel @Inject constructor(
             repository.insertWorkout(
                 WorkoutEntity(
                     date = dateTimestamp,
-                    name = "Тренировка",
-                    isCompleted = false
+                    name = "Тренировка"
                 )
             )
         }

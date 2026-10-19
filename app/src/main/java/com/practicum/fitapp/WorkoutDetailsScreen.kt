@@ -83,7 +83,8 @@ fun WorkoutDetailsScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Статус: ${if (workout!!.isCompleted) "Выполнена" else "Ожидание"}")
+                    val statusEnum = com.practicum.fitapp.data.local.WorkoutStatus.valueOf(workout!!.status)
+                    Text(text = "Статус: ${statusEnum.displayName}")
                     Text(text = "Заметка: ${workout!!.note.ifBlank { "нет" }}")
                     Spacer(modifier = Modifier.height(24.dp))
                 }

@@ -21,7 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         WorkoutExerciseEntity::class,
         SetEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 
@@ -151,6 +151,35 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_sets_workoutExerciseId ON sets(workoutExerciseId)")
             }
         }
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 1. Добавляем новую колонку status
+                db.execSQL("ALTER TABLE workouts ADD COLUMN status TEXT NOT NULL DEFAULT 'WAITING'")
+
+                // 2. Переносим старые данные: если isCompleted = 1, то ставим COMPLETED
+                db.execSQL("UPDATE workouts SET status = 'COMPLETED' WHERE isCompleted = 1")
+
+                // 3. Удаляем старую колонку isCompleted
+                // В SQLite нет прямого DROP COLUMN (до 3.35), поэтому пересоздаём таблицу.
+                db.execSQL("""
+            CREATE TABLE workouts_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                date INTEGER NOT NULL,
+                endDate INTEGER,
+                name TEXT NOT NULL,
+                note TEXT NOT NULL,
+                status TEXT NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+        """.trimIndent())
+                db.execSQL("""
+            INSERT INTO workouts_new (id, date, endDate, name, note, status, createdAt)
+            SELECT id, date, endDate, name, note, status, createdAt FROM workouts
+        """.trimIndent())
+                db.execSQL("DROP TABLE workouts")
+                db.execSQL("ALTER TABLE workouts_new RENAME TO workouts")
+            }
+        }
 
 
         fun getInstance(context: Context): FitAppDatabase {
@@ -160,7 +189,7 @@ abstract class FitAppDatabase : RoomDatabase() {
                     FitAppDatabase::class.java,
                     "fitapp_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                     .also { INSTANCE = it }
             }

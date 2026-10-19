@@ -42,8 +42,8 @@ class TrainingRepository(
         name: String,
         note: String,
         endDate: Long?,
-        isCompleted: Boolean
-    ) = workoutDao.update(id, name, note, endDate, isCompleted)
+        status: String
+    ) = workoutDao.update(id, name, note, endDate, status)
 
     suspend fun deleteWorkout(id: Long) = workoutDao.deleteById(id)
 

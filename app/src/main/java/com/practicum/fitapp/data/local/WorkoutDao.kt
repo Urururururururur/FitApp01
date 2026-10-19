@@ -22,16 +22,16 @@ interface WorkoutDao {
 
     /** Обновить тренировку. */
     @Query("""
-        UPDATE workouts 
-        SET name = :name, note = :note, endDate = :endDate, isCompleted = :isCompleted
-        WHERE id = :id
-    """)
+    UPDATE workouts 
+    SET name = :name, note = :note, endDate = :endDate, status = :status
+    WHERE id = :id
+""")
     suspend fun update(
         id: Long,
         name: String,
         note: String,
         endDate: Long?,
-        isCompleted: Boolean
+        status: String
     )
 
     /** Удалить тренировку по id (каскадно удалит упражнения и подходы). */
