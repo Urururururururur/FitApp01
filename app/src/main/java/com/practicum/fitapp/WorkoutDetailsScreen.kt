@@ -39,6 +39,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.presentation.training.WorkoutDetailsViewModel
 import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.graphics.Color
+import com.practicum.fitapp.data.local.WorkoutStatus
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,6 +94,43 @@ fun WorkoutDetailsScreen(
                     Text(text = "Статус: ${statusEnum.displayName}")
                     Text(text = "Заметка: ${workout!!.note.ifBlank { "нет" }}")
                     Spacer(modifier = Modifier.height(24.dp))
+                }
+                // Блок с кнопкой и статусом
+                item {
+                    val statusEnum = WorkoutStatus.valueOf(workout!!.status)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (statusEnum == WorkoutStatus.IN_PROGRESS) {
+                        // Если тренировка идёт, показываем красную кнопку "Закончить"
+                        Button(
+                            onClick = { viewModel.finishWorkout() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
+                        ) {
+                            Text("ЗАКОНЧИТЬ ТРЕНИРОВКУ", fontSize = 16.sp)
+                        }
+                    } else if (statusEnum == WorkoutStatus.WAITING) {
+                        // Если ожидание, показываем зеленую кнопку "Начать"
+                        Button(
+                            onClick = { viewModel.startWorkout() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047))
+                        ) {
+                            Text("НАЧАТЬ ТРЕНИРОВКУ", fontSize = 16.sp)
+                        }
+                    } else if (statusEnum == WorkoutStatus.COMPLETED) {
+                        // Если выполнена, просто пишем текст
+                        Text(
+                            text = "Тренировка завершена",
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 // 2. Заголовок "Упражнения"

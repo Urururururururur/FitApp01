@@ -14,12 +14,42 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
+import com.practicum.fitapp.data.local.WorkoutStatus
+
 
 @HiltViewModel
 class WorkoutDetailsViewModel @Inject constructor(
     private val repository: TrainingRepository,
     savedStateHandle: SavedStateHandle  // ← Сюда NavController передаёт аргументы из URL
 ) : ViewModel() {
+
+    /** Начать тренировку: статус IN_PROGRESS, endDate = null. */
+    fun startWorkout() {
+        val currentWorkout = workout.value ?: return
+        viewModelScope.launch {
+            repository.updateWorkout(
+                id = currentWorkout.id,
+                name = currentWorkout.name,
+                note = currentWorkout.note,
+                endDate = null,   // Тренировка идёт
+                status = WorkoutStatus.IN_PROGRESS.name
+            )
+        }
+    }
+
+    /** Закончить тренировку: статус COMPLETED, endDate = сейчас. */
+    fun finishWorkout() {
+        val currentWorkout = workout.value ?: return
+        viewModelScope.launch {
+            repository.updateWorkout(
+                id = currentWorkout.id,
+                name = currentWorkout.name,
+                note = currentWorkout.note,
+                endDate = System.currentTimeMillis(),   // Время окончания
+                status = WorkoutStatus.COMPLETED.name
+            )
+        }
+    }
 
     // Достаём workoutId из URL
     private val workoutId: Long = checkNotNull(savedStateHandle["workoutId"])
