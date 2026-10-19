@@ -51,6 +51,18 @@ class TrainingViewModel @Inject constructor(
 
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
+    /** Множество дат (начало дня), в которые есть хотя бы одна тренировка. */
+    val workoutDates: StateFlow<Set<LocalDate>> = repository
+        .getAllWorkoutDates()
+        .map { timestamps ->
+            timestamps.map { DateUtils.timestampToLocalDate(it) }.toSet()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
+
     // Список упражнений для отображения
     val allExercises: StateFlow<List<ExerciseEntity>> = repository
         .getAllExercises()

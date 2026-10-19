@@ -3,15 +3,39 @@ package com.practicum.fitapp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,11 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.practicum.fitapp.data.local.MuscleGroup
 import com.practicum.fitapp.data.local.WorkoutStatus
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.training.TrainingViewModel
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TrainingScreen(
@@ -35,28 +60,41 @@ fun TrainingScreen(
     val workouts by viewModel.workoutsForDay.collectAsStateWithLifecycle()
     val tags by viewModel.workoutTags.collectAsStateWithLifecycle()
 
+    // Стейты для календаря
+    var showCalendar by remember { mutableStateOf(false) }
+    var calendarMonth by remember { mutableStateOf(java.time.YearMonth.from(selectedDate)) }
+    val datesWithWorkouts by viewModel.workoutDates.collectAsStateWithLifecycle()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // 1. Заголовок (Октябрь 2026)
         item {
             Text(
                 text = DateUtils.formatMonthYear(selectedDate),
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    calendarMonth = java.time.YearMonth.from(selectedDate)
+                    showCalendar = true
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // 2. Лента недели
         item {
             WeekStrip(
                 selectedDate = selectedDate,
-                onDayClick = { viewModel.setSelectedDate(it) }
+                datesWithWorkouts = datesWithWorkouts,
+                onDayClick = { date -> viewModel.setSelectedDate(date) }
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
 
+        // 3. Дата строкой (14.10.2026)
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -186,12 +224,26 @@ fun TrainingScreen(
             }
         }
     }
+    if (showCalendar) {
+        MonthCalendarDialog(
+            currentMonth = calendarMonth,
+            selectedDate = selectedDate,
+            datesWithWorkouts = datesWithWorkouts,
+            onMonthChange = { calendarMonth = it },
+            onDateSelected = {
+                viewModel.setSelectedDate(it)
+                showCalendar = false
+            },
+            onDismiss = { showCalendar = false }
+        )
+    }
 }
 
 @Composable
 private fun WeekStrip(
     selectedDate: LocalDate,
-    onDayClick: (LocalDate) -> Unit
+    datesWithWorkouts: Set<LocalDate>,
+    onDayClick: (LocalDate) -> Unit  // ← Вот здесь явно указываем, что принимаем дату
 ) {
     val week = DateUtils.weekDays(selectedDate)
 
@@ -203,13 +255,173 @@ private fun WeekStrip(
             DayCell(
                 date = date,
                 isSelected = date == selectedDate,
-                onClick = { onDayClick(date) },
+                hasWorkout = date in datesWithWorkouts,
+                onClick = { onDayClick(date) }, // ← Передаем дату в лямбду
                 modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
+@Composable
+private fun DayCell(
+    date: LocalDate,
+    isSelected: Boolean,
+    hasWorkout: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isWeekend = DateUtils.isWeekend(date)
+    val dayNameColor = if (isWeekend) Color(0xFFD32F2F) else Color.Gray
+    val dayNumberColor = if (isWeekend) Color(0xFFD32F2F) else Color.Black
+
+    // Определяем цвет фона: выбранный — синий, с тренировкой — зеленый
+    val backgroundColor = when {
+        isSelected -> Color(0xFFE3F2FD)
+        hasWorkout -> Color(0xFFA5D6A7)
+        else -> Color.White
+    }
+
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        border = if (isSelected) BorderStroke(2.dp, Color(0xFF1976D2)) else null
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = DateUtils.dayOfWeekShort(date),
+                fontSize = 11.sp,
+                color = dayNameColor,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = date.dayOfMonth.toString(),
+                fontSize = 16.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = dayNumberColor,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+@Composable
+private fun MonthCalendarDialog(
+    currentMonth: YearMonth,
+    selectedDate: LocalDate,
+    datesWithWorkouts: Set<LocalDate>,
+    onMonthChange: (YearMonth) -> Unit,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
+                    Icon(Icons.Default.KeyboardArrowLeft, "Предыдущий месяц")
+                }
+                Text(
+                    text = currentMonth.format(DateTimeFormatter.ofPattern("LLLL yyyy")),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
+                    Icon(Icons.Default.KeyboardArrowRight, "Следующий месяц")
+                }
+            }
+        },
+        text = {
+            Column {
+                // Дни недели
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
+                        Text(
+                            text = name,
+                            modifier = Modifier.weight(1f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (name == "Сб" || name == "Вс") Color.Red else Color.Gray,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Ячейки дней
+                val firstDayOfMonth = currentMonth.atDay(1)
+                val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value // 1=Пн, 7=Вс
+                val daysInMonth = currentMonth.lengthOfMonth()
+
+                // Сдвиг для пустых ячеек в начале
+                val totalCells = firstDayOfWeek - 1 + daysInMonth
+                val rows = (totalCells + 6) / 7  // округление вверх
+
+                for (row in 0 until rows) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        for (col in 0 until 7) {
+                            val cellIndex = row * 7 + col
+                            val dayNumber = cellIndex - (firstDayOfWeek - 1) + 1
+
+                            if (dayNumber in 1..daysInMonth) {
+                                val date = currentMonth.atDay(dayNumber)
+                                val isSelected = date == selectedDate
+                                val isWeekend = DateUtils.isWeekend(date)
+                                val hasWorkout = date in datesWithWorkouts
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .padding(2.dp)
+                                        .background(
+                                            color = when {
+                                                isSelected -> Color(0xFF1976D2)
+                                                hasWorkout -> Color(0xFFA5D6A7)
+                                                else -> Color.Transparent
+                                            },
+                                            shape = RoundedCornerShape(50)
+                                        )
+                                        .clickable { onDateSelected(date) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = dayNumber.toString(),
+                                        fontSize = 14.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = when {
+                                            isSelected -> Color.White
+                                            isWeekend -> Color.Red
+                                            else -> Color.Black
+                                        }
+                                    )
+                                }
+                            } else {
+                                // пустая ячейка
+                                Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Закрыть")
+            }
+        }
+    )
+}
 @Composable
 private fun DayCell(
     date: LocalDate,

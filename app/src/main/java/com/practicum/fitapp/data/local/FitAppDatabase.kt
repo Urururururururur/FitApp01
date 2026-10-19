@@ -19,9 +19,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ExerciseEntity::class,
         WorkoutEntity::class,
         WorkoutExerciseEntity::class,
-        SetEntity::class
+        SetEntity::class,
+        UserProfileEntity::class   // ← новая
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 
@@ -38,6 +39,8 @@ abstract class FitAppDatabase : RoomDatabase() {
     abstract fun setDao(): SetDao
 
     abstract fun exerciseDao(): ExerciseDao
+
+    abstract fun userProfileDao(): UserProfileDao
 
     companion object {
         @Volatile
@@ -180,6 +183,22 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE workouts_new RENAME TO workouts")
             }
         }
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+            CREATE TABLE IF NOT EXISTS user_profile (
+                id INTEGER NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL,
+                gender TEXT NOT NULL,
+                age INTEGER NOT NULL,
+                heightCm REAL NOT NULL,
+                weightKg REAL NOT NULL,
+                activityLevel TEXT NOT NULL,
+                goal TEXT NOT NULL
+            )
+        """.trimIndent())
+            }
+        }
 
 
         fun getInstance(context: Context): FitAppDatabase {
@@ -189,7 +208,7 @@ abstract class FitAppDatabase : RoomDatabase() {
                     FitAppDatabase::class.java,
                     "fitapp_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .build()
                     .also { INSTANCE = it }
             }

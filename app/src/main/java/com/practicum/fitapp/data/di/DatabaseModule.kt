@@ -17,6 +17,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import com.practicum.fitapp.data.local.UserProfileDao
+import com.practicum.fitapp.data.repository.UserRepository
 
 /**
  * Модуль Hilt: объясняет, как создавать объекты для БД.
@@ -39,7 +41,8 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_2_3,
                 FitAppDatabase.MIGRATION_3_4,
                 FitAppDatabase.MIGRATION_4_5,
-                FitAppDatabase.MIGRATION_5_6
+                FitAppDatabase.MIGRATION_5_6,
+                FitAppDatabase.MIGRATION_6_7
             )
             .build()
     }
@@ -65,6 +68,13 @@ object DatabaseModule {
 
     @Provides
     fun provideSetDao(db: FitAppDatabase): SetDao = db.setDao()
+
+    @Provides
+    fun provideUserProfileDao(db: FitAppDatabase): UserProfileDao = db.userProfileDao()
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(dao: UserProfileDao): UserRepository = UserRepository(dao)
 
     @Provides
     fun provideExerciseDao(db: FitAppDatabase): ExerciseDao = db.exerciseDao()
