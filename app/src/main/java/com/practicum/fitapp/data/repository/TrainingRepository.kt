@@ -11,6 +11,7 @@ import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import kotlinx.coroutines.flow.Flow
 import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
 import com.practicum.fitapp.data.local.ExerciseStats
+import com.practicum.fitapp.data.local.WorkoutMuscleGroupsRaw
 
 /**
  * Repository для раздела «Тренировки».
@@ -30,6 +31,9 @@ class TrainingRepository(
 
     fun getWorkoutsByDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutEntity>> =
         workoutDao.getWorkoutsByDay(startOfDay, endOfDay)
+
+    fun getMuscleGroupsForDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutMuscleGroupsRaw>> =
+        workoutDao.getMuscleGroupsForDay(startOfDay, endOfDay)
 
     fun getWorkoutById(id: Long): Flow<WorkoutEntity?> = workoutDao.getById(id)
 

@@ -37,6 +37,22 @@ class WorkoutDetailsViewModel @Inject constructor(
             )
         }
     }
+
+    /** Обновить название тренировки. */
+    fun updateName(newName: String) {
+        val currentWorkout = workout.value ?: return
+        if (newName.isBlank()) return  // не даём сохранить пустое имя
+        viewModelScope.launch {
+            repository.updateWorkout(
+                id = currentWorkout.id,
+                name = newName,
+                note = currentWorkout.note,
+                endDate = currentWorkout.endDate,
+                status = currentWorkout.status
+            )
+        }
+    }
+
     /** Обновить заметку тренировки. */
     fun updateNote(newNote: String) {
         val currentWorkout = workout.value ?: return

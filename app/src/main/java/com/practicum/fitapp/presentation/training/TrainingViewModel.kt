@@ -3,6 +3,7 @@ package com.practicum.fitapp.presentation.training
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.fitapp.data.local.ExerciseEntity
+import com.practicum.fitapp.data.local.MuscleGroup
 import com.practicum.fitapp.data.repository.TrainingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,16 +17,38 @@ import javax.inject.Inject
 import com.practicum.fitapp.data.local.WorkoutEntity
 import com.practicum.fitapp.presentation.common.DateUtils
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import java.util.Calendar
 
 @HiltViewModel
 class TrainingViewModel @Inject constructor(
     private val repository: TrainingRepository
 ) : ViewModel() {
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
+
+    /** Теги групп мышц для каждой тренировки за выбранный день. */
+    val workoutTags: StateFlow<Map<Long, List<MuscleGroup>>> = _selectedDate
+        .flatMapLatest { date ->
+            val start = DateUtils.localDateToStartOfDay(date)
+            val end = date.plusDays(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            repository.getMuscleGroupsForDay(start, end).map { rawList ->
+                // Группируем по workoutId и объединяем группы мышц
+                rawList.groupBy { it.workoutId }
+                    .mapValues { (_, items) ->
+                        items.flatMap { MuscleGroup.parseList(it.muscleGroups) }
+                            .distinct()
+                    }
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
 
     // Стейт выбранной даты (по умолчанию - сегодня)
-    private val _selectedDate = MutableStateFlow(LocalDate.now())
+
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
     // Список упражнений для отображения
@@ -36,6 +59,12 @@ class TrainingViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+    /** Удалить тренировку по id. */
+    fun deleteWorkout(id: Long) {
+        viewModelScope.launch {
+            repository.deleteWorkout(id)
+        }
+    }
 
     // Наполнение БД при старте
     init {

@@ -34,6 +34,19 @@ interface WorkoutDao {
         status: String
     )
 
+    /**
+     * Все группы мышц по всем тренировкам за интервал [startOfDay, endOfDay).
+     * Возвращает пары: (workoutId, muscleGroups) — как строку вида "LEGS,BACK".
+     */
+    @Query("""
+    SELECT we.workoutId AS workoutId, e.muscleGroups AS muscleGroups
+    FROM workout_exercises we
+    JOIN exercises e ON e.id = we.exerciseId
+    JOIN workouts w ON w.id = we.workoutId
+    WHERE w.date >= :startOfDay AND w.date < :endOfDay
+""")
+    fun getMuscleGroupsForDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutMuscleGroupsRaw>>
+
     /** Удалить тренировку по id (каскадно удалит упражнения и подходы). */
     @Query("DELETE FROM workouts WHERE id = :id")
     suspend fun deleteById(id: Long)

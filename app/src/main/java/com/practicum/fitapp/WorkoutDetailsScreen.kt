@@ -1,8 +1,10 @@
 package com.practicum.fitapp
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.WorkoutStatus
 import com.practicum.fitapp.presentation.training.WorkoutDetailsViewModel
 import kotlinx.coroutines.delay
+import androidx.compose.material.icons.filled.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +63,8 @@ fun WorkoutDetailsScreen(
     val exercisesWithId by viewModel.exercisesWithId.collectAsStateWithLifecycle()
     var showNoteDialog by remember { mutableStateOf(false) }
     var editedNote by remember { mutableStateOf("") }
+    var showNameDialog by remember { mutableStateOf(false) }
+    var editedName by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -86,11 +91,55 @@ fun WorkoutDetailsScreen(
             ) {
                 // 1. Заголовок тренировки
                 item {
-                    Text(
-                        text = workout!!.name,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = workout!!.name,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = {
+                            editedName = workout!!.name
+                            showNameDialog = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Редактировать название"
+                            )
+                        }
+                    }
+                    if (showNameDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showNameDialog = false },
+                            title = { Text("Название тренировки") },
+                            text = {
+                                OutlinedTextField(
+                                    value = editedName,
+                                    onValueChange = { editedName = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("Название") },
+                                    singleLine = true
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    viewModel.updateName(editedName)
+                                    showNameDialog = false
+                                }) {
+                                    Text("Сохранить")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showNameDialog = false }) {
+                                    Text("Отмена")
+                                }
+                            }
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     val statusEnum = com.practicum.fitapp.data.local.WorkoutStatus.valueOf(workout!!.status)
                     Text(text = "Статус: ${statusEnum.displayName}")
