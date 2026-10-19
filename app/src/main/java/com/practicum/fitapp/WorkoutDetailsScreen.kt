@@ -69,43 +69,53 @@ fun WorkoutDetailsScreen(
                 CircularProgressIndicator() // Пока данные грузятся
             }
         } else {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp)
             ) {
-                Text(
-                    text = workout!!.name,
-                    fontSize = 24.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Статус: ${if (workout!!.isCompleted) "Выполнена" else "Ожидание"}")
-                Text(text = "Заметка: ${workout!!.note.ifBlank { "нет" }}")
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Здесь список упражнений
-                Text(
-                    text = "Упражнения (${exercisesWithId.size})",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { showExercisePicker = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("+ Добавить упражнение")
+                // 1. Заголовок тренировки
+                item {
+                    Text(
+                        text = workout!!.name,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "Статус: ${if (workout!!.isCompleted) "Выполнена" else "Ожидание"}")
+                    Text(text = "Заметка: ${workout!!.note.ifBlank { "нет" }}")
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
 
+                // 2. Заголовок "Упражнения"
+                item {
+                    Text(
+                        text = "Упражнения (${exercisesWithId.size})",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                // 3. Кнопка "Добавить упражнение"
+                item {
+                    Button(
+                        onClick = { showExercisePicker = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("+ Добавить упражнение")
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // 4. Список упражнений (используем items)
                 if (exercisesWithId.isEmpty()) {
-                    Text("Пока нет упражнений", color = MaterialTheme.colorScheme.outline)
+                    item {
+                        Text("Пока нет упражнений", color = MaterialTheme.colorScheme.outline)
+                    }
                 } else {
-                    exercisesWithId.forEach { item ->
+                    items(exercisesWithId) { item ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -127,6 +137,7 @@ fun WorkoutDetailsScreen(
                     }
                 }
             }
+
             if (showExercisePicker) {
                 // Простой диалог: список всех упражнений
                 val allExercises by viewModel.allExercises.collectAsStateWithLifecycle()
