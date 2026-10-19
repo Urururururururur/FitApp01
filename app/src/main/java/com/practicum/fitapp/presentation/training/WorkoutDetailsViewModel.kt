@@ -37,7 +37,19 @@ class WorkoutDetailsViewModel @Inject constructor(
             )
         }
     }
-
+    /** Обновить заметку тренировки. */
+    fun updateNote(newNote: String) {
+        val currentWorkout = workout.value ?: return
+        viewModelScope.launch {
+            repository.updateWorkout(
+                id = currentWorkout.id,
+                name = currentWorkout.name,
+                note = newNote,
+                endDate = currentWorkout.endDate,
+                status = currentWorkout.status
+            )
+        }
+    }
     /** Закончить тренировку: статус COMPLETED, endDate = сейчас. */
     fun finishWorkout() {
         val currentWorkout = workout.value ?: return

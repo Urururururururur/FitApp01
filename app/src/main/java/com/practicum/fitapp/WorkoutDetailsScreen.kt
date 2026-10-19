@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -57,6 +58,8 @@ fun WorkoutDetailsScreen(
     val workout by viewModel.workout.collectAsStateWithLifecycle()
     val exerciseStats by viewModel.exerciseStats.collectAsStateWithLifecycle()
     val exercisesWithId by viewModel.exercisesWithId.collectAsStateWithLifecycle()
+    var showNoteDialog by remember { mutableStateOf(false) }
+    var editedNote by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -91,7 +94,14 @@ fun WorkoutDetailsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     val statusEnum = com.practicum.fitapp.data.local.WorkoutStatus.valueOf(workout!!.status)
                     Text(text = "Статус: ${statusEnum.displayName}")
-                    Text(text = "Заметка: ${workout!!.note.ifBlank { "нет" }}")
+                    Text(
+                        text = "Заметка: ${workout!!.note.ifBlank { "нет" }}",
+                        modifier = Modifier.clickable {
+                            editedNote = workout!!.note
+                            showNoteDialog = true
+                        },
+                        color = MaterialTheme.colorScheme.primary
+                    )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
                 // Блок с кнопкой и статусом
@@ -214,6 +224,34 @@ fun WorkoutDetailsScreen(
                     }
                 }
             }
+                if (showNoteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showNoteDialog = false },
+                        title = { Text("Заметка к тренировке") },
+                        text = {
+                            OutlinedTextField(
+                                value = editedNote,
+                                onValueChange = { editedNote = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Текст заметки") }
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.updateNote(editedNote)
+                                showNoteDialog = false
+                            }) {
+                                Text("Сохранить")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showNoteDialog = false }) {
+                                Text("Отмена")
+                            }
+                        }
+                    )
+                }
+
 
             if (showExercisePicker) {
                 // Простой диалог: список всех упражнений
@@ -237,6 +275,7 @@ fun WorkoutDetailsScreen(
                                 )
                             }
                         }
+
                     },
                     confirmButton = {
                         TextButton(onClick = { showExercisePicker = false }) {
