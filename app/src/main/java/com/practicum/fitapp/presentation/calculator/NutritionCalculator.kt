@@ -4,6 +4,7 @@ import com.practicum.fitapp.data.local.ActivityLevel
 import com.practicum.fitapp.data.local.FitnessGoal
 import com.practicum.fitapp.data.local.Gender
 import com.practicum.fitapp.data.local.UserProfileEntity
+import com.practicum.fitapp.data.local.WeightEntryEntity
 
 /**
  * Результат расчёта нормы калорий.
@@ -82,5 +83,44 @@ object NutritionCalculator {
             fatGrams = fatGrams,
             carbsGrams = carbsGrams
         )
+    }
+    /**
+     * Проверяет, актуальна ли норма.
+     * Норма актуальна, если последнее взвешивание было в ТЕКУЩЕМ месяце.
+     * Если взвешиваний не было — считаем неактуальной (надо взвеситься).
+     */
+    fun isWeightOutdated(lastWeightDate: Long?): Boolean {
+        if (lastWeightDate == null) return true
+
+        val now = java.time.LocalDate.now()
+        val lastDate = java.time.Instant.ofEpochMilli(lastWeightDate)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+
+        return now.year != lastDate.year || now.monthValue != lastDate.monthValue
+    }
+    /**
+     * Считает норму калорий для конкретной даты.
+     * Берёт последнее взвешивание до этой даты (или сам профиль, если истории нет).
+     * Возвращает: (норма калорий, вес, дата взвешивания) или null, если профиля нет.
+     */
+    suspend fun calculatePlanForDate(
+        profile: UserProfileEntity?,
+        date: Long,
+        getWeightAt: suspend (Long) -> WeightEntryEntity?
+    ): Pair<NutritionPlan, WeightEntryEntity?>? {
+        if (profile == null) return null
+
+        // Ищем взвешивание на эту дату или раньше
+        val weightEntry = getWeightAt(date)
+
+        // Если взвешивания нет — берём стартовый вес из профиля
+        val effectiveWeight = weightEntry?.weightKg ?: profile.weightKg
+
+        // Создаём временный профиль с нужным весом
+        val adjustedProfile = profile.copy(weightKg = effectiveWeight)
+
+        val plan = calculatePlan(adjustedProfile)
+        return plan to weightEntry
     }
 }

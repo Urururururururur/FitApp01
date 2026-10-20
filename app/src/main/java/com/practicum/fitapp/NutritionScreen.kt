@@ -32,6 +32,7 @@ import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun NutritionScreen(
@@ -41,6 +42,7 @@ fun NutritionScreen(
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
     val entries by viewModel.entriesForDay.collectAsStateWithLifecycle()
     val summary by viewModel.dailySummary.collectAsStateWithLifecycle()
+    val dailyGoal by viewModel.dailyGoal.collectAsStateWithLifecycle()
     val products by viewModel.products.collectAsStateWithLifecycle()
     val availableDates by viewModel.availableDates.collectAsStateWithLifecycle()
 
@@ -96,18 +98,52 @@ fun NutritionScreen(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // Съедено
                 Text(
-                    text = "Калорий: ${"%.1f".format(summary.calories)} ккал",
-                    fontSize = 16.sp
+                    text = "Съедено: ${"%.0f".format(summary.calories)} ккал",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
                 )
+
+                // Норма и остаток (если профиль заполнен)
+                if (dailyGoal != null) {
+                    Text(
+                        text = "Норма: ${"%.0f".format(dailyGoal!!)} ккал",
+                        fontSize = 14.sp
+                    )
+
+                    val remaining = dailyGoal!! - summary.calories
+                    Text(
+                        text = if (remaining >= 0) {
+                            "Осталось: ${"%.0f".format(remaining)} ккал"
+                        } else {
+                            "Перебор: ${"%.0f".format(-remaining)} ккал"
+                        },
+                        fontSize = 14.sp,
+                        color = if (remaining >= 0) Color(0xFF2E7D32) else Color(0xFFC62828),
+                        fontWeight = FontWeight.Medium
+                    )
+                } else {
+                    Text(
+                        text = "Заполните профиль, чтобы видеть норму",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // БЖУ
                 Text(
-                    text = "Б: ${"%.1f".format(summary.protein)} г  " +
-                            "Ж: ${"%.1f".format(summary.fat)} г  " +
+                    text = "Б: ${"%.1f".format(summary.protein)} г · " +
+                            "Ж: ${"%.1f".format(summary.fat)} г · " +
                             "У: ${"%.1f".format(summary.carbs)} г",
-                    fontSize = 14.sp
+                    fontSize = 13.sp,
+                    color = Color.Gray
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "Записей: ${summary.entriesCount}", fontSize = 13.sp)
+
+                Text(text = "Записей: ${summary.entriesCount}", fontSize = 12.sp, color = Color.Gray)
             }
         }
 

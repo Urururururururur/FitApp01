@@ -17,10 +17,14 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
+import com.practicum.fitapp.data.local.UserProfileEntity
+import com.practicum.fitapp.data.repository.UserRepository
+import com.practicum.fitapp.presentation.calculator.NutritionCalculator
 
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
-    private val repository: NutritionRepository
+    private val repository: NutritionRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     // ==================== Выбранная дата ====================
@@ -49,6 +53,19 @@ class NutritionViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
+        )
+    /** Норма калорий пользователя (null, если профиль не заполнен). */
+    val dailyGoal: StateFlow<Double?> = userRepository
+        .getProfile()
+        .map { profile ->
+            if (profile != null) {
+                NutritionCalculator.calculatePlan(profile).targetCalories
+            } else null
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
         )
 
     // ==================== Записи за выбранный день ====================

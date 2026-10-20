@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import com.practicum.fitapp.data.local.UserProfileDao
+import com.practicum.fitapp.data.local.WeightEntryDao
 import com.practicum.fitapp.data.repository.UserRepository
 
 /**
@@ -42,7 +43,8 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_3_4,
                 FitAppDatabase.MIGRATION_4_5,
                 FitAppDatabase.MIGRATION_5_6,
-                FitAppDatabase.MIGRATION_6_7
+                FitAppDatabase.MIGRATION_6_7,
+                FitAppDatabase.MIGRATION_7_8
             )
             .build()
     }
@@ -73,10 +75,6 @@ object DatabaseModule {
     fun provideUserProfileDao(db: FitAppDatabase): UserProfileDao = db.userProfileDao()
 
     @Provides
-    @Singleton
-    fun provideUserRepository(dao: UserProfileDao): UserRepository = UserRepository(dao)
-
-    @Provides
     fun provideExerciseDao(db: FitAppDatabase): ExerciseDao = db.exerciseDao()
     @Provides
     @Singleton
@@ -86,4 +84,13 @@ object DatabaseModule {
         setDao: SetDao,
         exerciseDao: ExerciseDao
     ): TrainingRepository = TrainingRepository(workoutDao, workoutExerciseDao, setDao, exerciseDao)
+    @Provides
+    fun provideWeightEntryDao(db: FitAppDatabase): WeightEntryDao = db.weightEntryDao()
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        dao: UserProfileDao,
+        weightEntryDao: WeightEntryDao
+    ): UserRepository = UserRepository(dao, weightEntryDao)
 }
