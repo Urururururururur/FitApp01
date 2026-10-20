@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +32,8 @@ import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.journal.JournalViewModel
 import com.practicum.fitapp.presentation.journal.NutritionDay
 import com.practicum.fitapp.presentation.journal.WorkoutDay
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @Composable
 fun JournalScreen(
@@ -36,6 +42,8 @@ fun JournalScreen(
     val nutritionDays by viewModel.nutritionDays.collectAsStateWithLifecycle()
     val workoutDays by viewModel.workoutDays.collectAsStateWithLifecycle()
     val weightHistory by viewModel.weightHistory.collectAsStateWithLifecycle()
+    val selectedMonth by viewModel.selectedMonth.collectAsStateWithLifecycle()
+
 
     Column(
         modifier = Modifier
@@ -46,17 +54,45 @@ fun JournalScreen(
         Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ============ Тепловая карта питания ============
+// ============ НАВИГАЦИЯ ПО МЕСЯЦАМ ============
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { viewModel.previousMonth() }) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.KeyboardArrowLeft,
+                    contentDescription = "Предыдущий месяц"
+                )
+            }
+            Text(
+                text = com.practicum.fitapp.presentation.common.DateUtils.formatMonthYear(selectedMonth.atDay(1)),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = { viewModel.nextMonth() }) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Следующий месяц"
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+// ============ Тепловая карта питания ============
         Text(text = "Питание", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         NutritionHeatmap(nutritionDays)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ============ Тепловая карта тренировок ============
+// ============ Тепловая карта тренировок ============
         Text(text = "Тренировки", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         WorkoutHeatmap(workoutDays)
         Spacer(modifier = Modifier.height(24.dp))
+
+// ... дальше график веса ...
 
         // ============ График веса ============
         Text(text = "Вес", fontSize = 20.sp, fontWeight = FontWeight.Bold)
