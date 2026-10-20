@@ -22,6 +22,15 @@ import com.practicum.fitapp.data.local.FitnessGoal
 import com.practicum.fitapp.data.local.Gender
 import com.practicum.fitapp.presentation.profile.ProfileViewModel
 import com.practicum.fitapp.presentation.calculator.NutritionCalculator
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.practicum.fitapp.data.local.WeightEntryEntity
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Color
+import com.practicum.fitapp.presentation.common.DateUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +54,10 @@ fun ProfileScreen(
     val plan = if (currentProfile != null) {
         NutritionCalculator.calculatePlan(currentProfile)
     } else null
+    val lastWeight by viewModel.lastWeight.collectAsStateWithLifecycle()
+    val weightHistory by viewModel.weightHistory.collectAsStateWithLifecycle()
+    var showWeighDialog by remember { mutableStateOf(false) }
+    var newWeightInput by remember { mutableStateOf("") }
 
     // Когда профиль загрузился — заполняем поля его данными
     LaunchedEffect(profile) {
@@ -193,6 +206,8 @@ fun ProfileScreen(
         if (plan != null) {
             Spacer(modifier = Modifier.height(24.dp))
 
+            val isOutdated = NutritionCalculator.isWeightOutdated(lastWeight?.date)
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -212,8 +227,18 @@ fun ProfileScreen(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
 
+                    // Предупреждение, если норма неактуальна
+                    if (isOutdated) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "⚠ Норма неактуальна — пора взвеситься",
+                            fontSize = 12.sp,
+                            color = Color(0xFFC62828)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Б: ${"%.0f".format(plan.proteinGrams)} г · " +
                                 "Ж: ${"%.0f".format(plan.fatGrams)} г · " +
@@ -223,17 +248,67 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Базовый метаболизм (BMR): ${"%.0f".format(plan.bmr)} ккал",
+                        text = "BMR: ${"%.0f".format(plan.bmr)} ккал · TDEE: ${"%.0f".format(plan.tdee)} ккал",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = "Суточный расход (TDEE): ${"%.0f".format(plan.tdee)} ккал",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+
+                    // Кнопка взвешивания
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = { showWeighDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Взвеситься сегодня")
+                    }
+
+                    // Последнее взвешивание
+                    if (lastWeight != null) {
+                        Text(
+                            text = "Последнее взвешивание: ${DateUtils.formatShort(
+                                DateUtils.timestampToLocalDate(lastWeight!!.date)
+                            )} — ${"%.1f".format(lastWeight!!.weightKg)} кг",
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
             }
         }
+    }
+    if (showWeighDialog) {
+        AlertDialog(
+            onDismissRequest = { showWeighDialog = false },
+            title = { Text("Взвешивание") },
+            text = {
+                OutlinedTextField(
+                    value = newWeightInput,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() || it == '.' }) newWeightInput = newValue
+                    },
+                    label = { Text("Текущий вес, кг") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val w = newWeightInput.toDoubleOrNull()
+                    if (w != null && w > 0) {
+                        viewModel.addWeight(w)
+                        newWeightInput = ""
+                        showWeighDialog = false
+                    }
+                }) {
+                    Text("Сохранить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWeighDialog = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
     }
 }
