@@ -1,5 +1,6 @@
 package com.practicum.fitapp.data.repository
 
+import com.practicum.fitapp.data.local.DailyWorkoutCount
 import com.practicum.fitapp.data.local.ExerciseDao
 import com.practicum.fitapp.data.local.ExerciseEntity
 import com.practicum.fitapp.data.local.SetDao
@@ -25,6 +26,9 @@ class TrainingRepository(
 ) {
     fun getWorkoutExerciseById(id: Long): Flow<WorkoutExerciseEntity?> =
         workoutExerciseDao.getById(id)
+
+    fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>> =
+        workoutDao.getDailyWorkoutCounts(startDate, endDate)
     // ==================== Тренировки ====================
     fun getExercisesWithId(workoutId: Long): Flow<List<WorkoutExerciseWithExercise>> =
         workoutExerciseDao.getExercisesWithId(workoutId)

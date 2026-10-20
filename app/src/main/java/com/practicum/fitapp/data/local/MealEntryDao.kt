@@ -23,4 +23,22 @@ interface MealEntryDao {
     /** Удалить запись по id. */
     @Query("DELETE FROM meal_entries WHERE id = :id")
     suspend fun deleteById(id: Long)
+    /**
+     * Сумма калорий по дням за период [startDate, endDate).
+     * Возвращает список пар (день, калории) — только дни, где были записи.
+     * date — timestamp начала дня.
+     */
+    @Query("""
+    SELECT 
+        (date / 86400000) * 86400000 AS dayTimestamp,
+        SUM(grams * productCalories / 100.0) AS totalCalories
+    FROM meal_entries
+    WHERE date >= :startDate AND date < :endDate
+    GROUP BY dayTimestamp
+    ORDER BY dayTimestamp
+""")
+    fun getDailyCalories(startDate: Long, endDate: Long): Flow<List<DailyCalories>>
+
+
+
 }

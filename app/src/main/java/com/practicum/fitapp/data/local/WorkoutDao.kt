@@ -73,6 +73,24 @@ interface WorkoutDao {
     """)
     fun getMuscleGroupsRaw(workoutId: Long): Flow<List<String>>
 
+    /**
+     * Тренировки по дням за период.
+     * Возвращает список пар (день, количество тренировок).
+     */
+    @Query("""
+    SELECT 
+        (date / 86400000) * 86400000 AS dayTimestamp,
+        COUNT(*) AS count
+    FROM workouts
+    WHERE date >= :startDate AND date < :endDate
+    GROUP BY dayTimestamp
+    ORDER BY dayTimestamp
+""")
+    fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>>
+
+
+
+
     @Query("""
     SELECT 
         we.id AS workoutExerciseId,

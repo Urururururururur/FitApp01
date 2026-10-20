@@ -1,5 +1,6 @@
 package com.practicum.fitapp.data.repository
 
+import com.practicum.fitapp.data.local.DailyCalories
 import com.practicum.fitapp.data.local.MealEntryDao
 import com.practicum.fitapp.data.local.MealEntryEntity
 import com.practicum.fitapp.data.local.ProductDao
@@ -14,6 +15,8 @@ class NutritionRepository(
     private val productDao: ProductDao,
     private val mealEntryDao: MealEntryDao
 ) {
+    fun getDailyCalories(startDate: Long, endDate: Long): Flow<List<DailyCalories>> =
+        mealEntryDao.getDailyCalories(startDate, endDate)
 
     // ==================== Продукты (справочник) ====================
 
