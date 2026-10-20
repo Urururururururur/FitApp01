@@ -51,4 +51,7 @@ class NutritionRepository(
     suspend fun deleteMealEntryById(id: Long) {
         mealEntryDao.deleteById(id)
     }
+    fun getBuiltInProducts(): Flow<List<ProductEntity>> = productDao.getBuiltIn()
+    fun getUserCreatedProducts(): Flow<List<ProductEntity>> = productDao.getUserCreated()
+    fun getUsedProducts(): Flow<List<ProductEntity>> = productDao.getUsed()
 }

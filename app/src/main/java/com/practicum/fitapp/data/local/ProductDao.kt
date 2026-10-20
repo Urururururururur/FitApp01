@@ -28,4 +28,19 @@ interface ProductDao {
     /** Удалить продукт. */
     @Delete
     suspend fun delete(product: ProductEntity)
+    /** Только встроенные продукты (справочник). */
+    @Query("SELECT * FROM products WHERE isUserCreated = 0 ORDER BY name")
+    fun getBuiltIn(): Flow<List<ProductEntity>>
+
+    /** Только созданные пользователем. */
+    @Query("SELECT * FROM products WHERE isUserCreated = 1 ORDER BY name")
+    fun getUserCreated(): Flow<List<ProductEntity>>
+
+    /** Использованные: те, что хоть раз добавлялись в записи о еде. */
+    @Query("""
+    SELECT DISTINCT p.* FROM products p
+    INNER JOIN meal_entries me ON me.productId = p.id
+    ORDER BY p.name
+""")
+    fun getUsed(): Flow<List<ProductEntity>>
 }

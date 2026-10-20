@@ -11,19 +11,13 @@ import androidx.room.PrimaryKey
 data class ProductEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-
     val name: String,
-    // Новое поле: категория продукта. Значение по умолчанию — пустая строка,
-    // чтобы старые записи в БД не сломались.
     val category: String = "Прочее",
-
     val caloriesPer100g: Int,
-
     val proteinPer100g: Double,
-
     val fatPer100g: Double,
-
-    val carbsPer100g: Double
+    val carbsPer100g: Double,
+    val isUserCreated: Boolean = false
 )
 /**
  * Объявил таблицу products. Room по этой аннотации сам сгенерирует SQL:

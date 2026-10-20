@@ -17,7 +17,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,44 +33,45 @@ class MainActivity : ComponentActivity() {
         setContent {
             FitAppTheme {
                 val navController = rememberNavController()
-
-                // Следим за текущим экраном, чтобы подсветить активную вкладку в меню
                 val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        NavigationBar {
-                            NavigationBarItem(
-                                selected = currentRoute == "community",
-                                onClick = { navController.navigate("community") },
-                                icon = { Icon(Icons.Default.Star, contentDescription = null) },
-                                label = { Text("Сообщество") }
-                            )
-                            NavigationBarItem(
-                                selected = currentRoute == "training",
-                                onClick = { navController.navigate("training") },
-                                icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                                label = { Text("Тренировка") }
-                            )
-                            NavigationBarItem(
-                                selected = currentRoute == "nutrition",
-                                onClick = { navController.navigate("nutrition") },
-                                icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-                                label = { Text("Питание") }
-                            )
-                            NavigationBarItem(
-                                selected = currentRoute == "journal",
-                                onClick = { navController.navigate("journal") },
-                                icon = { Icon(Icons.Default.List, contentDescription = null) },
-                                label = { Text("Журнал") }
-                            )
-                            NavigationBarItem(
-                                selected = currentRoute == "profile",
-                                onClick = { navController.navigate("profile") },
-                                icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                                label = { Text("Профиль") }
-                            )
+                        // Прячем нижнее меню, когда мы внутри справочника/тренировки
+                        if (currentRoute in listOf("community", "training", "nutrition", "journal", "profile")) {
+                            NavigationBar {
+                                NavigationBarItem(
+                                    selected = currentRoute == "community",
+                                    onClick = { navController.navigate("community") },
+                                    icon = { Icon(Icons.Default.Star, contentDescription = null) },
+                                    label = { Text("Сообщество") }
+                                )
+                                NavigationBarItem(
+                                    selected = currentRoute == "training",
+                                    onClick = { navController.navigate("training") },
+                                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                                    label = { Text("Тренировка") }
+                                )
+                                NavigationBarItem(
+                                    selected = currentRoute == "nutrition",
+                                    onClick = { navController.navigate("nutrition") },
+                                    icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+                                    label = { Text("Питание") }
+                                )
+                                NavigationBarItem(
+                                    selected = currentRoute == "journal",
+                                    onClick = { navController.navigate("journal") },
+                                    icon = { Icon(Icons.Default.List, contentDescription = null) },
+                                    label = { Text("Журнал") }
+                                )
+                                NavigationBarItem(
+                                    selected = currentRoute == "profile",
+                                    onClick = { navController.navigate("profile") },
+                                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                                    label = { Text("Профиль") }
+                                )
+                            }
                         }
                     }
                 ) { innerPadding ->
@@ -88,21 +88,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        composable("nutrition") { NutritionScreen() }
-                        composable("journal") { JournalScreen() }
-                        composable("profile") { ProfileScreen() }
-                        composable("training") {
-                            TrainingScreen(
-                                onWorkoutClick = { workoutId ->
-                                    navController.navigate("workout_details/$workoutId")
-                                }
-                            )
-                        }
                         composable(
                             route = "workout_details/{workoutId}",
-                            arguments = listOf(androidx.navigation.navArgument("workoutId") {
-                                type = androidx.navigation.NavType.LongType
-                            })
+                            arguments = listOf(androidx.navigation.navArgument("workoutId") { type = androidx.navigation.NavType.LongType })
                         ) { backStackEntry ->
                             val workoutId = backStackEntry.arguments?.getLong("workoutId") ?: 0L
                             WorkoutDetailsScreen(
@@ -115,11 +103,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             route = "exercise/{workoutExerciseId}",
-                            arguments = listOf(
-                                androidx.navigation.navArgument("workoutExerciseId") {
-                                    type = androidx.navigation.NavType.LongType
-                                }
-                            )
+                            arguments = listOf(androidx.navigation.navArgument("workoutExerciseId") { type = androidx.navigation.NavType.LongType })
                         ) { backStackEntry ->
                             val workoutExerciseId = backStackEntry.arguments?.getLong("workoutExerciseId") ?: 0L
                             ExerciseScreen(
@@ -127,21 +111,26 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() }
                             )
                         }
+                        composable("nutrition") { backStackEntry ->
+                            NutritionScreen(
+                                onAddFood = { navController.navigate("food_catalog") },
+                                savedStateHandle = backStackEntry.savedStateHandle
+                            )
+                        }
+                        composable("food_catalog") {
+                            FoodCatalogScreen(
+                                onBack = { navController.popBackStack() },
+                                onProductSelected = { product ->
+                                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedProductId", product.id)
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        composable("journal") { JournalScreen() }
+                        composable("profile") { ProfileScreen() }
                     }
-
                 }
             }
         }
     }
-}
-
-/**
- * Считает индекс массы тела.
- * weightKg — вес в килограммах
- * heightM  — рост в метрах
- * Возвращает число с двумя знаками после запятой.
- */
-fun calculateBmi(weightKg: Double, heightM: Double): Double {
-    val bmi = weightKg / (heightM * heightM)
-    return Math.round(bmi * 100.0) / 100.0
 }

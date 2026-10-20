@@ -5,21 +5,21 @@ import androidx.lifecycle.viewModelScope
 import com.practicum.fitapp.data.local.MealEntryEntity
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.data.repository.NutritionRepository
+import com.practicum.fitapp.data.repository.UserRepository
+import com.practicum.fitapp.presentation.calculator.NutritionCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
-import kotlinx.coroutines.flow.map
-import com.practicum.fitapp.data.local.UserProfileEntity
-import com.practicum.fitapp.data.repository.UserRepository
-import com.practicum.fitapp.presentation.calculator.NutritionCalculator
+
 
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
@@ -27,25 +27,12 @@ class NutritionViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    // ==================== Выбранная дата ====================
+    // ==================== Выбранная дата (LocalDate) ====================
 
-    /** Возвращает timestamp начала сегодняшнего дня (00:00:00). */
-    private fun startOfToday(): Long {
-        val cal = Calendar.getInstance()
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        return cal.timeInMillis
-    }
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
-    // Внутренний state текущего выбранного дня. По умолчанию — сегодня.
-    private val _selectedDate = MutableStateFlow(startOfToday())
-
-    /** Публичное read-only представление для UI. */
-    val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
-
-    // ==================== Продукты (справочник) ====================
+    // ==================== Продукты ====================
 
     val products: StateFlow<List<ProductEntity>> = repository
         .getAllProducts()
@@ -54,13 +41,13 @@ class NutritionViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    /** Норма калорий пользователя (null, если профиль не заполнен). */
+
+    // ==================== Норма калорий ====================
+
     val dailyGoal: StateFlow<Double?> = userRepository
         .getProfile()
         .map { profile ->
-            if (profile != null) {
-                NutritionCalculator.calculatePlan(profile).targetCalories
-            } else null
+            if (profile != null) NutritionCalculator.calculatePlan(profile).targetCalories else null
         }
         .stateIn(
             scope = viewModelScope,
@@ -68,29 +55,27 @@ class NutritionViewModel @Inject constructor(
             initialValue = null
         )
 
-    // ==================== Записи за выбранный день ====================
+    // ==================== Записи за день ====================
 
-    /**
-     * Записи за день. flatMapLatest переключает поток на новый день,
-     * когда меняется _selectedDate.
-     */
     val entriesForDay: StateFlow<List<MealEntryEntity>> = _selectedDate
-        .flatMapLatest { date -> repository.getEntriesByDate(date) }
+        .flatMapLatest { date ->
+            val timestamp = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            repository.getEntriesByDate(timestamp)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    /** Сумма калорий за выбранный день. */
-    /** Сводка за выбранный день: калории + БЖУ + количество записей. */
+    // ==================== Сводка ====================
+
     val dailySummary: StateFlow<DailySummary> = entriesForDay
         .map { entries ->
             var calories = 0.0
             var protein = 0.0
             var fat = 0.0
             var carbs = 0.0
-
             entries.forEach { entry ->
                 val factor = entry.grams / 100.0
                 calories += entry.productCalories * factor
@@ -98,14 +83,7 @@ class NutritionViewModel @Inject constructor(
                 fat += entry.productFat * factor
                 carbs += entry.productCarbs * factor
             }
-
-            DailySummary(
-                calories = calories,
-                protein = protein,
-                fat = fat,
-                carbs = carbs,
-                entriesCount = entries.size
-            )
+            DailySummary(calories, protein, fat, carbs, entries.size)
         }
         .stateIn(
             scope = viewModelScope,
@@ -113,51 +91,18 @@ class NutritionViewModel @Inject constructor(
             initialValue = DailySummary()
         )
 
-    /** Список всех дат, где есть записи. */
-    val availableDates: StateFlow<List<Long>> = repository
-        .getAllDates()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-
     // ==================== Действия ====================
 
-    fun setSelectedDate(date: Long) {
+    fun setSelectedDate(date: LocalDate) {
         _selectedDate.value = date
     }
 
-    fun addProduct(name: String, category: String, calories: Int,
-                   protein: Double, fat: Double, carbs: Double) {
-        if (name.isBlank()) return
-
-        viewModelScope.launch {
-            repository.addProduct(
-                ProductEntity(
-                    name = name,
-                    category = category,
-                    caloriesPer100g = calories,
-                    proteinPer100g = protein,
-                    fatPer100g = fat,
-                    carbsPer100g = carbs
-                )
-            )
-        }
-    }
-
-    fun deleteProduct(product: ProductEntity) {
-        viewModelScope.launch {
-            repository.deleteProduct(product)
-        }
-    }
-
-    /** Добавить запись о еде — продукт съеден в выбранный день. */
     fun addEntry(product: ProductEntity, grams: Double) {
         viewModelScope.launch {
+            val timestamp = _selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             repository.addMealEntry(
                 MealEntryEntity(
-                    date = _selectedDate.value,
+                    date = timestamp,
                     productId = product.id,
                     productName = product.name,
                     productCalories = product.caloriesPer100g,
