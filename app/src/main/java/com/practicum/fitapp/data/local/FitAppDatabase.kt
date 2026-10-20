@@ -23,7 +23,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UserProfileEntity::class,
         WeightEntryEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 
@@ -212,6 +212,16 @@ abstract class FitAppDatabase : RoomDatabase() {
         """.trimIndent())
             }
         }
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Обновляем категорию для "Планки" (если она была встроенной)
+                db.execSQL("""
+            UPDATE exercises 
+            SET category = 'HOLD' 
+            WHERE name = 'Планка' AND isBuiltIn = 1
+        """.trimIndent())
+            }
+        }
 
 
         fun getInstance(context: Context): FitAppDatabase {
@@ -221,7 +231,7 @@ abstract class FitAppDatabase : RoomDatabase() {
                     FitAppDatabase::class.java,
                     "fitapp_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .build()
                     .also { INSTANCE = it }
             }

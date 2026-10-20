@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import com.practicum.fitapp.data.local.ExerciseEntity
+import com.practicum.fitapp.data.local.ExerciseCategory
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
@@ -25,6 +29,16 @@ class ExerciseViewModel @Inject constructor(
     /** Само упражнение (из связи). */
     val workoutExercise: StateFlow<WorkoutExerciseEntity?> = repository
         .getWorkoutExerciseById(workoutExerciseId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+    /** Само упражнение (справочник). Нужно для определения категории. */
+    val exercise: StateFlow<ExerciseEntity?> = workoutExercise
+        .flatMapLatest { we ->
+            if (we != null) repository.getExerciseById(we.exerciseId) else kotlinx.coroutines.flow.flowOf(null)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -43,24 +57,42 @@ class ExerciseViewModel @Inject constructor(
     /** Добавить пустой подход. */
     fun addSet() {
         viewModelScope.launch {
-            // 1. Ищем последний подход
-            val lastSet = repository.getLastSet(workoutExerciseId)
+            // Берём категорию из текущего упражнения. Если не загрузилось — пробуем ещё раз.
+            val category = exercise.value?.categoryEnum ?: ExerciseCategory.STRENGTH
 
-            // 2. Определяем следующий порядковый номер
+            val lastSet = repository.getLastSet(workoutExerciseId)
             val nextOrder = repository.nextSetOrder(workoutExerciseId)
 
-            // 3. Создаём новый подход, копируя значения (если есть)
-            repository.insertSet(
-                SetEntity(
+            val newSet = when (category) {
+                ExerciseCategory.STRENGTH -> SetEntity(
                     workoutExerciseId = workoutExerciseId,
                     weight = lastSet?.weight,
                     reps = lastSet?.reps,
+                    intensity = lastSet?.intensity ?: Intensity.NORMAL.name,
+                    orderInExercise = nextOrder
+                )
+                ExerciseCategory.BODYWEIGHT -> SetEntity(
+                    workoutExerciseId = workoutExerciseId,
+                    reps = lastSet?.reps,
+                    intensity = lastSet?.intensity ?: Intensity.NORMAL.name,
+                    orderInExercise = nextOrder
+                )
+                ExerciseCategory.CARDIO -> SetEntity(
+                    workoutExerciseId = workoutExerciseId,
                     distance = lastSet?.distance,
                     duration = lastSet?.duration,
                     intensity = lastSet?.intensity ?: Intensity.NORMAL.name,
                     orderInExercise = nextOrder
                 )
-            )
+                ExerciseCategory.HOLD -> SetEntity(
+                    workoutExerciseId = workoutExerciseId,
+                    duration = lastSet?.duration,
+                    intensity = lastSet?.intensity ?: Intensity.NORMAL.name,
+                    orderInExercise = nextOrder
+                )
+            }
+
+            repository.insertSet(newSet)
         }
     }
     /** Обновить подход. */

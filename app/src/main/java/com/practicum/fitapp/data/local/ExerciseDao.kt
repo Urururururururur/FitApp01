@@ -12,6 +12,9 @@ interface ExerciseDao {
     @Query("SELECT * FROM exercises ORDER BY name")
     fun getAll(): Flow<List<ExerciseEntity>>
 
+    @Query("SELECT * FROM exercises WHERE id = :id")
+    fun getById(id: Long): Flow<ExerciseEntity?>
+
     /** Только встроенные. */
     @Query("SELECT * FROM exercises WHERE isBuiltIn = 1 ORDER BY name")
     fun getBuiltIn(): Flow<List<ExerciseEntity>>

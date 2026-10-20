@@ -115,7 +115,7 @@ val builtInExercises: List<ExerciseEntity> = listOf(
     ExerciseEntity(
         name = "Планка",
         muscleGroups = MuscleGroup.ABS.name,
-        category = ExerciseCategory.BODYWEIGHT.name,
+        category = ExerciseCategory.HOLD.name,
         isBuiltIn = true,
         description = "Статическое упражнение на пресс. Засекай время."
     ),

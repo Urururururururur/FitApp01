@@ -34,7 +34,8 @@ enum class MuscleGroup(val displayName: String) {
 enum class ExerciseCategory(val displayName: String) {
     STRENGTH("Силовое"),
     BODYWEIGHT("С собственным весом"),
-    CARDIO("Кардио")
+    CARDIO("Кардио"),
+    HOLD("На время")
 }
 
 /**

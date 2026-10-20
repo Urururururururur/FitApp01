@@ -27,6 +27,9 @@ class TrainingRepository(
     fun getWorkoutExerciseById(id: Long): Flow<WorkoutExerciseEntity?> =
         workoutExerciseDao.getById(id)
 
+    fun getExerciseById(id: Long): Flow<ExerciseEntity?> =
+        exerciseDao.getById(id)
+
     fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>> =
         workoutDao.getDailyWorkoutCounts(startDate, endDate)
     // ==================== Тренировки ====================
