@@ -3,6 +3,7 @@ package com.practicum.fitapp.data.repository
 import com.practicum.fitapp.data.local.DailyWorkoutCount
 import com.practicum.fitapp.data.local.ExerciseDao
 import com.practicum.fitapp.data.local.ExerciseEntity
+import com.practicum.fitapp.data.local.ExerciseProgress
 import com.practicum.fitapp.data.local.SetDao
 import com.practicum.fitapp.data.local.SetEntity
 import com.practicum.fitapp.data.local.WorkoutDao
@@ -12,6 +13,7 @@ import com.practicum.fitapp.data.local.WorkoutExerciseEntity
 import kotlinx.coroutines.flow.Flow
 import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
 import com.practicum.fitapp.data.local.ExerciseStats
+import com.practicum.fitapp.data.local.ExerciseWithProgress
 import com.practicum.fitapp.data.local.WorkoutMuscleGroupsRaw
 
 /**
@@ -24,6 +26,12 @@ class TrainingRepository(
     private val setDao: SetDao,
     private val exerciseDao: ExerciseDao
 ) {
+    fun getExercisesWithProgress(): Flow<List<ExerciseWithProgress>> =
+        workoutDao.getExercisesWithProgress()
+
+    fun getExerciseProgress(exerciseId: Long): Flow<List<ExerciseProgress>> =
+        workoutDao.getExerciseProgress(exerciseId)
+
     fun getWorkoutExerciseById(id: Long): Flow<WorkoutExerciseEntity?> =
         workoutExerciseDao.getById(id)
 

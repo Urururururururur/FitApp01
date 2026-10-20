@@ -110,4 +110,39 @@ interface WorkoutDao {
     GROUP BY we.id
 """)
     fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>>
+
+    /**
+     * Список всех упражнений, по которым есть хотя бы один подход.
+     * Считает количество выполненных подходов, чтобы не показывать пустые упражнения.
+     */
+    @Query("""
+    SELECT DISTINCT e.id, e.name, e.category, COUNT(s.id) as totalSets
+    FROM exercises e
+    JOIN workout_exercises we ON we.exerciseId = e.id
+    JOIN sets s ON s.workoutExerciseId = we.id
+    GROUP BY e.id
+    HAVING totalSets > 0
+    ORDER BY totalSets DESC
+""")
+    fun getExercisesWithProgress(): Flow<List<ExerciseWithProgress>>
+
+    /**
+     * Прогресс по упражнению: для каждого дня, когда оно выполнялось,
+     * возвращает метрики (макс вес, сумма повторов, сумма времени).
+     */
+    @Query("""
+    SELECT 
+        (w.date / 86400000) * 86400000 AS dayTimestamp,
+        COALESCE(MAX(s.weight), 0.0) AS maxWeight,
+        COALESCE(SUM(s.reps), 0) AS totalReps,
+        COALESCE(SUM(s.duration), 0) AS totalDuration,
+        COALESCE(SUM(s.distance), 0.0) AS totalDistance
+    FROM sets s
+    JOIN workout_exercises we ON we.id = s.workoutExerciseId
+    JOIN workouts w ON w.id = we.workoutId
+    WHERE we.exerciseId = :exerciseId
+    GROUP BY dayTimestamp
+    ORDER BY dayTimestamp ASC
+""")
+    fun getExerciseProgress(exerciseId: Long): Flow<List<ExerciseProgress>>
 }
