@@ -91,12 +91,19 @@ interface WorkoutDao {
 
 
 
+    /**
+     * Статистика по каждому упражнению в тренировке.
+     * Возвращает: id связи, максимальный вес, суммарный вес,
+     * суммарные повторения, суммарную дистанцию, суммарное время.
+     */
     @Query("""
     SELECT 
         we.id AS workoutExerciseId,
         COALESCE(MAX(s.weight), 0.0) AS maxWeight,
         COALESCE(SUM(s.weight * s.reps), 0.0) AS totalWeight,
-        COALESCE(SUM(s.reps), 0) AS totalReps
+        COALESCE(SUM(s.reps), 0) AS totalReps,
+        COALESCE(SUM(s.distance), 0.0) AS totalDistance,
+        COALESCE(SUM(s.duration), 0) AS totalDuration
     FROM workout_exercises we
     LEFT JOIN sets s ON s.workoutExerciseId = we.id
     WHERE we.workoutId = :workoutId
@@ -104,7 +111,3 @@ interface WorkoutDao {
 """)
     fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>>
 }
-/**
- * Статистика по каждому упражнению в тренировке.
- * Возвращает: id связи, максимальный вес, суммарный вес, суммарные повторения.
- */

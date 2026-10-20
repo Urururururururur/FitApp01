@@ -260,13 +260,51 @@ fun WorkoutDetailsScreen(
                                     fontSize = 12.sp
                                 )
                                 val stat = exerciseStats.find { it.workoutExerciseId == item.workoutExerciseId }
-                                if (stat != null && stat.totalReps > 0) {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "Макс: ${"%.0f".format(stat.maxWeight)} кг · Всего: ${"%.0f".format(stat.totalWeight)} кг · ${stat.totalReps} повт.",
-                                        fontSize = 12.sp,
-                                        color = Color.Gray
-                                    )
+                                if (stat != null) {
+                                    val category = item.exercise.categoryEnum
+                                    val statsParts = mutableListOf<String>()
+
+                                    // Для СИЛОВЫХ: Макс вес и Общий вес
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH) {
+                                        if (stat.maxWeight > 0) {
+                                            statsParts.add("Макс: ${"%.0f".format(stat.maxWeight)} кг")
+                                        }
+                                        if (stat.totalWeight > 0) {
+                                            statsParts.add("Всего: ${"%.0f".format(stat.totalWeight)} кг")
+                                        }
+                                    }
+
+                                    // Для всех: Повторения (если есть)
+                                    if (stat.totalReps > 0) {
+                                        statsParts.add("${stat.totalReps} повт.")
+                                    }
+
+                                    // Для КАРДИО: Дистанция и Время
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.CARDIO) {
+                                        if (stat.totalDistance > 0) {
+                                            statsParts.add("Дист: ${"%.0f".format(stat.totalDistance)} м")
+                                        }
+                                        if (stat.totalDuration > 0) {
+                                            statsParts.add("Время: ${formatDuration(stat.totalDuration.toLong())}")
+                                        }
+                                    }
+
+                                    // Для HOLD: Время
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.HOLD) {
+                                        if (stat.totalDuration > 0) {
+                                            statsParts.add("Время: ${formatDuration(stat.totalDuration.toLong())}")
+                                        }
+                                    }
+
+                                    // Показываем, если есть хоть что-то
+                                    if (statsParts.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = statsParts.joinToString(" · "),
+                                            fontSize = 12.sp,
+                                            color = Color.Gray
+                                        )
+                                    }
                                 }
                             }
                         }
