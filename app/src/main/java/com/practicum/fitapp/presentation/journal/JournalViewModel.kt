@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
+import com.practicum.fitapp.data.local.WeightEntryEntity
+
 
 /**
  * Состояние дня для тепловой карты питания.
@@ -51,6 +53,18 @@ class JournalViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val currentMonth = YearMonth.now()
+
+    /** История взвешиваний (для графика веса). */
+    val weightHistory: StateFlow<List<WeightEntryEntity>> = userRepository
+        .getWeightHistory()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+
+
 
     /**
      * Данные для тепловой карты питания за текущий месяц.

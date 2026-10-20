@@ -1,22 +1,30 @@
 package com.practicum.fitapp
 
+import android.graphics.Paint
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.practicum.fitapp.data.local.WeightEntryEntity
+import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.journal.JournalViewModel
 import com.practicum.fitapp.presentation.journal.NutritionDay
 import com.practicum.fitapp.presentation.journal.WorkoutDay
@@ -27,6 +35,7 @@ fun JournalScreen(
 ) {
     val nutritionDays by viewModel.nutritionDays.collectAsStateWithLifecycle()
     val workoutDays by viewModel.workoutDays.collectAsStateWithLifecycle()
+    val weightHistory by viewModel.weightHistory.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -47,6 +56,17 @@ fun JournalScreen(
         Text(text = "Тренировки", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         WorkoutHeatmap(workoutDays)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ============ График веса ============
+        Text(text = "Вес", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (weightHistory.isEmpty()) {
+            Text("Нет данных для графика", color = Color.Gray)
+        } else {
+            WeightChart(weightHistory)
+        }
     }
 }
 
@@ -57,13 +77,10 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
         return
     }
 
-    // Сетка 7 колонок (дни недели) x N строк (недели месяца)
-    // Первый день месяца может быть не понедельником — нужен сдвиг
     val firstDay = days.first().date
-    val firstDayOfWeek = firstDay.dayOfWeek.value  // 1=Пн, 7=Вс
-    val offset = firstDayOfWeek - 1  // сколько пустых ячеек в начале
+    val firstDayOfWeek = firstDay.dayOfWeek.value
+    val offset = firstDayOfWeek - 1
 
-    // Дни недели
     Row(modifier = Modifier.fillMaxWidth()) {
         listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
             Text(
@@ -78,7 +95,6 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
     }
     Spacer(modifier = Modifier.height(4.dp))
 
-    // Ячейки
     val totalCells = offset + days.size
     val rows = (totalCells + 6) / 7
 
@@ -103,7 +119,6 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
     }
 
     Spacer(modifier = Modifier.height(8.dp))
-    // Легенда
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -199,22 +214,119 @@ private fun LegendDot(color: Color) {
     )
 }
 
-/**
- * Цвет квадратика по проценту от нормы.
- *  < 75%     → бледно-зелёный
- *  75–100%   → ярко-зелёный
- *  100–110%  → розовый
- *  110–130%  → красный
- *  > 130%    → тёмно-красный
- *  0 калорий → белый (данных нет)
- */
 private fun nutritionColor(ratio: Double, calories: Double): Color {
     if (calories <= 0.0) return Color.White
     return when {
-        ratio < 0.75 -> Color(0xFFC8E6C9)   // бледно-зелёный
-        ratio < 1.0 -> Color(0xFF4CAF50)    // ярко-зелёный
-        ratio < 1.10 -> Color(0xFFFFCDD2)   // светло-розовый
-        ratio < 1.30 -> Color(0xFFF44336)   // красный
-        else -> Color(0xFFB71C1C)           // тёмно-красный
+        ratio < 0.75 -> Color(0xFFC8E6C9)
+        ratio < 1.0 -> Color(0xFF4CAF50)
+        ratio < 1.10 -> Color(0xFFFFCDD2)
+        ratio < 1.30 -> Color(0xFFF44336)
+        else -> Color(0xFFB71C1C)
+    }
+}
+
+@Composable
+private fun WeightChart(history: List<WeightEntryEntity>) {
+    val sorted = history.sortedBy { it.date }
+
+    if (sorted.size < 2) {
+        Text("Нужно минимум 2 взвешивания", color = Color.Gray, fontSize = 12.sp)
+        return
+    }
+
+    val minWeight = sorted.minOf { it.weightKg }
+    val maxWeight = sorted.maxOf { it.weightKg }
+    val weightRange = (maxWeight - minWeight).takeIf { it > 0 } ?: 1.0
+
+    Column {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(16.dp)
+        ) {
+            val width = size.width
+            val height = size.height
+            val paddingLeft = 60.dp.toPx()
+            val paddingBottom = 24.dp.toPx()
+            val chartWidth = width - paddingLeft
+            val chartHeight = height - paddingBottom
+
+            // Сетка и подписи по оси Y
+            val gridPaint = Paint().apply {
+                color = android.graphics.Color.LTGRAY
+                strokeWidth = 2f
+                textSize = 28f
+                isAntiAlias = true
+            }
+            val labelPaint = Paint().apply {
+                color = android.graphics.Color.DKGRAY
+                textSize = 28f
+                isAntiAlias = true
+            }
+            val steps = 4
+            for (i in 0..steps) {
+                val weight = minWeight + (weightRange * i / steps)
+                val y = chartHeight - (chartHeight * i / steps)
+                drawLine(
+                    color = Color.LightGray,
+                    start = Offset(paddingLeft, y),
+                    end = Offset(width, y),
+                    strokeWidth = 1f
+                )
+                drawContext.canvas.nativeCanvas.drawText(
+                    "%.0f".format(weight),
+                    0f,
+                    y + 10f,
+                    labelPaint
+                )
+            }
+
+            // Линия графика
+            val path = Path()
+            val points = mutableListOf<Offset>()
+            sorted.forEachIndexed { index, entry ->
+                val x = paddingLeft + (chartWidth * index / (sorted.size - 1))
+                val normalizedWeight = ((entry.weightKg - minWeight) / weightRange).toFloat()
+                val y = chartHeight - (chartHeight * normalizedWeight)
+                val point = Offset(x, y)
+                points.add(point)
+
+                if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            }
+
+            drawPath(
+                path = path,
+                color = Color(0xFF1976D2),
+                style = Stroke(width = 4f)
+            )
+
+            // Точки
+            points.forEach { point ->
+                drawCircle(
+                    color = Color(0xFF1976D2),
+                    radius = 6f,
+                    center = point
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = DateUtils.formatShort(DateUtils.timestampToLocalDate(sorted.first().date)),
+                fontSize = 10.sp,
+                color = Color.Gray
+            )
+            Text(
+                text = DateUtils.formatShort(DateUtils.timestampToLocalDate(sorted.last().date)),
+                fontSize = 10.sp,
+                color = Color.Gray
+            )
+        }
     }
 }
