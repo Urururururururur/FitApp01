@@ -2,10 +2,21 @@ package com.practicum.fitapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// ==================== Брендовые цвета FitApp ====================
+// Primary — зелёный (здоровье, энергия)
+val Green80 = Color(0xFFA5D6A7)   // светлый
+val GreenGrey80 = Color(0xFF81C784)
+val Teal80 = Color(0xFF80CBC4)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Secondary — синий (сила, фокус)
+val Blue80 = Color(0xFF90CAF9)
+
+// Tertiary — оранжевый (мотивация)
+val Orange80 = Color(0xFFFFCC80)
+
+// ==================== Тёмные варианты (для светлой темы) ====================
+val Green40 = Color(0xFF2E7D32)   // основной зелёный
+val GreenGrey40 = Color(0xFF388E3C)
+val Teal40 = Color(0xFF00796B)
+val Blue40 = Color(0xFF1976D2)
+val Orange40 = Color(0xFFEF6C00)
