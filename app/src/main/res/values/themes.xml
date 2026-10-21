@@ -1,5 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Базовая тема приложения -->
     <style name="Theme.FitApp" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Тема Splash Screen (для Android 12+) -->
+    <style name="Theme.FitApp.Starting" parent="Theme.SplashScreen">
+        <!-- Цвет фона splash screen -->
+        <item name="windowSplashScreenBackground">#2E7D32</item>
+        <!-- Иконка на splash screen -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <!-- Тема после splash -->
+        <item name="postSplashScreenTheme">@style/Theme.FitApp</item>
+    </style>
 </resources>
