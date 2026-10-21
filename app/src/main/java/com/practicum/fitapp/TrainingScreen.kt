@@ -3,16 +3,7 @@ package com.practicum.fitapp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,22 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +28,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrainingScreen(
     onWorkoutClick: (Long) -> Unit,
@@ -59,32 +37,31 @@ fun TrainingScreen(
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
     val workouts by viewModel.workoutsForDay.collectAsStateWithLifecycle()
     val tags by viewModel.workoutTags.collectAsStateWithLifecycle()
-
-    // Стейты для календаря
-    var showCalendar by remember { mutableStateOf(false) }
-    var calendarMonth by remember { mutableStateOf(java.time.YearMonth.from(selectedDate)) }
     val datesWithWorkouts by viewModel.workoutDates.collectAsStateWithLifecycle()
+
+    var showCalendar by remember { mutableStateOf(false) }
+    var calendarMonth by remember { mutableStateOf(YearMonth.from(selectedDate)) }
+    var showAddSheet by remember { mutableStateOf(false) }
+    var showHistoryDialog by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // 1. Заголовок (Октябрь 2026)
         item {
             Text(
                 text = DateUtils.formatMonthYear(selectedDate),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable {
-                    calendarMonth = java.time.YearMonth.from(selectedDate)
+                    calendarMonth = YearMonth.from(selectedDate)
                     showCalendar = true
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
-
-        // 2. Лента недели
         item {
             WeekStrip(
                 selectedDate = selectedDate,
@@ -93,8 +70,6 @@ fun TrainingScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
-
-        // 3. Дата строкой (14.10.2026)
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -121,25 +96,21 @@ fun TrainingScreen(
             }
         } else {
             items(workouts, key = { it.id }) { workout ->
-                // Настройка свайпа для удаления
                 val dismissState = rememberSwipeToDismissBoxState(
                     confirmValueChange = { value ->
                         if (value == SwipeToDismissBoxValue.EndToStart) {
                             viewModel.deleteWorkout(workout.id)
                             true
-                        } else {
-                            false
-                        }
+                        } else false
                     }
                 )
-
                 SwipeToDismissBox(
                     state = dismissState,
                     backgroundContent = {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(vertical = 4.dp) // Соответствует отступу карточки
+                                .padding(vertical = 4.dp)
                                 .background(Color(0xFFE53935), shape = RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.CenterEnd
                         ) {
@@ -167,7 +138,6 @@ fun TrainingScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
-
                             val statusEnum = WorkoutStatus.valueOf(workout.status)
                             Text(
                                 text = statusEnum.displayName,
@@ -178,8 +148,6 @@ fun TrainingScreen(
                                     WorkoutStatus.WAITING -> Color.Gray
                                 }
                             )
-
-                            // Теги групп мышц
                             val workoutTags = tags[workout.id] ?: emptyList()
                             if (workoutTags.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -210,7 +178,7 @@ fun TrainingScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.addNewWorkout() }
+                    .clickable { showAddSheet = true }
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -224,6 +192,7 @@ fun TrainingScreen(
             }
         }
     }
+
     if (showCalendar) {
         MonthCalendarDialog(
             currentMonth = calendarMonth,
@@ -237,16 +206,83 @@ fun TrainingScreen(
             onDismiss = { showCalendar = false }
         )
     }
+
+    if (showAddSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAddSheet = false },
+            sheetState = sheetState
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Как создать тренировку?",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                ListItem(
+                    headlineContent = { Text("Каталог тренировок") },
+                    supportingContent = { Text("Готовые программы на выбор") },
+                    modifier = Modifier.clickable {
+                        showAddSheet = false
+                        // TODO: экран каталога
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text("Чистый шаблон") },
+                    supportingContent = { Text("Создать пустую тренировку") },
+                    modifier = Modifier.clickable {
+                        viewModel.addNewWorkout()
+                        showAddSheet = false
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text("История тренировок") },
+                    supportingContent = { Text("Скопировать из прошлой") },
+                    modifier = Modifier.clickable {
+                        showAddSheet = false
+                        showHistoryDialog = true
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+
+    if (showHistoryDialog) {
+        val allWorkouts by viewModel.allWorkouts.collectAsStateWithLifecycle()
+        AlertDialog(
+            onDismissRequest = { showHistoryDialog = false },
+            title = { Text("Выберите тренировку") },
+            text = {
+                LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                    items(allWorkouts) { workout ->
+                        Text(
+                            text = "${workout.name} — ${DateUtils.formatShort(DateUtils.timestampToLocalDate(workout.date))}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.copyWorkoutToDate(workout.id, selectedDate)
+                                    showHistoryDialog = false
+                                }
+                                .padding(12.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHistoryDialog = false }) { Text("Закрыть") }
+            }
+        )
+    }
 }
 
 @Composable
 private fun WeekStrip(
     selectedDate: LocalDate,
     datesWithWorkouts: Set<LocalDate>,
-    onDayClick: (LocalDate) -> Unit  // ← Вот здесь явно указываем, что принимаем дату
+    onDayClick: (LocalDate) -> Unit
 ) {
     val week = DateUtils.weekDays(selectedDate)
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -256,7 +292,7 @@ private fun WeekStrip(
                 date = date,
                 isSelected = date == selectedDate,
                 hasWorkout = date in datesWithWorkouts,
-                onClick = { onDayClick(date) }, // ← Передаем дату в лямбду
+                onClick = { onDayClick(date) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -274,14 +310,11 @@ private fun DayCell(
     val isWeekend = DateUtils.isWeekend(date)
     val dayNameColor = if (isWeekend) Color(0xFFD32F2F) else Color.Gray
     val dayNumberColor = if (isWeekend) Color(0xFFD32F2F) else Color.Black
-
-    // Определяем цвет фона: выбранный — синий, с тренировкой — зеленый
     val backgroundColor = when {
         isSelected -> Color(0xFFE3F2FD)
         hasWorkout -> Color(0xFFA5D6A7)
         else -> Color.White
     }
-
     Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
@@ -311,6 +344,7 @@ private fun DayCell(
         }
     }
 }
+
 @Composable
 private fun MonthCalendarDialog(
     currentMonth: YearMonth,
@@ -343,7 +377,6 @@ private fun MonthCalendarDialog(
         },
         text = {
             Column {
-                // Дни недели
                 Row(modifier = Modifier.fillMaxWidth()) {
                     listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
                         Text(
@@ -357,28 +390,21 @@ private fun MonthCalendarDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-
-                // Ячейки дней
                 val firstDayOfMonth = currentMonth.atDay(1)
-                val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value // 1=Пн, 7=Вс
+                val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
                 val daysInMonth = currentMonth.lengthOfMonth()
-
-                // Сдвиг для пустых ячеек в начале
                 val totalCells = firstDayOfWeek - 1 + daysInMonth
-                val rows = (totalCells + 6) / 7  // округление вверх
-
+                val rows = (totalCells + 6) / 7
                 for (row in 0 until rows) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         for (col in 0 until 7) {
                             val cellIndex = row * 7 + col
                             val dayNumber = cellIndex - (firstDayOfWeek - 1) + 1
-
                             if (dayNumber in 1..daysInMonth) {
                                 val date = currentMonth.atDay(dayNumber)
                                 val isSelected = date == selectedDate
                                 val isWeekend = DateUtils.isWeekend(date)
                                 val hasWorkout = date in datesWithWorkouts
-
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
@@ -407,7 +433,6 @@ private fun MonthCalendarDialog(
                                     )
                                 }
                             } else {
-                                // пустая ячейка
                                 Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
                             }
                         }
@@ -416,47 +441,7 @@ private fun MonthCalendarDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Закрыть")
-            }
+            TextButton(onClick = onDismiss) { Text("Закрыть") }
         }
     )
-}
-@Composable
-private fun DayCell(
-    date: LocalDate,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val isWeekend = DateUtils.isWeekend(date)
-    val dayNameColor = if (isWeekend) Color(0xFFD32F2F) else Color.Gray
-    val dayNumberColor = if (isWeekend) Color(0xFFD32F2F) else Color.Black
-
-    Card(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFFE3F2FD) else Color.White
-        ),
-        border = if (isSelected) BorderStroke(2.dp, Color(0xFF1976D2)) else null
-    ) {
-        Column(
-            modifier = Modifier.padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = DateUtils.dayOfWeekShort(date),
-                fontSize = 11.sp,
-                color = dayNameColor
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = date.dayOfMonth.toString(),
-                fontSize = 16.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = dayNumberColor
-            )
-        }
-    }
 }

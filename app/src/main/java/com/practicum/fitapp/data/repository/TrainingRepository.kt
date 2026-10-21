@@ -1,62 +1,27 @@
 package com.practicum.fitapp.data.repository
 
-import com.practicum.fitapp.data.local.DailyWorkoutCount
-import com.practicum.fitapp.data.local.ExerciseDao
-import com.practicum.fitapp.data.local.ExerciseEntity
-import com.practicum.fitapp.data.local.ExerciseProgress
-import com.practicum.fitapp.data.local.SetDao
-import com.practicum.fitapp.data.local.SetEntity
-import com.practicum.fitapp.data.local.WorkoutDao
-import com.practicum.fitapp.data.local.WorkoutEntity
-import com.practicum.fitapp.data.local.WorkoutExerciseDao
-import com.practicum.fitapp.data.local.WorkoutExerciseEntity
+import com.practicum.fitapp.data.local.*
 import kotlinx.coroutines.flow.Flow
-import com.practicum.fitapp.data.local.WorkoutExerciseWithExercise
-import com.practicum.fitapp.data.local.ExerciseStats
-import com.practicum.fitapp.data.local.ExerciseWithProgress
-import com.practicum.fitapp.data.local.WorkoutMuscleGroupsRaw
+import kotlinx.coroutines.flow.first
 
-/**
- * Repository для раздела «Тренировки».
- * Объединяет работу с тренировками, упражнениями в тренировке и подходами.
- */
 class TrainingRepository(
     private val workoutDao: WorkoutDao,
     private val workoutExerciseDao: WorkoutExerciseDao,
     private val setDao: SetDao,
     private val exerciseDao: ExerciseDao
 ) {
-    fun getExercisesWithProgress(): Flow<List<ExerciseWithProgress>> =
-        workoutDao.getExercisesWithProgress()
-
-    fun getExerciseProgress(exerciseId: Long): Flow<List<ExerciseProgress>> =
-        workoutDao.getExerciseProgress(exerciseId)
-
-    fun getWorkoutExerciseById(id: Long): Flow<WorkoutExerciseEntity?> =
-        workoutExerciseDao.getById(id)
-
-    fun getExerciseById(id: Long): Flow<ExerciseEntity?> =
-        exerciseDao.getById(id)
-
-    fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>> =
-        workoutDao.getDailyWorkoutCounts(startDate, endDate)
-    // ==================== Тренировки ====================
-    fun getExercisesWithId(workoutId: Long): Flow<List<WorkoutExerciseWithExercise>> =
-        workoutExerciseDao.getExercisesWithId(workoutId)
 
     fun getWorkoutsByDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutEntity>> =
         workoutDao.getWorkoutsByDay(startOfDay, endOfDay)
 
-    fun getMuscleGroupsForDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutMuscleGroupsRaw>> =
-        workoutDao.getMuscleGroupsForDay(startOfDay, endOfDay)
-
     fun getWorkoutById(id: Long): Flow<WorkoutEntity?> = workoutDao.getById(id)
+
+    fun getAllWorkouts(): Flow<List<WorkoutEntity>> = workoutDao.getAllWorkouts()
 
     fun getAllWorkoutDates(): Flow<List<Long>> = workoutDao.getAllWorkoutDates()
 
     suspend fun insertWorkout(workout: WorkoutEntity): Long = workoutDao.insert(workout)
-    suspend fun getLastSet(workoutExerciseId: Long): SetEntity? =
-        setDao.getLastSet(workoutExerciseId)
+
     suspend fun updateWorkout(
         id: Long,
         name: String,
@@ -67,20 +32,35 @@ class TrainingRepository(
 
     suspend fun deleteWorkout(id: Long) = workoutDao.deleteById(id)
 
-    /** Список "сырых" строк групп мышц — для дальнейшего парсинга в Kotlin. */
     fun getMuscleGroupsRaw(workoutId: Long): Flow<List<String>> =
         workoutDao.getMuscleGroupsRaw(workoutId)
+
+    fun getMuscleGroupsForDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutMuscleGroupsRaw>> =
+        workoutDao.getMuscleGroupsForDay(startOfDay, endOfDay)
 
     fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>> =
         workoutDao.getExerciseStats(workoutId)
 
-    // ==================== Упражнения в тренировке ====================
+    fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>> =
+        workoutDao.getDailyWorkoutCounts(startDate, endDate)
+
+    fun getExercisesWithProgress(): Flow<List<ExerciseWithProgress>> =
+        workoutDao.getExercisesWithProgress()
+
+    fun getExerciseProgress(exerciseId: Long): Flow<List<ExerciseProgress>> =
+        workoutDao.getExerciseProgress(exerciseId)
 
     fun getWorkoutExercises(workoutId: Long): Flow<List<WorkoutExerciseEntity>> =
         workoutExerciseDao.getByWorkout(workoutId)
 
     fun getExercisesForWorkout(workoutId: Long): Flow<List<ExerciseEntity>> =
         workoutExerciseDao.getExercisesForWorkout(workoutId)
+
+    fun getExercisesWithId(workoutId: Long): Flow<List<WorkoutExerciseWithExercise>> =
+        workoutExerciseDao.getExercisesWithId(workoutId)
+
+    fun getWorkoutExerciseById(id: Long): Flow<WorkoutExerciseEntity?> =
+        workoutExerciseDao.getById(id)
 
     suspend fun insertWorkoutExercise(entity: WorkoutExerciseEntity): Long =
         workoutExerciseDao.insert(entity)
@@ -92,8 +72,6 @@ class TrainingRepository(
         workoutExerciseDao.update(id, note, order)
 
     suspend fun deleteWorkoutExercise(id: Long) = workoutExerciseDao.deleteById(id)
-
-    // ==================== Подходы ====================
 
     fun getSets(workoutExerciseId: Long): Flow<List<SetEntity>> =
         setDao.getByWorkoutExercise(workoutExerciseId)
@@ -111,10 +89,9 @@ class TrainingRepository(
 
     suspend fun deleteSet(id: Long) = setDao.deleteById(id)
 
-    suspend fun nextSetOrder(workoutExerciseId: Long): Int =
-        setDao.nextOrder(workoutExerciseId)
+    suspend fun nextSetOrder(workoutExerciseId: Long): Int = setDao.nextOrder(workoutExerciseId)
 
-    // ==================== Справочник упражнений ====================
+    suspend fun getLastSet(workoutExerciseId: Long): SetEntity? = setDao.getLastSet(workoutExerciseId)
 
     fun getAllExercises(): Flow<List<ExerciseEntity>> = exerciseDao.getAll()
 
@@ -130,4 +107,49 @@ class TrainingRepository(
 
     suspend fun deleteUserExercise(id: Long) = exerciseDao.deleteUserCreated(id)
 
+    fun getExerciseById(id: Long): Flow<ExerciseEntity?> = exerciseDao.getById(id)
+
+    suspend fun copyWorkout(sourceWorkoutId: Long, targetDate: Long) {
+        val sourceWorkout = workoutDao.getById(sourceWorkoutId).first() ?: return
+
+        val newWorkoutId = workoutDao.insert(
+            WorkoutEntity(
+                date = targetDate,
+                name = sourceWorkout.name,
+                note = sourceWorkout.note,
+                status = WorkoutStatus.WAITING.name,
+                endDate = null
+            )
+        )
+
+        val details = workoutDao.getWorkoutWithDetails(sourceWorkoutId).first()
+        val grouped = details.groupBy { it.workoutExerciseId }
+
+        grouped.forEach { (_, rows) ->
+            val first = rows.first()
+            val newWorkoutExerciseId = workoutExerciseDao.insert(
+                WorkoutExerciseEntity(
+                    workoutId = newWorkoutId,
+                    exerciseId = first.exerciseId,
+                    orderInWorkout = first.orderInWorkout,
+                    note = first.note
+                )
+            )
+            rows.forEach { row ->
+                if (row.setId != null) {
+                    setDao.insert(
+                        SetEntity(
+                            workoutExerciseId = newWorkoutExerciseId,
+                            weight = row.weight,
+                            reps = row.reps,
+                            distance = row.distance,
+                            duration = row.duration,
+                            intensity = row.intensity ?: Intensity.NORMAL.name,
+                            orderInExercise = row.orderInExercise ?: 0
+                        )
+                    )
+                }
+            }
+        }
+    }
 }
