@@ -21,9 +21,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         WorkoutExerciseEntity::class,
         SetEntity::class,
         UserProfileEntity::class,
-        WeightEntryEntity::class
+        WeightEntryEntity::class,
+        UnlockedAchievementEntity::class
+
     ],
-    version = 10,
+    version = 12,
     exportSchema = false
 )
 
@@ -43,6 +45,8 @@ abstract class FitAppDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
 
     abstract fun userProfileDao(): UserProfileDao
+
+    abstract fun achievementDao(): AchievementDao
 
     companion object {
         @Volatile
@@ -227,6 +231,28 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE products ADD COLUMN isUserCreated INTEGER NOT NULL DEFAULT 0")
             }
         }
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Для алкоголя
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN quitAlcohol INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN alcoholQuitDate INTEGER")
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN alcoholRelapses INTEGER NOT NULL DEFAULT 0")
+                // Для никотина
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN quitNicotine INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN nicotineQuitDate INTEGER")
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN nicotineRelapses INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+            CREATE TABLE IF NOT EXISTS unlocked_achievements (
+                achievementId TEXT NOT NULL PRIMARY KEY,
+                unlockedAt INTEGER NOT NULL
+            )
+        """.trimIndent())
+            }
+        }
 
 
         fun getInstance(context: Context): FitAppDatabase {
@@ -237,7 +263,8 @@ abstract class FitAppDatabase : RoomDatabase() {
                     "fitapp_database"
                 )
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
-                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
+                        MIGRATION_10_11, MIGRATION_11_12)
                     .build()
                     .also { INSTANCE = it }
             }

@@ -2,6 +2,7 @@ package com.practicum.fitapp.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.practicum.fitapp.data.local.AchievementDao
 import com.practicum.fitapp.data.local.ExerciseDao
 import com.practicum.fitapp.data.local.FitAppDatabase
 import com.practicum.fitapp.data.local.MealEntryDao
@@ -19,6 +20,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import com.practicum.fitapp.data.local.UserProfileDao
 import com.practicum.fitapp.data.local.WeightEntryDao
+import com.practicum.fitapp.data.repository.AchievementRepository
 import com.practicum.fitapp.data.repository.UserRepository
 
 /**
@@ -46,7 +48,9 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_6_7,
                 FitAppDatabase.MIGRATION_7_8,
                 FitAppDatabase.MIGRATION_8_9,
-                FitAppDatabase.MIGRATION_9_10
+                FitAppDatabase.MIGRATION_9_10,
+                FitAppDatabase.MIGRATION_10_11,
+                FitAppDatabase.MIGRATION_11_12
             )
             .build()
     }
@@ -88,6 +92,14 @@ object DatabaseModule {
     ): TrainingRepository = TrainingRepository(workoutDao, workoutExerciseDao, setDao, exerciseDao)
     @Provides
     fun provideWeightEntryDao(db: FitAppDatabase): WeightEntryDao = db.weightEntryDao()
+
+    @Provides
+    @Singleton
+    fun provideAchievementRepository(dao: AchievementDao): AchievementRepository =
+        AchievementRepository(dao)
+
+    @Provides
+    fun provideAchievementDao(db: FitAppDatabase): AchievementDao = db.achievementDao()
 
     @Provides
     @Singleton

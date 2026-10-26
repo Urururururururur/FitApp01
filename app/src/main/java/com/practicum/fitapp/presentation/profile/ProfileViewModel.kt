@@ -49,6 +49,44 @@ class ProfileViewModel @Inject constructor(
             repository.addWeight(System.currentTimeMillis(), weightKg)
         }
     }
+    fun addAlcoholRelapse() {
+        val current = profile.value ?: return
+        viewModelScope.launch {
+            repository.saveProfile(current.copy(alcoholRelapses = current.alcoholRelapses + 1))
+        }
+    }
+    /** Обновить дату отказа от алкоголя (сбрасывает срывы). */
+    fun updateAlcoholDate(date: Long) {
+        val current = profile.value ?: return
+        viewModelScope.launch {
+            repository.saveProfile(
+                current.copy(
+                    alcoholQuitDate = date,
+                    alcoholRelapses = 0   // ← сбрасываем срывы
+                )
+            )
+        }
+    }
+
+    /** Обновить дату отказа от никотина (сбрасывает срывы). */
+    fun updateNicotineDate(date: Long) {
+        val current = profile.value ?: return
+        viewModelScope.launch {
+            repository.saveProfile(
+                current.copy(
+                    nicotineQuitDate = date,
+                    nicotineRelapses = 0   // ← сбрасываем срывы
+                )
+            )
+        }
+    }
+
+    fun addNicotineRelapse() {
+        val current = profile.value ?: return
+        viewModelScope.launch {
+            repository.saveProfile(current.copy(nicotineRelapses = current.nicotineRelapses + 1))
+        }
+    }
     /** Сохранить (или создать) профиль. */
     fun saveProfile(
         name: String,
@@ -57,9 +95,12 @@ class ProfileViewModel @Inject constructor(
         heightCm: Double,
         weightKg: Double,
         activityLevel: String,
-        goal: String
+        goal: String,
+        quitAlcohol: Boolean,
+        quitNicotine: Boolean
     ) {
         viewModelScope.launch {
+            val current = profile.value
             repository.saveProfile(
                 UserProfileEntity(
                     id = 1,
@@ -69,7 +110,14 @@ class ProfileViewModel @Inject constructor(
                     heightCm = heightCm,
                     weightKg = weightKg,
                     activityLevel = activityLevel,
-                    goal = goal
+                    goal = goal,
+                    // Переносим данные о привычках
+                    quitAlcohol = quitAlcohol,
+                    alcoholQuitDate = if (quitAlcohol && current?.alcoholQuitDate == null) System.currentTimeMillis() else current?.alcoholQuitDate,
+                    alcoholRelapses = current?.alcoholRelapses ?: 0,
+                    quitNicotine = quitNicotine,
+                    nicotineQuitDate = if (quitNicotine && current?.nicotineQuitDate == null) System.currentTimeMillis() else current?.nicotineQuitDate,
+                    nicotineRelapses = current?.nicotineRelapses ?: 0
                 )
             )
         }
