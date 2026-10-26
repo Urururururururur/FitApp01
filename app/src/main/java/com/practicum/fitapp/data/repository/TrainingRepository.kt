@@ -3,6 +3,9 @@ package com.practicum.fitapp.data.repository
 import com.practicum.fitapp.data.local.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import com.practicum.fitapp.presentation.training.CatalogDay
+import com.practicum.fitapp.presentation.training.CatalogProgram
+
 
 class TrainingRepository(
     private val workoutDao: WorkoutDao,
@@ -151,5 +154,47 @@ class TrainingRepository(
                 }
             }
         }
+    }
+
+    suspend fun addProgramDayToWorkout(program: CatalogProgram, day: CatalogDay, targetDate: Long): Long {
+        // 1. Создаем тренировку
+        val workoutId = workoutDao.insert(
+            WorkoutEntity(
+                date = targetDate,
+                name = "${program.title} (${day.title})",
+                note = program.description,
+                status = WorkoutStatus.WAITING.name
+            )
+        )
+
+        // 2. Проходим по упражнениям выбранного дня
+        day.exercises.forEachIndexed { index, catalogExercise ->
+            val exerciseEntity = exerciseDao.getByName(catalogExercise.name)
+            if (exerciseEntity != null) {
+                val weId = workoutExerciseDao.insert(
+                    WorkoutExerciseEntity(
+                        workoutId = workoutId,
+                        exerciseId = exerciseEntity.id,
+                        orderInWorkout = index
+                    )
+                )
+
+                // Ищем первое число в строке (например, из "8-10" возьмет 8, из "Максимум" вернет null)
+                val repsInt = Regex("\\d+").find(catalogExercise.reps)?.value?.toIntOrNull() ?: 10
+
+                // Создаем подходы
+                for (setIndex in 0 until catalogExercise.sets) {
+                    setDao.insert(
+                        SetEntity(
+                            workoutExerciseId = weId,
+                            reps = repsInt,
+                            intensity = Intensity.NORMAL.name,
+                            orderInExercise = setIndex
+                        )
+                    )
+                }
+            }
+        }
+        return workoutId
     }
 }

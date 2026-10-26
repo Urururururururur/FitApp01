@@ -5,20 +5,26 @@ package com.practicum.fitapp.data.local
  * В Entity хранится как строка имени (например, "LEGS").
  */
 enum class MuscleGroup(val displayName: String) {
-    LEGS("Ноги"),
-    BACK("Спина"),
     SHOULDERS("Плечи"),
-    CARDIO("Кардио"),
+    TRAPS("Трапеция"),
+    BACK("Спина"),
+    LOWER_BACK("Поясница"),
     CHEST("Грудь"),
-    ARMS("Руки"),
-    ABS("Пресс");
+    ABS("Пресс"),
+    BICEPS("Бицепс"),
+    TRICEPS("Трицепс"),
+    FOREARMS("Предплечья"),
+    QUADS("Квадрицепс"),
+    GLUTES("Ягодицы"),
+    HAMSTRINGS("Бицепс бедра"),
+    ADDUCTORS("Приводящие бедра"),
+    CALVES("Икры"),
+    CARDIO("Кардио");
 
     companion object {
-        /** Найти по строковому имени. Возвращает null, если не найдено. */
         fun fromString(value: String): MuscleGroup? =
             entries.find { it.name == value }
 
-        /** Разобрать строку вида "LEGS,BACK" в список групп. */
         fun parseList(value: String): List<MuscleGroup> =
             value.split(",")
                 .mapNotNull { fromString(it.trim()) }

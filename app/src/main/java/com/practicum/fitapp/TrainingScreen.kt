@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TrainingScreen(
     onWorkoutClick: (Long) -> Unit,
+    onCatalogClick: () -> Unit,
     viewModel: TrainingViewModel = hiltViewModel()
 ) {
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
@@ -224,7 +225,7 @@ fun TrainingScreen(
                     supportingContent = { Text("Готовые программы на выбор") },
                     modifier = Modifier.clickable {
                         showAddSheet = false
-                        // TODO: экран каталога
+                        onCatalogClick() // Нужно передать этот колбэк в TrainingScreen
                     }
                 )
                 ListItem(

@@ -35,4 +35,7 @@ interface ExerciseDao {
 
     @Query("DELETE FROM exercises WHERE id = :id AND isBuiltIn = 0")
     suspend fun deleteUserCreated(id: Long)
+
+    @Query("SELECT * FROM exercises WHERE name = :name LIMIT 1")
+    suspend fun getByName(name: String): ExerciseEntity?
 }

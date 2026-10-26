@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import com.practicum.fitapp.data.local.ExerciseEntity
 import com.practicum.fitapp.data.local.ExerciseCategory
+import com.practicum.fitapp.data.local.WorkoutEntity
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
@@ -27,8 +28,18 @@ class ExerciseViewModel @Inject constructor(
     private val workoutExerciseId: Long = checkNotNull(savedStateHandle["workoutExerciseId"])
 
     /** Само упражнение (из связи). */
+
     val workoutExercise: StateFlow<WorkoutExerciseEntity?> = repository
         .getWorkoutExerciseById(workoutExerciseId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+    val workout: StateFlow<WorkoutEntity?> = workoutExercise
+        .flatMapLatest { we ->
+            if (we != null) repository.getWorkoutById(we.workoutId) else kotlinx.coroutines.flow.flowOf(null)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

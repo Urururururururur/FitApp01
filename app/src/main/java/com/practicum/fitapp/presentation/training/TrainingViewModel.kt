@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
 import javax.inject.Inject
+import com.practicum.fitapp.presentation.training.CatalogProgram
+
 
 @HiltViewModel
 class TrainingViewModel @Inject constructor(
@@ -86,7 +88,9 @@ class TrainingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (repository.countBuiltInExercises() == 0) {
+            // Так как мы обновили базу, в ней теперь 0 встроенных упражнений.
+            // Если их меньше 300 (значит база пустая или старая), вставляем новые.
+            if (repository.countBuiltInExercises() < 300) {
                 repository.insertExercises(builtInExercises)
             }
         }
@@ -120,6 +124,14 @@ class TrainingViewModel @Inject constructor(
             val targetTimestamp = DateUtils.localDateToStartOfDay(targetDate) +
                     (System.currentTimeMillis() % 86_400_000L)
             repository.copyWorkout(sourceWorkoutId, targetTimestamp)
+        }
+    }
+
+    fun addProgramDay(program: com.practicum.fitapp.presentation.training.CatalogProgram, day: com.practicum.fitapp.presentation.training.CatalogDay) {
+        viewModelScope.launch {
+            val timestamp = DateUtils.localDateToStartOfDay(_selectedDate.value) +
+                    (System.currentTimeMillis() % 86_400_000L)
+            repository.addProgramDayToWorkout(program, day, timestamp)
         }
     }
 }

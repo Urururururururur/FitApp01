@@ -55,6 +55,7 @@ fun WorkoutDetailsScreen(
     workoutId: Long,
     onBack: () -> Unit,
     onExerciseClick: (Long) -> Unit,
+    onAddExerciseClick: () -> Unit,
     viewModel: WorkoutDetailsViewModel = hiltViewModel()
 ) {
     var showExercisePicker by remember { mutableStateOf(false) }
@@ -227,9 +228,11 @@ fun WorkoutDetailsScreen(
 
                 // 3. Кнопка "Добавить упражнение"
                 item {
+                    val isCompleted = workout!!.status == WorkoutStatus.COMPLETED.name
                     Button(
-                        onClick = { showExercisePicker = true },
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = onAddExerciseClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isCompleted  // ← Кнопка выключится, если тренировка выполнена
                     ) {
                         Text("+ Добавить упражнение")
                     }
@@ -340,38 +343,7 @@ fun WorkoutDetailsScreen(
                 }
 
 
-            if (showExercisePicker) {
-                // Простой диалог: список всех упражнений
-                val allExercises by viewModel.allExercises.collectAsStateWithLifecycle()
 
-                AlertDialog(
-                    onDismissRequest = { showExercisePicker = false },
-                    title = { Text("Выберите упражнение") },
-                    text = {
-                        LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                            items(allExercises) { exercise ->
-                                Text(
-                                    text = "${exercise.name} (${exercise.categoryEnum.displayName})",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            viewModel.addExercise(exercise)
-                                            showExercisePicker = false
-                                        }
-                                        .padding(12.dp)
-                                )
-                            }
-                        }
-
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showExercisePicker = false }) {
-                            Text("Отмена")
-                        }
-                    }
-
-                )
-            }
         }
     }
 }

@@ -23,6 +23,8 @@ data class ExerciseEntity(
     // "STRENGTH" / "BODYWEIGHT" / "CARDIO"
     val category: String = ExerciseCategory.STRENGTH.name,
 
+    val subcategory: String = "",
+
     // true — встроенное, удалить нельзя. false — пользовательское.
     val isBuiltIn: Boolean = false,
 

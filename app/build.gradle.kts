@@ -68,6 +68,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.vico.compose.m3)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.material.icons.extended)
 }
 hilt {
     enableAggregatingTask = false

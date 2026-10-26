@@ -31,11 +31,16 @@ fun ExerciseScreen(
     val exercise by viewModel.exercise.collectAsStateWithLifecycle()
     val category = exercise?.categoryEnum ?: com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH
     val sets by viewModel.sets.collectAsStateWithLifecycle()
+    val workout by viewModel.workout.collectAsStateWithLifecycle()
+// Можно ли редактировать? Нет, если тренировка завершена.
+    val isEditable = workout?.status != com.practicum.fitapp.data.local.WorkoutStatus.COMPLETED.name
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Упражнение") },
+                title = {
+                    Text(exercise?.name ?: "Упражнение")  // ← Берем имя из БД, если загрузилось
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
@@ -106,8 +111,10 @@ fun ExerciseScreen(
                                                         onValueChange = { v ->
                                                             viewModel.updateSet(set.copy(weight = v.toDoubleOrNull()))
                                                         },
+                                                        enabled = isEditable,
                                                         modifier = Modifier.width(70.dp),
                                                         singleLine = true
+
                                                     )
 
                                                     TextButton(
@@ -116,7 +123,8 @@ fun ExerciseScreen(
                                                             viewModel.updateSet(set.copy(weight = nw))
                                                         },
                                                         contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp)
+                                                        modifier = Modifier.size(28.dp),
+                                                        enabled = isEditable
                                                     ) { Text("+", fontSize = 16.sp) }
                                                 }
                                             }
@@ -131,7 +139,8 @@ fun ExerciseScreen(
                                                             viewModel.updateSet(set.copy(reps = maxOf(nr, 0)))
                                                         },
                                                         contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp)
+                                                        modifier = Modifier.size(28.dp),
+                                                        enabled = isEditable
                                                     ) { Text("−", fontSize = 16.sp) }
 
                                                     OutlinedTextField(
@@ -140,6 +149,7 @@ fun ExerciseScreen(
                                                             viewModel.updateSet(set.copy(reps = v.toIntOrNull()))
                                                         },
                                                         modifier = Modifier.width(70.dp),
+                                                        enabled = isEditable,
                                                         singleLine = true
                                                     )
 
@@ -149,7 +159,8 @@ fun ExerciseScreen(
                                                             viewModel.updateSet(set.copy(reps = nr))
                                                         },
                                                         contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp)
+                                                        modifier = Modifier.size(28.dp),
+                                                        enabled = isEditable
                                                     ) { Text("+", fontSize = 16.sp) }
                                                 }
                                             }
@@ -166,7 +177,8 @@ fun ExerciseScreen(
                                                         viewModel.updateSet(set.copy(reps = maxOf(nr, 0)))
                                                     },
                                                     contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(28.dp)
+                                                    modifier = Modifier.size(28.dp),
+                                                    enabled = isEditable
                                                 ) { Text("−", fontSize = 16.sp) }
 
                                                 OutlinedTextField(
@@ -175,7 +187,8 @@ fun ExerciseScreen(
                                                         viewModel.updateSet(set.copy(reps = v.toIntOrNull()))
                                                     },
                                                     modifier = Modifier.width(70.dp),
-                                                    singleLine = true
+                                                    singleLine = true,
+                                                    enabled = isEditable
                                                 )
 
                                                 TextButton(
@@ -184,7 +197,8 @@ fun ExerciseScreen(
                                                         viewModel.updateSet(set.copy(reps = nr))
                                                     },
                                                     contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(28.dp)
+                                                    modifier = Modifier.size(28.dp),
+                                                    enabled = isEditable
                                                 ) { Text("+", fontSize = 16.sp) }
                                             }
                                         }
@@ -203,7 +217,8 @@ fun ExerciseScreen(
                                                         viewModel.updateSet(set.copy(distance = v.toDoubleOrNull()))
                                                     },
                                                     modifier = Modifier.width(90.dp),
-                                                    singleLine = true
+                                                    singleLine = true,
+                                                    enabled = isEditable
                                                 )
                                             }
                                             Column {
@@ -214,7 +229,8 @@ fun ExerciseScreen(
                                                         viewModel.updateSet(set.copy(duration = v.toIntOrNull()))
                                                     },
                                                     modifier = Modifier.width(90.dp),
-                                                    singleLine = true
+                                                    singleLine = true,
+                                                    enabled = isEditable
                                                 )
                                             }
                                         }
@@ -229,15 +245,18 @@ fun ExerciseScreen(
                                                     viewModel.updateSet(set.copy(duration = v.toIntOrNull()))
                                                 },
                                                 modifier = Modifier.width(120.dp),
-                                                singleLine = true
+                                                singleLine = true,
+                                                enabled = isEditable
                                             )
                                         }
                                     }
                                 }
 
                                 // Кнопка удаления
-                                TextButton(onClick = { viewModel.deleteSet(set.id) }) {
-                                    Text("✕", color = Color.Red)
+                                if (isEditable) {
+                                    TextButton(onClick = { viewModel.deleteSet(set.id) }) {
+                                        Text("✕", color = Color.Red)
+                                    }
                                 }
                             }
 
@@ -252,24 +271,28 @@ fun ExerciseScreen(
                                     label = "РАЗМ",
                                     isSelected = set.intensity == "WARMUP",
                                     color = Color.Gray,
+                                    enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "WARMUP")) }
                                 )
                                 IntensityChip(
                                     label = "ЛЕГК",
                                     isSelected = set.intensity == "EASY",
                                     color = Color(0xFF4CAF50),
+                                    enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "EASY")) }
                                 )
                                 IntensityChip(
                                     label = "НОРМ",
                                     isSelected = set.intensity == "NORMAL",
                                     color = Color(0xFFFF9800),
+                                    enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "NORMAL")) }
                                 )
                                 IntensityChip(
                                     label = "СЛОЖ",
                                     isSelected = set.intensity == "HARD",
                                     color = Color(0xFFF44336),
+                                    enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "HARD")) }
                                 )
                             }
@@ -283,7 +306,8 @@ fun ExerciseScreen(
             // Кнопка добавления подхода (одна на весь экран)
             Button(
                 onClick = { viewModel.addSet() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isEditable
             ) {
                 Text("+ Добавить подход")
             }
@@ -296,10 +320,12 @@ private fun IntensityChip(
     label: String,
     isSelected: Boolean,
     color: Color,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(50),
         color = if (isSelected) color.copy(alpha = 0.15f) else Color.Transparent,
         border = BorderStroke(

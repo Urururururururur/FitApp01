@@ -25,7 +25,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UnlockedAchievementEntity::class
 
     ],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 
@@ -253,6 +253,16 @@ abstract class FitAppDatabase : RoomDatabase() {
         """.trimIndent())
             }
         }
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Добавляем колонку subcategory
+                db.execSQL("ALTER TABLE exercises ADD COLUMN subcategory TEXT NOT NULL DEFAULT ''")
+
+                // Так как мы полностью обновили базу упражнений, старые встроенные упражнения (isBuiltIn = 1)
+                // больше не актуальны. Удаляем их. (Связанные тренировки удалятся по CASCADE).
+                db.execSQL("DELETE FROM exercises WHERE isBuiltIn = 1")
+            }
+        }
 
 
         fun getInstance(context: Context): FitAppDatabase {
@@ -264,7 +274,7 @@ abstract class FitAppDatabase : RoomDatabase() {
                 )
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
                         MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
-                        MIGRATION_10_11, MIGRATION_11_12)
+                        MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                     .build()
                     .also { INSTANCE = it }
             }
