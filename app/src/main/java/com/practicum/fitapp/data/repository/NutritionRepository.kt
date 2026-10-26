@@ -54,4 +54,13 @@ class NutritionRepository(
     fun getBuiltInProducts(): Flow<List<ProductEntity>> = productDao.getBuiltIn()
     fun getUserCreatedProducts(): Flow<List<ProductEntity>> = productDao.getUserCreated()
     fun getUsedProducts(): Flow<List<ProductEntity>> = productDao.getUsed()
+
+    suspend fun countBuiltInProducts(): Int = productDao.countBuiltIn()
+    suspend fun insertProducts(products: List<ProductEntity>) = productDao.insertAll(products)
+    suspend fun getProductByName(name: String): ProductEntity? {
+        return productDao.getByName(name)
+    }
+
+
+
 }

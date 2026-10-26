@@ -2,19 +2,23 @@ package com.practicum.fitapp.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.fitapp.data.local.FitAppDatabase
 import com.practicum.fitapp.data.local.UserProfileEntity
+import com.practicum.fitapp.data.local.WeightEntryEntity
 import com.practicum.fitapp.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import com.practicum.fitapp.data.local.WeightEntryEntity
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val db: FitAppDatabase // ← Добавляем базу данных
 ) : ViewModel() {
 
     /** История взвешиваний. */
@@ -120,6 +124,16 @@ class ProfileViewModel @Inject constructor(
                     nicotineRelapses = current?.nicotineRelapses ?: 0
                 )
             )
+        }
+    }
+    fun clearAllData(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            // Очищаем БД в фоновом потоке, чтобы не блокировать UI
+            withContext(Dispatchers.IO) {
+                db.clearAllTables()
+            }
+            // Возвращаемся в главный поток и вызываем колбэк
+            onComplete()
         }
     }
 }

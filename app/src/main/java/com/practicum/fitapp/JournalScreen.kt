@@ -60,6 +60,7 @@ fun JournalScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
         Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold)

@@ -43,4 +43,18 @@ interface ProductDao {
     ORDER BY p.name
 """)
     fun getUsed(): Flow<List<ProductEntity>>
+    /** Проверяет, есть ли встроенные продукты в базе. */
+    @Query("SELECT COUNT(*) FROM products WHERE isUserCreated = 0")
+    suspend fun countBuiltIn(): Int
+
+    /** Вставляет список продуктов, игнорируя дубликаты. */
+    @Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE)
+    suspend fun insertAll(products: List<ProductEntity>)
+    @Query("SELECT * FROM products WHERE name = :name LIMIT 1")
+    suspend fun getByName(name: String): ProductEntity?
+
+
+
+
+
 }

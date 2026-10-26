@@ -24,6 +24,8 @@ import com.practicum.fitapp.presentation.calculator.NutritionCalculator
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.profile.ProfileViewModel
 import androidx.compose.material.icons.filled.Edit
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +59,9 @@ fun ProfileScreen(
     var quitAlcohol by remember { mutableStateOf(false) }
     var quitNicotine by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     // Заполнение формы при загрузке профиля
     LaunchedEffect(profile) {
         profile?.let { p ->
@@ -79,6 +84,7 @@ fun ProfileScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
         Text(text = "Профиль", fontSize = 28.sp, fontWeight = FontWeight.Bold)
@@ -464,6 +470,49 @@ fun ProfileScreen(
                         ) {
                             Text("Сохранить")
                         }
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        TextButton(
+                            onClick = { showDeleteDialog = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Удалить все данные",
+                                color = Color.Red,
+                                fontSize = 16.sp
+                            )
+                        }
+                        if (showDeleteDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showDeleteDialog = false },
+                                title = { Text("Удалить все данные?") },
+                                text = {
+                                    Text(
+                                        "Все ваши тренировки, записи о питании, вес и достижения будут удалены. " +
+                                                "Это действие нельзя отменить."
+                                    )
+                                },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            showDeleteDialog = false
+                                            viewModel.clearAllData {
+                                                // Перезапускаем Activity, чтобы все ViewModel и БД обновились
+                                                (context as Activity).recreate()
+                                            }
+                                        }
+                                    ) {
+                                        Text("Удалить", color = Color.Red)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDeleteDialog = false }) {
+                                        Text("Отмена")
+                                    }
+                                }
+                            )
+                        }
+                     // ← Конец Column
 
                         if (showSavedMessage) {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -473,6 +522,7 @@ fun ProfileScreen(
                                 fontSize = 14.sp
                             )
                         }
+
                     }
                 }
             }

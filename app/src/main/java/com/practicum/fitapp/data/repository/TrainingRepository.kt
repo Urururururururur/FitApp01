@@ -27,11 +27,12 @@ class TrainingRepository(
 
     suspend fun updateWorkout(
         id: Long,
+        date: Long, // ← Добавили
         name: String,
         note: String,
         endDate: Long?,
         status: String
-    ) = workoutDao.update(id, name, note, endDate, status)
+    ) = workoutDao.update(id, date, name, note, endDate, status)
 
     suspend fun deleteWorkout(id: Long) = workoutDao.deleteById(id)
 

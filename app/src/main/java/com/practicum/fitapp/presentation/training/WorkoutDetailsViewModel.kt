@@ -30,37 +30,39 @@ class WorkoutDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.updateWorkout(
                 id = currentWorkout.id,
+                date = System.currentTimeMillis(), // ← СТАРТ ТРЕНИРОВКИ СЕЙЧАС
                 name = currentWorkout.name,
                 note = currentWorkout.note,
-                endDate = null,   // Тренировка идёт
+                endDate = null,
                 status = WorkoutStatus.IN_PROGRESS.name
             )
         }
     }
 
     /** Обновить название тренировки. */
-    fun updateName(newName: String) {
+    fun updateNote(newNote: String) {
         val currentWorkout = workout.value ?: return
-        if (newName.isBlank()) return  // не даём сохранить пустое имя
         viewModelScope.launch {
             repository.updateWorkout(
                 id = currentWorkout.id,
-                name = newName,
-                note = currentWorkout.note,
+                date = currentWorkout.date, // ← Оставляем старую дату
+                name = currentWorkout.name,
+                note = newNote,
                 endDate = currentWorkout.endDate,
                 status = currentWorkout.status
             )
         }
     }
 
-    /** Обновить заметку тренировки. */
-    fun updateNote(newNote: String) {
+    fun updateName(newName: String) {
         val currentWorkout = workout.value ?: return
+        if (newName.isBlank()) return
         viewModelScope.launch {
             repository.updateWorkout(
                 id = currentWorkout.id,
-                name = currentWorkout.name,
-                note = newNote,
+                date = currentWorkout.date, // ← Оставляем старую дату
+                name = newName,
+                note = currentWorkout.note,
                 endDate = currentWorkout.endDate,
                 status = currentWorkout.status
             )
@@ -72,9 +74,10 @@ class WorkoutDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.updateWorkout(
                 id = currentWorkout.id,
+                date = currentWorkout.date, // ← Оставляем старую дату старта
                 name = currentWorkout.name,
                 note = currentWorkout.note,
-                endDate = System.currentTimeMillis(),   // Время окончания
+                endDate = System.currentTimeMillis(),
                 status = WorkoutStatus.COMPLETED.name
             )
         }
@@ -139,6 +142,12 @@ class WorkoutDetailsViewModel @Inject constructor(
                     orderInWorkout = nextOrder
                 )
             )
+        }
+    }
+    fun deleteExercise(workoutExerciseId: Long) {
+        viewModelScope.launch {
+            // Метод удаления связи из репозитория (он уже там есть)
+            repository.deleteWorkoutExercise(workoutExerciseId)
         }
     }
 }

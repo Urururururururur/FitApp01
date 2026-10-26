@@ -1,5 +1,6 @@
 package com.practicum.fitapp
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +49,13 @@ import com.practicum.fitapp.data.local.WorkoutStatus
 import com.practicum.fitapp.presentation.training.WorkoutDetailsViewModel
 import kotlinx.coroutines.delay
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,68 +253,82 @@ fun WorkoutDetailsScreen(
                         Text("Пока нет упражнений", color = MaterialTheme.colorScheme.outline)
                     }
                 } else {
-                    items(exercisesWithId) { item ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .clickable { onExerciseClick(item.workoutExerciseId) }
+                    // Обрати внимание на key = { it.workoutExerciseId } — это важно для свайпа!
+                    items(exercisesWithId, key = { it.workoutExerciseId }) { item ->
+
+                        // Стейт для свайпа
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { value ->
+                                if (value == SwipeToDismissBoxValue.EndToStart) {
+                                    // Если свайпнули справа налево — удаляем
+                                    viewModel.deleteExercise(item.workoutExerciseId)
+                                    true
+                                } else {
+                                    false
+                                }
+                            }
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = {
+                                // Красный фон с иконкой корзины при свайпе
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(vertical = 4.dp)
+                                        .background(Color(0xFFE53935), shape = RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Удалить",
+                                        tint = Color.White,
+                                        modifier = Modifier.padding(end = 20.dp)
+                                    )
+                                }
+                            },
+                            enableDismissFromStartToEnd = false,
+                            enableDismissFromEndToStart = true
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text(
-                                    text = item.exercise.name,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = item.exercise.muscleGroupList.joinToString(", ") { it.displayName },
-                                    fontSize = 12.sp
-                                )
-                                val stat = exerciseStats.find { it.workoutExerciseId == item.workoutExerciseId }
-                                if (stat != null) {
-                                    val category = item.exercise.categoryEnum
-                                    val statsParts = mutableListOf<String>()
+                            // Сама карточка упражнения (твой текущий дизайн)
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .clickable(enabled = workout?.status != WorkoutStatus.COMPLETED.name) {
+                                        onExerciseClick(item.workoutExerciseId)
+                                    },
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = item.exercise.name,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = item.exercise.muscleGroupList.joinToString(", ") { it.displayName },
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
+                                    )
 
-                                    // Для СИЛОВЫХ: Макс вес и Общий вес
-                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH) {
-                                        if (stat.maxWeight > 0) {
-                                            statsParts.add("Макс: ${"%.0f".format(stat.maxWeight)} кг")
+                                    // Тут у тебя уже есть блок статистики (Макс, Всего и т.д.)
+                                    // Оставь его как есть
+                                    val stat = exerciseStats.find { it.workoutExerciseId == item.workoutExerciseId }
+                                    if (stat != null) {
+                                        val category = item.exercise.categoryEnum
+                                        val statsParts = mutableListOf<String>()
+                                        // ... (код статистики из шага 140) ...
+                                        if (statsParts.isNotEmpty()) {
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Text(
+                                                text = statsParts.joinToString(" · "),
+                                                fontSize = 12.sp,
+                                                color = Color.Gray
+                                            )
                                         }
-                                        if (stat.totalWeight > 0) {
-                                            statsParts.add("Всего: ${"%.0f".format(stat.totalWeight)} кг")
-                                        }
-                                    }
-
-                                    // Для всех: Повторения (если есть)
-                                    if (stat.totalReps > 0) {
-                                        statsParts.add("${stat.totalReps} повт.")
-                                    }
-
-                                    // Для КАРДИО: Дистанция и Время
-                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.CARDIO) {
-                                        if (stat.totalDistance > 0) {
-                                            statsParts.add("Дист: ${"%.0f".format(stat.totalDistance)} м")
-                                        }
-                                        if (stat.totalDuration > 0) {
-                                            statsParts.add("Время: ${formatDuration(stat.totalDuration.toLong())}")
-                                        }
-                                    }
-
-                                    // Для HOLD: Время
-                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.HOLD) {
-                                        if (stat.totalDuration > 0) {
-                                            statsParts.add("Время: ${formatDuration(stat.totalDuration.toLong())}")
-                                        }
-                                    }
-
-                                    // Показываем, если есть хоть что-то
-                                    if (statsParts.isNotEmpty()) {
-                                        Spacer(modifier = Modifier.height(6.dp))
-                                        Text(
-                                            text = statsParts.joinToString(" · "),
-                                            fontSize = 12.sp,
-                                            color = Color.Gray
-                                        )
                                     }
                                 }
                             }

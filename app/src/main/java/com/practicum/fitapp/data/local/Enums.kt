@@ -53,3 +53,21 @@ enum class Intensity(val displayName: String) {
     NORMAL("Норма"),
     HARD("Сложно")
 }
+/**
+ * Категории продуктов для справочника.
+ */
+enum class ProductCategory(val id: String, val displayName: String) {
+    MEAT("meat", "Мясо"),
+    FISH("fish", "Рыба"),
+    DAIRY_EGGS("dairy_eggs", "Молочное/Яйца"),
+    GRAINS_BREAD("grains_bread", "Крупы/Хлеб"),
+    VEGETABLES_MUSHROOMS("vegetables_mushrooms", "Овощи/Грибы"),
+    FRUITS_BERRIES("fruits_berries", "Фрукты/Ягоды"),
+    FATS_NUTS("fats_nuts", "Жиры/Орехи"),
+    SWEETS("sweets", "Сладкое"),
+    OTHER("other", "Прочее");
+
+    companion object {
+        fun fromId(id: String): ProductCategory = entries.find { it.id == id } ?: OTHER
+    }
+}

@@ -19,12 +19,13 @@ interface WorkoutDao {
     suspend fun insert(workout: WorkoutEntity): Long
 
     @Query("""
-        UPDATE workouts 
-        SET name = :name, note = :note, endDate = :endDate, status = :status
-        WHERE id = :id
-    """)
+    UPDATE workouts 
+    SET date = :date, name = :name, note = :note, endDate = :endDate, status = :status
+    WHERE id = :id
+""")
     suspend fun update(
         id: Long,
+        date: Long, // ← Добавили дату
         name: String,
         note: String,
         endDate: Long?,

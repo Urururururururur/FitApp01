@@ -51,7 +51,8 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_9_10,
                 FitAppDatabase.MIGRATION_10_11,
                 FitAppDatabase.MIGRATION_11_12,
-                FitAppDatabase.MIGRATION_12_13
+                FitAppDatabase.MIGRATION_12_13,
+                FitAppDatabase.MIGRATION_13_14
             )
             .build()
     }

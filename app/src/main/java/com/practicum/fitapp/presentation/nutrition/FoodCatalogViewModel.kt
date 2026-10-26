@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.practicum.fitapp.presentation.nutrition.builtInProducts
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class FoodCatalogViewModel @Inject constructor(
@@ -73,6 +76,48 @@ class FoodCatalogViewModel @Inject constructor(
         if (!product.isUserCreated) return   // защита от удаления встроенных
         viewModelScope.launch {
             repository.deleteProduct(product)
+        }
+    }
+    init {
+        viewModelScope.launch {
+            if (repository.countBuiltInProducts() == 0) {
+                // Указываем полный путь, чтобы Kotlin взял список из BuiltInProducts.kt,
+                // а не StateFlow из этого же класса
+                repository.insertProducts(com.practicum.fitapp.presentation.nutrition.builtInProducts)
+            }
+        }
+    }
+    // Поиск
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+    fun addRecipeToDiary(recipe: Recipe, dateTimestamp: Long, grams: Double) {
+        viewModelScope.launch {
+            // Вычисляем КБЖУ на 100 г на основе общих данных рецепта
+            val kcalPer100 = if (recipe.totalWeightGrams > 0)
+                (recipe.totalsKcal / recipe.totalWeightGrams * 100).toInt() else 0
+            val proteinPer100 = if (recipe.totalWeightGrams > 0)
+                recipe.totalsProtein / recipe.totalWeightGrams * 100 else 0.0
+            val fatPer100 = if (recipe.totalWeightGrams > 0)
+                recipe.totalsFat / recipe.totalWeightGrams * 100 else 0.0
+            val carbsPer100 = if (recipe.totalWeightGrams > 0)
+                recipe.totalsCarbs / recipe.totalWeightGrams * 100 else 0.0
+
+            repository.addMealEntry(
+                com.practicum.fitapp.data.local.MealEntryEntity(
+                    date = dateTimestamp,
+                    productId = 0L, // ID 0 означает, что это рецепт
+                    productName = recipe.title,
+                    productCalories = kcalPer100,
+                    productProtein = proteinPer100,
+                    productFat = fatPer100,
+                    productCarbs = carbsPer100,
+                    grams = grams
+                )
+            )
         }
     }
 }
