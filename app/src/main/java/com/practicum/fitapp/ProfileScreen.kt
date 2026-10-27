@@ -26,6 +26,8 @@ import com.practicum.fitapp.presentation.profile.ProfileViewModel
 import androidx.compose.material.icons.filled.Edit
 import android.app.Activity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -379,7 +381,8 @@ fun ProfileScreen(
                             onValueChange = { v -> if (v.all { it.isDigit() }) age = v },
                             label = { Text("Возраст") },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -389,7 +392,8 @@ fun ProfileScreen(
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) height = v },
                             label = { Text("Рост, см") },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -399,7 +403,8 @@ fun ProfileScreen(
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) weight = v },
                             label = { Text("Вес, кг") },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -423,12 +428,13 @@ fun ProfileScreen(
                         // Цель
                         Text(text = "Цель", fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             FitnessGoal.entries.forEach { fg ->
                                 FilterChip(
                                     selected = goal == fg.name,
                                     onClick = { goal = fg.name },
-                                    label = { Text(fg.displayName) }
+                                    label = { Text(fg.displayName) },
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
@@ -465,6 +471,7 @@ fun ProfileScreen(
                                     quitNicotine = quitNicotine
                                 )
                                 showSavedMessage = true
+                                isDataExpanded = false // ← Закрывает спойлер
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -496,7 +503,7 @@ fun ProfileScreen(
                                     TextButton(
                                         onClick = {
                                             showDeleteDialog = false
-                                            viewModel.clearAllData {
+                                            viewModel.clearAllData(context) {  // ← ДОБАВИЛИ context
                                                 // Перезапускаем Activity, чтобы все ViewModel и БД обновились
                                                 (context as Activity).recreate()
                                             }
@@ -542,7 +549,8 @@ fun ProfileScreen(
                         onValueChange = { dateInput = it },
                         label = { Text("Дата") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                 }
             },
@@ -589,7 +597,8 @@ fun ProfileScreen(
                         onValueChange = { dateInput = it },
                         label = { Text("Дата") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                 }
             },
@@ -629,7 +638,8 @@ fun ProfileScreen(
                     onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) newWeightInput = v },
                     label = { Text("Текущий вес, кг") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             },
             confirmButton = {

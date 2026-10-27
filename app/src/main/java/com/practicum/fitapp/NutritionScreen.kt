@@ -21,6 +21,9 @@ import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import java.time.LocalDate
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+
 
 @Composable
 fun NutritionScreen(
@@ -200,7 +203,8 @@ fun NutritionScreen(
                         onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) gramsInput = v },
                         label = { Text("Граммы") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number) // ← ДОБАВИЛИ ЭТО
                     )
                 }
             },

@@ -15,23 +15,37 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Светлая тема
+// СВЕТЛАЯ ТЕМА (ЗЕЛЕНАЯ)
 private val LightColorScheme = lightColorScheme(
     primary = Green40,
+    onPrimary = androidx.compose.ui.graphics.Color.White,
+    primaryContainer = GreenContainerLight,
+    onPrimaryContainer = OnGreenContainerLight,
+
     secondary = Blue40,
+    onSecondary = androidx.compose.ui.graphics.Color.White,
+    secondaryContainer = BlueContainerLight,
+    onSecondaryContainer = OnBlueContainerLight,
+
     tertiary = Orange40,
-    background = androidx.compose.ui.graphics.Color(0xFFF8F8F8),
-    surface = androidx.compose.ui.graphics.Color.White,
+
+    background = LightBackground,
+    onBackground = androidx.compose.ui.graphics.Color.Black,
+
+    surface = LightSurface,
+    onSurface = androidx.compose.ui.graphics.Color.Black,
+
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
 )
 
-// Темная тема (СТРОГО ЗЕЛЕНАЯ)
+// ТЕМНАЯ ТЕМА (ЗЕЛЕНАЯ)
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     onPrimary = DarkOnPrimary,
     primaryContainer = DarkPrimaryContainer,
     onPrimaryContainer = DarkOnPrimaryContainer,
 
-    // Вторичные цвета тоже делаем зелеными, чтобы убить фиолетовый
     secondary = DarkPrimary,
     onSecondary = DarkOnPrimary,
     secondaryContainer = DarkPrimaryContainer,

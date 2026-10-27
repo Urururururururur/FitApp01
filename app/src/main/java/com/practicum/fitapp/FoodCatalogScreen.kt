@@ -26,6 +26,9 @@ import com.practicum.fitapp.data.local.ProductCategory
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.nutrition.FoodCatalogViewModel
 import com.practicum.fitapp.presentation.nutrition.Recipe
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,6 +151,7 @@ fun FoodCatalogScreen(
                         value = newCalories,
                         onValueChange = { v -> if (v.all { it.isDigit() }) newCalories = v },
                         label = { Text("Ккал / 100 г") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -157,6 +161,7 @@ fun FoodCatalogScreen(
                             value = newProtein,
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) newProtein = v },
                             label = { Text("Белки") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -164,6 +169,7 @@ fun FoodCatalogScreen(
                             value = newFat,
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) newFat = v },
                             label = { Text("Жиры") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -171,6 +177,7 @@ fun FoodCatalogScreen(
                             value = newCarbs,
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) newCarbs = v },
                             label = { Text("Углеводы") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -235,6 +242,7 @@ fun FoodCatalogScreen(
                         value = recipeGrams,
                         onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) recipeGrams = v },
                         label = { Text("Граммы порции") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
