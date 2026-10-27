@@ -77,15 +77,10 @@ interface WorkoutDao {
     fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>>
 
     @Query("""
-        SELECT 
-            (date / 86400000) * 86400000 AS dayTimestamp,
-            COUNT(*) AS count
-        FROM workouts
-        WHERE date >= :startDate AND date < :endDate
-        GROUP BY dayTimestamp
-        ORDER BY dayTimestamp
-    """)
-    fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>>
+    SELECT date FROM workouts
+    WHERE date >= :startDate AND date < :endDate
+""")
+    fun getWorkoutTimestampsForMonth(startDate: Long, endDate: Long): Flow<List<Long>>
 
     @Query("""
         SELECT 

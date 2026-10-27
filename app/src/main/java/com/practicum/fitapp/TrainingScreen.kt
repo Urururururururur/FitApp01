@@ -92,7 +92,7 @@ fun TrainingScreen(
                 Text(
                     text = "Нет тренировок на этот день",
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -132,7 +132,8 @@ fun TrainingScreen(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable { onWorkoutClick(workout.id) },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                        // ИСПОЛЬЗУЕМ ЦВЕТ ТЕМЫ
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
@@ -145,9 +146,9 @@ fun TrainingScreen(
                                 text = statusEnum.displayName,
                                 fontSize = 12.sp,
                                 color = when (statusEnum) {
-                                    WorkoutStatus.COMPLETED -> Color(0xFF2E7D32)
-                                    WorkoutStatus.IN_PROGRESS -> Color(0xFF1976D2)
-                                    WorkoutStatus.WAITING -> Color.Gray
+                                    WorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
+                                    WorkoutStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
+                                    WorkoutStatus.WAITING -> MaterialTheme.colorScheme.onSurfaceVariant
                                 }
                             )
                             val workoutTags = tags[workout.id] ?: emptyList()
@@ -157,12 +158,12 @@ fun TrainingScreen(
                                     workoutTags.take(4).forEach { group ->
                                         Surface(
                                             shape = RoundedCornerShape(50),
-                                            color = Color(0xFFE3F2FD)
+                                            color = MaterialTheme.colorScheme.primaryContainer
                                         ) {
                                             Text(
                                                 text = group.displayName,
                                                 fontSize = 10.sp,
-                                                color = Color(0xFF1976D2),
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                             )
                                         }
@@ -188,7 +189,7 @@ fun TrainingScreen(
                 Text(
                     text = "+ Добавить тренировку",
                     fontSize = 16.sp,
-                    color = Color(0xFF1976D2),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -226,7 +227,7 @@ fun TrainingScreen(
                     supportingContent = { Text("Готовые программы на выбор") },
                     modifier = Modifier.clickable {
                         showAddSheet = false
-                        onCatalogClick() // Нужно передать этот колбэк в TrainingScreen
+                        onCatalogClick()
                     }
                 )
                 ListItem(
@@ -310,18 +311,20 @@ private fun DayCell(
     modifier: Modifier = Modifier
 ) {
     val isWeekend = DateUtils.isWeekend(date)
-    val dayNameColor = if (isWeekend) Color(0xFFD32F2F) else Color.Gray
-    val dayNumberColor = if (isWeekend) Color(0xFFD32F2F) else Color.Black
+    val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
+    val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
+
     val backgroundColor = when {
-        isSelected -> Color(0xFFE3F2FD)
-        hasWorkout -> Color(0xFFA5D6A7)
-        else -> Color.White
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f) // Полупрозрачный зеленый для темной темы
+        else -> MaterialTheme.colorScheme.surfaceVariant
     }
+
     Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        border = if (isSelected) BorderStroke(2.dp, Color(0xFF1976D2)) else null
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
@@ -386,7 +389,7 @@ private fun MonthCalendarDialog(
                             modifier = Modifier.weight(1f),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (name == "Сб" || name == "Вс") Color.Red else Color.Gray,
+                            color = if (name == "Сб" || name == "Вс") Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
@@ -414,8 +417,8 @@ private fun MonthCalendarDialog(
                                         .padding(2.dp)
                                         .background(
                                             color = when {
-                                                isSelected -> Color(0xFF1976D2)
-                                                hasWorkout -> Color(0xFFA5D6A7)
+                                                isSelected -> MaterialTheme.colorScheme.primary
+                                                hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.4f)
                                                 else -> Color.Transparent
                                             },
                                             shape = RoundedCornerShape(50)
@@ -428,9 +431,9 @@ private fun MonthCalendarDialog(
                                         fontSize = 14.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                         color = when {
-                                            isSelected -> Color.White
-                                            isWeekend -> Color.Red
-                                            else -> Color.Black
+                                            isSelected -> MaterialTheme.colorScheme.onPrimary
+                                            isWeekend -> Color(0xFFE57373)
+                                            else -> MaterialTheme.colorScheme.onSurface
                                         }
                                     )
                                 }

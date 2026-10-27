@@ -5,15 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,14 +33,15 @@ fun ExerciseScreen(
     val category = exercise?.categoryEnum ?: com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH
     val sets by viewModel.sets.collectAsStateWithLifecycle()
     val workout by viewModel.workout.collectAsStateWithLifecycle()
-// Можно ли редактировать? Нет, если тренировка завершена.
+
+    // Можно ли редактировать? Нет, если тренировка завершена.
     val isEditable = workout?.status != com.practicum.fitapp.data.local.WorkoutStatus.COMPLETED.name
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(exercise?.name ?: "Упражнение")  // ← Берем имя из БД, если загрузилось
+                    Text(exercise?.name ?: "Упражнение")
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -68,7 +70,35 @@ fun ExerciseScreen(
             LazyColumn(
                 modifier = Modifier.weight(1f)
             ) {
-                items(sets) { set ->
+                items(sets, key = { it.id }) { set ->
+                    // Локальный текст для полей
+                    var weightText by remember(set.id) { mutableStateOf(set.weight?.toString() ?: "") }
+                    var repsText by remember(set.id) { mutableStateOf(set.reps?.toString() ?: "") }
+                    var distanceText by remember(set.id) { mutableStateOf(set.distance?.toString() ?: "") }
+                    var durationText by remember(set.id) { mutableStateOf(set.duration?.toString() ?: "") }
+
+                    // Синхронизация
+                    LaunchedEffect(set.weight) {
+                        if (set.weight != weightText.replace(',', '.').toDoubleOrNull()) {
+                            weightText = set.weight?.toString() ?: ""
+                        }
+                    }
+                    LaunchedEffect(set.reps) {
+                        if (set.reps != repsText.toIntOrNull()) {
+                            repsText = set.reps?.toString() ?: ""
+                        }
+                    }
+                    LaunchedEffect(set.distance) {
+                        if (set.distance != distanceText.replace(',', '.').toDoubleOrNull()) {
+                            distanceText = set.distance?.toString() ?: ""
+                        }
+                    }
+                    LaunchedEffect(set.duration) {
+                        if (set.duration != durationText.toIntOrNull()) {
+                            durationText = set.duration?.toString() ?: ""
+                        }
+                    }
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -79,231 +109,205 @@ fun ExerciseScreen(
                                 .fillMaxWidth()
                                 .padding(12.dp)
                         ) {
-                            // Верхняя строка: поля ввода + удалить
+                            // ВЕРХНЯЯ СТРОКА (Поля ввода + Кнопка удаления)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Поля ввода в зависимости от категории
-                                when (category) {
-                                    com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH -> {
-                                        // Вес + повторения
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            // Вес
-                                            Column {
-                                                Text("Вес, кг", fontSize = 10.sp, color = Color.Gray)
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    TextButton(
-                                                        onClick = {
-                                                            val nw = (set.weight ?: 0.0) - 2.5
-                                                            viewModel.updateSet(set.copy(weight = maxOf(nw, 0.0)))
-                                                        },
-                                                        contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp)
-                                                    ) { Text("−", fontSize = 16.sp) }
-
-                                                    OutlinedTextField(
-                                                        value = set.weight?.toString() ?: "",
-                                                        onValueChange = { v ->
-                                                            viewModel.updateSet(set.copy(weight = v.toDoubleOrNull()))
-                                                        },
-                                                        enabled = isEditable,
-                                                        modifier = Modifier.width(70.dp),
-                                                        singleLine = true
-
-                                                    )
-
-                                                    TextButton(
-                                                        onClick = {
-                                                            val nw = (set.weight ?: 0.0) + 2.5
-                                                            viewModel.updateSet(set.copy(weight = nw))
-                                                        },
-                                                        contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp),
-                                                        enabled = isEditable
-                                                    ) { Text("+", fontSize = 16.sp) }
-                                                }
-                                            }
-
-                                            // Повторы
-                                            Column {
-                                                Text("Повторы", fontSize = 10.sp, color = Color.Gray)
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    TextButton(
-                                                        onClick = {
-                                                            val nr = (set.reps ?: 0) - 1
-                                                            viewModel.updateSet(set.copy(reps = maxOf(nr, 0)))
-                                                        },
-                                                        contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp),
-                                                        enabled = isEditable
-                                                    ) { Text("−", fontSize = 16.sp) }
-
-                                                    OutlinedTextField(
-                                                        value = set.reps?.toString() ?: "",
-                                                        onValueChange = { v ->
-                                                            viewModel.updateSet(set.copy(reps = v.toIntOrNull()))
-                                                        },
-                                                        modifier = Modifier.width(70.dp),
-                                                        enabled = isEditable,
-                                                        singleLine = true
-                                                    )
-
-                                                    TextButton(
-                                                        onClick = {
-                                                            val nr = (set.reps ?: 0) + 1
-                                                            viewModel.updateSet(set.copy(reps = nr))
-                                                        },
-                                                        contentPadding = PaddingValues(0.dp),
-                                                        modifier = Modifier.size(28.dp),
-                                                        enabled = isEditable
-                                                    ) { Text("+", fontSize = 16.sp) }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    com.practicum.fitapp.data.local.ExerciseCategory.BODYWEIGHT -> {
-                                        // Только повторения
-                                        Column {
-                                            Text("Повторы", fontSize = 10.sp, color = Color.Gray)
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                TextButton(
-                                                    onClick = {
-                                                        val nr = (set.reps ?: 0) - 1
-                                                        viewModel.updateSet(set.copy(reps = maxOf(nr, 0)))
-                                                    },
-                                                    contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(28.dp),
-                                                    enabled = isEditable
-                                                ) { Text("−", fontSize = 16.sp) }
-
-                                                OutlinedTextField(
-                                                    value = set.reps?.toString() ?: "",
-                                                    onValueChange = { v ->
-                                                        viewModel.updateSet(set.copy(reps = v.toIntOrNull()))
-                                                    },
-                                                    modifier = Modifier.width(70.dp),
-                                                    singleLine = true,
-                                                    enabled = isEditable
-                                                )
-
-                                                TextButton(
-                                                    onClick = {
-                                                        val nr = (set.reps ?: 0) + 1
-                                                        viewModel.updateSet(set.copy(reps = nr))
-                                                    },
-                                                    contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(28.dp),
-                                                    enabled = isEditable
-                                                ) { Text("+", fontSize = 16.sp) }
-                                            }
-                                        }
-                                    }
-                                    com.practicum.fitapp.data.local.ExerciseCategory.CARDIO -> {
-                                        // Дистанция + время
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Column {
-                                                Text("Дистанция, м", fontSize = 10.sp, color = Color.Gray)
-                                                OutlinedTextField(
-                                                    value = set.distance?.toString() ?: "",
-                                                    onValueChange = { v ->
-                                                        viewModel.updateSet(set.copy(distance = v.toDoubleOrNull()))
-                                                    },
-                                                    modifier = Modifier.width(90.dp),
-                                                    singleLine = true,
-                                                    enabled = isEditable
-                                                )
-                                            }
-                                            Column {
-                                                Text("Время, сек", fontSize = 10.sp, color = Color.Gray)
-                                                OutlinedTextField(
-                                                    value = set.duration?.toString() ?: "",
-                                                    onValueChange = { v ->
-                                                        viewModel.updateSet(set.copy(duration = v.toIntOrNull()))
-                                                    },
-                                                    modifier = Modifier.width(90.dp),
-                                                    singleLine = true,
-                                                    enabled = isEditable
-                                                )
-                                            }
-                                        }
-                                    }
-                                    com.practicum.fitapp.data.local.ExerciseCategory.HOLD -> {
-                                        // Только время
-                                        Column {
-                                            Text("Время, сек", fontSize = 10.sp, color = Color.Gray)
-                                            OutlinedTextField(
-                                                value = set.duration?.toString() ?: "",
-                                                onValueChange = { v ->
-                                                    viewModel.updateSet(set.copy(duration = v.toIntOrNull()))
+                                // Контейнер для полей ввода (чтобы они были на одной строке)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    // ---- ВЕС (для силовых) ----
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            TextButton(
+                                                onClick = {
+                                                    val nw = (weightText.replace(',', '.').toDoubleOrNull() ?: 0.0) - 2.5
+                                                    weightText = nw.toString()
+                                                    viewModel.updateSet(set.copy(weight = maxOf(nw, 0.0)))
                                                 },
-                                                modifier = Modifier.width(120.dp),
+                                                contentPadding = PaddingValues(0.dp),
+                                                modifier = Modifier.size(28.dp),
+                                                enabled = isEditable
+                                            ) { Text("−", fontSize = 18.sp) }
+
+                                            OutlinedTextField(
+                                                value = weightText,
+                                                onValueChange = { newValue ->
+                                                    if (newValue.isEmpty() || newValue.matches(Regex("\\d*[.,]?\\d*"))) {
+                                                        weightText = newValue
+                                                        val parsed = newValue.replace(',', '.').toDoubleOrNull()
+                                                        if (parsed != null) viewModel.updateSet(set.copy(weight = parsed))
+                                                    }
+                                                },
+                                                label = { Text("Вес", fontSize = 9.sp) },
+                                                modifier = Modifier.width(65.dp),
                                                 singleLine = true,
+                                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                                 enabled = isEditable
                                             )
+
+                                            TextButton(
+                                                onClick = {
+                                                    val nw = (weightText.replace(',', '.').toDoubleOrNull() ?: 0.0) + 2.5
+                                                    weightText = nw.toString()
+                                                    viewModel.updateSet(set.copy(weight = nw))
+                                                },
+                                                contentPadding = PaddingValues(0.dp),
+                                                modifier = Modifier.size(28.dp),
+                                                enabled = isEditable
+                                            ) { Text("+", fontSize = 18.sp) }
                                         }
+                                    }
+
+                                    // ---- ПОВТОРЫ (для силовых и bodyweight) ----
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH || category == com.practicum.fitapp.data.local.ExerciseCategory.BODYWEIGHT) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            TextButton(
+                                                onClick = {
+                                                    val nr = (repsText.toIntOrNull() ?: 0) - 1
+                                                    repsText = nr.toString()
+                                                    viewModel.updateSet(set.copy(reps = maxOf(nr, 0)))
+                                                },
+                                                contentPadding = PaddingValues(0.dp),
+                                                modifier = Modifier.size(28.dp),
+                                                enabled = isEditable
+                                            ) { Text("−", fontSize = 18.sp) }
+
+                                            OutlinedTextField(
+                                                value = repsText,
+                                                onValueChange = { newValue ->
+                                                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                                                        repsText = newValue
+                                                        val parsed = newValue.toIntOrNull()
+                                                        if (parsed != null) viewModel.updateSet(set.copy(reps = parsed))
+                                                    }
+                                                },
+                                                label = { Text("Повт.", fontSize = 9.sp) },
+                                                modifier = Modifier.width(60.dp),
+                                                singleLine = true,
+                                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                enabled = isEditable
+                                            )
+
+                                            TextButton(
+                                                onClick = {
+                                                    val nr = (repsText.toIntOrNull() ?: 0) + 1
+                                                    repsText = nr.toString()
+                                                    viewModel.updateSet(set.copy(reps = nr))
+                                                },
+                                                contentPadding = PaddingValues(0.dp),
+                                                modifier = Modifier.size(28.dp),
+                                                enabled = isEditable
+                                            ) { Text("+", fontSize = 18.sp) }
+                                        }
+                                    }
+
+                                    // ---- КАРДИО (Дистанция + Время) ----
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.CARDIO) {
+                                        OutlinedTextField(
+                                            value = distanceText,
+                                            onValueChange = { newValue ->
+                                                if (newValue.isEmpty() || newValue.matches(Regex("\\d*[.,]?\\d*"))) {
+                                                    distanceText = newValue
+                                                    val parsed = newValue.replace(',', '.').toDoubleOrNull()
+                                                    if (parsed != null) viewModel.updateSet(set.copy(distance = parsed))
+                                                }
+                                            },
+                                            label = { Text("Дист, м", fontSize = 9.sp) },
+                                            modifier = Modifier.width(75.dp),
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                            enabled = isEditable
+                                        )
+                                        OutlinedTextField(
+                                            value = durationText,
+                                            onValueChange = { newValue ->
+                                                if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                                                    durationText = newValue
+                                                    val parsed = newValue.toIntOrNull()
+                                                    if (parsed != null) viewModel.updateSet(set.copy(duration = parsed))
+                                                }
+                                            },
+                                            label = { Text("Время, с", fontSize = 9.sp) },
+                                            modifier = Modifier.width(75.dp),
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                            enabled = isEditable
+                                        )
+                                    }
+
+                                    // ---- HOLD (Только время) ----
+                                    if (category == com.practicum.fitapp.data.local.ExerciseCategory.HOLD) {
+                                        OutlinedTextField(
+                                            value = durationText,
+                                            onValueChange = { newValue ->
+                                                if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                                                    durationText = newValue
+                                                    val parsed = newValue.toIntOrNull()
+                                                    if (parsed != null) viewModel.updateSet(set.copy(duration = parsed))
+                                                }
+                                            },
+                                            label = { Text("Время, с", fontSize = 9.sp) },
+                                            modifier = Modifier.width(100.dp),
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                            enabled = isEditable
+                                        )
                                     }
                                 }
 
                                 // Кнопка удаления
                                 if (isEditable) {
-                                    TextButton(onClick = { viewModel.deleteSet(set.id) }) {
-                                        Text("✕", color = Color.Red)
+                                    TextButton(
+                                        onClick = { viewModel.deleteSet(set.id) },
+                                        contentPadding = PaddingValues(0.dp),
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Text("✕", color = Color.Red, fontSize = 18.sp)
                                     }
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Нижняя строка: чипы интенсивности
+                            // ---- ИНТЕНСИВНОСТЬ ----
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 IntensityChip(
-                                    label = "РАЗМ",
-                                    isSelected = set.intensity == "WARMUP",
-                                    color = Color.Gray,
-                                    enabled = isEditable,
+                                    label = "РАЗМ", isSelected = set.intensity == "WARMUP",
+                                    color = Color.Gray, enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "WARMUP")) }
                                 )
                                 IntensityChip(
-                                    label = "ЛЕГК",
-                                    isSelected = set.intensity == "EASY",
-                                    color = Color(0xFF4CAF50),
-                                    enabled = isEditable,
+                                    label = "ЛЕГК", isSelected = set.intensity == "EASY",
+                                    color = Color(0xFF4CAF50), enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "EASY")) }
                                 )
                                 IntensityChip(
-                                    label = "НОРМ",
-                                    isSelected = set.intensity == "NORMAL",
-                                    color = Color(0xFFFF9800),
-                                    enabled = isEditable,
+                                    label = "НОРМ", isSelected = set.intensity == "NORMAL",
+                                    color = Color(0xFFFF9800), enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "NORMAL")) }
                                 )
                                 IntensityChip(
-                                    label = "СЛОЖ",
-                                    isSelected = set.intensity == "HARD",
-                                    color = Color(0xFFF44336),
-                                    enabled = isEditable,
+                                    label = "СЛОЖ", isSelected = set.intensity == "HARD",
+                                    color = Color(0xFFF44336), enabled = isEditable,
                                     onClick = { viewModel.updateSet(set.copy(intensity = "HARD")) }
                                 )
                             }
                         }
                     }
                 }
-            }
+            } // ← Вот здесь закрывается LazyColumn
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Кнопка добавления подхода (одна на весь экран)
+            // Кнопка добавления подхода (она ВНЕ LazyColumn, всегда внизу)
             Button(
                 onClick = { viewModel.addSet() },
                 modifier = Modifier.fillMaxWidth(),

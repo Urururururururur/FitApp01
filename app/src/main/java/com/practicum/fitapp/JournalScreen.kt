@@ -9,17 +9,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,9 +60,8 @@ fun JournalScreen(
             .padding(16.dp)
     ) {
         Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Навигация по месяцам
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -86,35 +81,31 @@ fun JournalScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Тепловая карта питания
         Text(text = "Питание", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         NutritionHeatmap(nutritionDays)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Тепловая карта тренировок
         Text(text = "Тренировки", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         WorkoutHeatmap(workoutDays)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // График веса
         Text(text = "Вес", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         if (weightHistory.isEmpty()) {
-            Text("Нет данных для графика", color = Color.Gray)
+            Text("Нет данных для графика", color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             WeightChart(weightHistory)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Статистика упражнений
         Text(text = "Статистика упражнений", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
 
         if (exercisesWithProgress.isEmpty()) {
-            Text("Нет данных о подходах", color = Color.Gray)
+            Text("Нет данных о подходах", color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             exercisesWithProgress.forEach { exercise ->
                 Card(
@@ -122,18 +113,17 @@ fun JournalScreen(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                         .clickable { statsViewModel.selectExercise(exercise.id) },
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text(text = exercise.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        Text(text = "Подходов: ${exercise.totalSets}", fontSize = 12.sp, color = Color.Gray)
+                        Text(text = "Подходов: ${exercise.totalSets}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
     }
 
-    // Диалог с графиком упражнения (вынесен из LazyColumn/Column)
     if (selectedExerciseId != null) {
         val selected = exercisesWithProgress.find { it.id == selectedExerciseId }
         if (selected != null) {
@@ -141,16 +131,11 @@ fun JournalScreen(
                 onDismissRequest = { statsViewModel.selectExercise(null) },
                 title = { Text(selected.name) },
                 text = {
-                    if (progressData.isEmpty()) {
-                        Text("Нет данных")
-                    } else {
-                        ExerciseProgressChart(data = progressData, category = selected.category)
-                    }
+                    if (progressData.isEmpty()) Text("Нет данных")
+                    else ExerciseProgressChart(data = progressData, category = selected.category)
                 },
                 confirmButton = {
-                    TextButton(onClick = { statsViewModel.selectExercise(null) }) {
-                        Text("Закрыть")
-                    }
+                    TextButton(onClick = { statsViewModel.selectExercise(null) }) { Text("Закрыть") }
                 }
             )
         }
@@ -160,13 +145,13 @@ fun JournalScreen(
 @Composable
 private fun NutritionHeatmap(days: List<NutritionDay>) {
     if (days.isEmpty()) {
-        Text("Заполните профиль, чтобы видеть статистику", color = Color.Gray)
+        Text("Заполните профиль, чтобы видеть статистику", color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
 
     val firstDay = days.first().date
-    val firstDayOfWeek = firstDay.dayOfWeek.value
-    val offset = firstDayOfWeek - 1
+    val offset = firstDay.dayOfWeek.value - 1
+    val onSurface = MaterialTheme.colorScheme.onSurface
 
     Row(modifier = Modifier.fillMaxWidth()) {
         listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
@@ -175,7 +160,7 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
                 modifier = Modifier.weight(1f),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (name == "Сб" || name == "Вс") Color.Red else Color.Gray,
+                color = if (name == "Сб" || name == "Вс") Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -193,11 +178,23 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
 
                 if (dayIndex in days.indices) {
                     val day = days[dayIndex]
-                    HeatmapCell(
-                        label = day.date.dayOfMonth.toString(),
-                        color = nutritionColor(day.ratio, day.calories),
-                        modifier = Modifier.weight(1f)
-                    )
+                    val bgColor = nutritionColor(day.ratio, day.calories)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(if (day.calories <= 0.0) MaterialTheme.colorScheme.surfaceVariant else bgColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = day.date.dayOfMonth.toString(),
+                            fontSize = 11.sp,
+                            color = if (day.calories <= 0.0) MaterialTheme.colorScheme.onSurfaceVariant else if (day.ratio < 1.10) Color.Black else Color.White,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 } else {
                     Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
                 }
@@ -205,28 +202,21 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
         }
     }
 
+    // Легенда
     Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text("Мало", fontSize = 10.sp, color = Color.Gray)
-        LegendDot(Color(0xFFC8E6C9))
-        LegendDot(Color(0xFF4CAF50))
-        Text("Норма", fontSize = 10.sp, color = Color.Gray)
-        LegendDot(Color(0xFFFFCDD2))
-        LegendDot(Color(0xFFF44336))
-        LegendDot(Color(0xFFB71C1C))
-        Text("Перебор", fontSize = 10.sp, color = Color.Gray)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Мало", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        LegendDot(Color(0xFFC8E6C9)); LegendDot(Color(0xFF4CAF50))
+        Text("Норма", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        LegendDot(Color(0xFFFFCDD2)); LegendDot(Color(0xFFF44336)); LegendDot(Color(0xFFB71C1C))
+        Text("Перебор", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun WorkoutHeatmap(days: List<WorkoutDay>) {
     if (days.isEmpty()) return
-    val firstDay = days.first().date
-    val offset = firstDay.dayOfWeek.value - 1
+    val offset = days.first().date.dayOfWeek.value - 1
 
     Row(modifier = Modifier.fillMaxWidth()) {
         listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
@@ -235,7 +225,7 @@ private fun WorkoutHeatmap(days: List<WorkoutDay>) {
                 modifier = Modifier.weight(1f),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (name == "Сб" || name == "Вс") Color.Red else Color.Gray,
+                color = if (name == "Сб" || name == "Вс") Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -250,11 +240,23 @@ private fun WorkoutHeatmap(days: List<WorkoutDay>) {
             for (col in 0 until 7) {
                 val dayIndex = row * 7 + col - offset
                 if (dayIndex in days.indices) {
-                    HeatmapCell(
-                        label = days[dayIndex].date.dayOfMonth.toString(),
-                        color = if (days[dayIndex].hasWorkout) Color(0xFF4CAF50) else Color(0xFFF5F5F5),
-                        modifier = Modifier.weight(1f)
-                    )
+                    val day = days[dayIndex]
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(if (day.hasWorkout) Color(0xFF4CAF50) else MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = day.date.dayOfMonth.toString(),
+                            fontSize = 11.sp,
+                            color = if (day.hasWorkout) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 } else {
                     Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
                 }
@@ -264,27 +266,12 @@ private fun WorkoutHeatmap(days: List<WorkoutDay>) {
 }
 
 @Composable
-private fun HeatmapCell(label: String, color: Color, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.aspectRatio(1f).padding(2.dp).clip(RoundedCornerShape(4.dp)).background(color),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            color = if (color == Color.White || color == Color(0xFFF5F5F5)) Color.Gray else Color.White,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
 private fun LegendDot(color: Color) {
     Box(modifier = Modifier.size(12.dp).clip(RoundedCornerShape(2.dp)).background(color))
 }
 
 private fun nutritionColor(ratio: Double, calories: Double): Color {
-    if (calories <= 0.0) return Color.White
+    if (calories <= 0.0) return Color.Transparent
     return when {
         ratio < 0.75 -> Color(0xFFC8E6C9)
         ratio < 1.0 -> Color(0xFF4CAF50)
@@ -298,13 +285,16 @@ private fun nutritionColor(ratio: Double, calories: Double): Color {
 private fun WeightChart(history: List<WeightEntryEntity>) {
     val sorted = history.sortedBy { it.date }
     if (sorted.size < 2) {
-        Text("Нужно минимум 2 взвешивания", color = Color.Gray, fontSize = 12.sp)
+        Text("Нужно минимум 2 взвешивания", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         return
     }
 
     val minWeight = sorted.minOf { it.weightKg }
     val maxWeight = sorted.maxOf { it.weightKg }
     val weightRange = (maxWeight - minWeight).takeIf { it > 0 } ?: 1.0
+
+    val gridColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+    val textColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
 
     Column {
         Canvas(modifier = Modifier.fillMaxWidth().height(200.dp).padding(16.dp)) {
@@ -316,7 +306,7 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
             val chartHeight = height - paddingBottom
 
             val labelPaint = Paint().apply {
-                color = android.graphics.Color.DKGRAY
+                color = textColor
                 textSize = 28f
                 isAntiAlias = true
             }
@@ -324,7 +314,7 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
             for (i in 0..steps) {
                 val weight = minWeight + (weightRange * i / steps)
                 val y = chartHeight - (chartHeight * i / steps)
-                drawLine(color = Color.LightGray, start = Offset(paddingLeft, y), end = Offset(width, y), strokeWidth = 1f)
+                drawLine(color = gridColor, start = Offset(paddingLeft, y), end = Offset(width, y), strokeWidth = 1f)
                 drawContext.canvas.nativeCanvas.drawText("%.0f".format(weight), 0f, y + 10f, labelPaint)
             }
 
@@ -338,14 +328,13 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
                 points.add(point)
                 if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
             }
-
-            drawPath(path = path, color = Color(0xFF1976D2), style = Stroke(width = 4f))
-            points.forEach { drawCircle(color = Color(0xFF1976D2), radius = 6f, center = it) }
+            drawPath(path = path, color = Color(0xFF4CAF50), style = Stroke(width = 4f))
+            points.forEach { drawCircle(color = Color(0xFF4CAF50), radius = 6f, center = it) }
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(sorted.first().date)), fontSize = 10.sp, color = Color.Gray)
-            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(sorted.last().date)), fontSize = 10.sp, color = Color.Gray)
+            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(sorted.first().date)), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(sorted.last().date)), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -353,7 +342,7 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
 @Composable
 private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String) {
     if (data.size < 2) {
-        Text("Нужно минимум 2 дня с тренировками", color = Color.Gray, fontSize = 12.sp)
+        Text("Нужно минимум 2 дня с тренировками", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         return
     }
 
@@ -374,6 +363,9 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
     val maxValue = values.maxOrNull() ?: 1.0
     val range = (maxValue - minValue).takeIf { it > 0 } ?: 1.0
 
+    val gridColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+    val textColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
+
     Column {
         Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).padding(8.dp)) {
             val width = size.width
@@ -384,7 +376,7 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
             val chartHeight = height - paddingBottom
 
             val gridPaint = Paint().apply {
-                color = android.graphics.Color.LTGRAY
+                color = textColor
                 strokeWidth = 1f
                 textSize = 24f
                 isAntiAlias = true
@@ -393,7 +385,7 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
             for (i in 0..steps) {
                 val v = minValue + (range * i / steps)
                 val y = chartHeight - (chartHeight * i / steps)
-                drawLine(color = Color.LightGray, start = Offset(paddingLeft, y), end = Offset(width, y), strokeWidth = 1f)
+                drawLine(color = gridColor, start = Offset(paddingLeft, y), end = Offset(width, y), strokeWidth = 1f)
                 drawContext.canvas.nativeCanvas.drawText("%.0f".format(v), 0f, y + 8f, gridPaint)
             }
 
@@ -407,16 +399,15 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
                 points.add(p)
                 if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
             }
-
-            drawPath(path = path, color = Color(0xFF1976D2), style = Stroke(width = 4f))
-            points.forEach { drawCircle(color = Color(0xFF1976D2), radius = 6f, center = it) }
+            drawPath(path = path, color = Color(0xFF4CAF50), style = Stroke(width = 4f))
+            points.forEach { drawCircle(color = Color(0xFF4CAF50), radius = 6f, center = it) }
         }
 
-        Text("Ед.: $unit", fontSize = 10.sp, color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
+        Text("Ед.: $unit", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp))
         Spacer(modifier = Modifier.height(4.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(data.first().dayTimestamp)), fontSize = 10.sp, color = Color.Gray)
-            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(data.last().dayTimestamp)), fontSize = 10.sp, color = Color.Gray)
+            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(data.first().dayTimestamp)), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(data.last().dayTimestamp)), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

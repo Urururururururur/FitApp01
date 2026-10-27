@@ -2,32 +2,12 @@ package com.practicum.fitapp
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -73,15 +53,15 @@ fun NutritionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
+            .padding(16.dp)
     ) {
         // Заголовок
         Text(text = "Питание", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Заголовок с месяцем и годом
+        // Месяц
         Text(
             text = DateUtils.formatMonthYear(selectedDate),
             fontSize = 20.sp,
@@ -89,14 +69,14 @@ fun NutritionScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-// Недельная лента
+        // Недельная лента
         NutritionWeekStrip(
             selectedDate = selectedDate,
             onDayClick = { viewModel.setSelectedDate(it) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-// Дата + кнопка "Сегодня"
+        // Дата + кнопка "Сегодня"
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -114,7 +94,10 @@ fun NutritionScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Сводка за день
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -136,14 +119,14 @@ fun NutritionScreen(
                             "Перебор: ${"%.0f".format(-remaining)} ккал"
                         },
                         fontSize = 14.sp,
-                        color = if (remaining >= 0) Color(0xFF2E7D32) else Color(0xFFC62828),
+                        color = if (remaining >= 0) Color(0xFF4CAF50) else Color(0xFFE53935),
                         fontWeight = FontWeight.Medium
                     )
                 } else {
                     Text(
                         text = "Заполните профиль, чтобы видеть норму",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -152,7 +135,7 @@ fun NutritionScreen(
                             "Ж: ${"%.1f".format(summary.fat)} г · " +
                             "У: ${"%.1f".format(summary.carbs)} г",
                     fontSize = 13.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -164,7 +147,7 @@ fun NutritionScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         if (entries.isEmpty()) {
-            Text("Пока ничего не записано", fontSize = 14.sp, color = Color.Gray)
+            Text("Пока ничего не записано", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             entries.forEach { entry ->
                 Row(
@@ -177,14 +160,14 @@ fun NutritionScreen(
                         Text(
                             text = "${entry.grams} г — ${"%.0f".format(entry.grams * entry.productCalories / 100)} ккал",
                             fontSize = 13.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     TextButton(onClick = { viewModel.deleteEntry(entry.id) }) {
-                        Text("✕", color = Color.Red)
+                        Text("✕", color = MaterialTheme.colorScheme.error)
                     }
                 }
-                HorizontalDivider()
+                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
             }
         }
 
@@ -209,7 +192,7 @@ fun NutritionScreen(
                     Text(
                         text = "${showGramsDialog!!.caloriesPer100g} ккал/100г",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -240,6 +223,7 @@ fun NutritionScreen(
         )
     }
 }
+
 @Composable
 private fun NutritionWeekStrip(
     selectedDate: LocalDate,
@@ -270,16 +254,21 @@ private fun NutritionDayCell(
     modifier: Modifier = Modifier
 ) {
     val isWeekend = DateUtils.isWeekend(date)
-    val dayNameColor = if (isWeekend) Color(0xFFD32F2F) else Color.Gray
-    val dayNumberColor = if (isWeekend) Color(0xFFD32F2F) else Color.Black
+
+    // Используем цвета из темы
+    val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
+    val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
+
+    val backgroundColor = when {
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
 
     Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFFE3F2FD) else Color.White
-        ),
-        border = if (isSelected) BorderStroke(2.dp, Color(0xFF1976D2)) else null
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),

@@ -2,35 +2,29 @@ package com.practicum.fitapp.presentation.journal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.practicum.fitapp.data.local.DailyCalories
-import com.practicum.fitapp.data.local.DailyWorkoutCount
 import com.practicum.fitapp.data.local.UserProfileEntity
+import com.practicum.fitapp.data.local.WeightEntryEntity
 import com.practicum.fitapp.data.repository.NutritionRepository
 import com.practicum.fitapp.data.repository.TrainingRepository
 import com.practicum.fitapp.data.repository.UserRepository
 import com.practicum.fitapp.presentation.calculator.NutritionCalculator
-import com.practicum.fitapp.presentation.common.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import java.time.LocalDate
-import java.time.YearMonth
-import javax.inject.Inject
-import com.practicum.fitapp.data.local.WeightEntryEntity
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-
+import kotlinx.coroutines.flow.stateIn
+import java.time.Instant
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneId
+import javax.inject.Inject
 
 /**
  * Состояние дня для тепловой карты питания.
- *  - день
- *  - съедено ккал
- *  - норма ккал
- *  - процент от нормы
  */
 data class NutritionDay(
     val date: LocalDate,
@@ -71,29 +65,33 @@ class JournalViewModel @Inject constructor(
 
     /**
      * Данные для тепловой карты питания за выбранный месяц.
-     * flatMapLatest автоматически переключает поток, когда меняется месяц.
      */
     val nutritionDays: StateFlow<List<NutritionDay>> = _selectedMonth
         .flatMapLatest { month ->
-            val start = month.atDay(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-            val end = month.plusMonths(1).atDay(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val start = month.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val end = month.plusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
             combine(
-                nutritionRepository.getDailyCalories(start, end),
+                nutritionRepository.getMealEntriesForMonth(start, end),
                 userRepository.getProfile()
-            ) { caloriesList, profile ->
+            ) { entriesList, profile ->
                 if (profile == null) return@combine emptyList()
 
                 val goal = NutritionCalculator.calculatePlan(profile).targetCalories
-                val caloriesByDay = caloriesList.associateBy { it.dayTimestamp }
+
+                // Группируем калории по LocalDate (исправление часовых поясов)
+                val caloriesByDate = entriesList.groupBy {
+                    Instant.ofEpochMilli(it.date).atZone(ZoneId.systemDefault()).toLocalDate()
+                }.mapValues { (_, entries) ->
+                    entries.sumOf { it.calories }
+                }
+
                 val days = mutableListOf<NutritionDay>()
                 val daysInMonth = month.lengthOfMonth()
-                val zone = java.time.ZoneId.systemDefault()
 
                 for (day in 1..daysInMonth) {
                     val date = month.atDay(day)
-                    val dayStartTs = date.atStartOfDay(zone).toInstant().toEpochMilli()
-                    val calories = caloriesByDay[dayStartTs]?.totalCalories ?: 0.0
+                    val calories = caloriesByDate[date] ?: 0.0
                     days.add(NutritionDay(date, calories, goal))
                 }
                 days
@@ -110,19 +108,21 @@ class JournalViewModel @Inject constructor(
      */
     val workoutDays: StateFlow<List<WorkoutDay>> = _selectedMonth
         .flatMapLatest { month ->
-            val start = month.atDay(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-            val end = month.plusMonths(1).atDay(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val start = month.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val end = month.plusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-            trainingRepository.getDailyWorkoutCounts(start, end).map { workoutsList ->
-                val workoutByDay = workoutsList.associateBy { it.dayTimestamp }
+            trainingRepository.getWorkoutTimestampsForMonth(start, end).map { timestamps ->
+                // Превращаем timestamp'ы в LocalDate для точного сравнения (исправление часовых поясов)
+                val workoutDates = timestamps.map {
+                    Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                }.toSet()
+
                 val days = mutableListOf<WorkoutDay>()
                 val daysInMonth = month.lengthOfMonth()
-                val zone = java.time.ZoneId.systemDefault()
 
                 for (day in 1..daysInMonth) {
                     val date = month.atDay(day)
-                    val dayStartTs = date.atStartOfDay(zone).toInstant().toEpochMilli()
-                    val hasWorkout = (workoutByDay[dayStartTs]?.count ?: 0) > 0
+                    val hasWorkout = date in workoutDates
                     days.add(WorkoutDay(date, hasWorkout))
                 }
                 days

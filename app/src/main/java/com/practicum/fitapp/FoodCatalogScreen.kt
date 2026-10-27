@@ -9,15 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.practicum.fitapp.data.local.ProductCategory
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.nutrition.FoodCatalogViewModel
 import com.practicum.fitapp.presentation.nutrition.Recipe
@@ -45,17 +42,15 @@ fun FoodCatalogScreen(
     var selectedTab by remember { mutableStateOf(0) }
     var showAddDialog by remember { mutableStateOf(false) }
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var recipeGrams by remember { mutableStateOf("") }
 
-    // Стейты для формы добавления продукта
+    // Стейты для формы добавления
     var newName by remember { mutableStateOf("") }
     var newCategory by remember { mutableStateOf("") }
     var newCalories by remember { mutableStateOf("") }
     var newProtein by remember { mutableStateOf("") }
     var newFat by remember { mutableStateOf("") }
     var newCarbs by remember { mutableStateOf("") }
-
-    // Стейт для граммовки рецептов
-    var recipeGrams by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -82,7 +77,7 @@ fun FoodCatalogScreen(
                 Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }, text = { Text("Рецепты") })
             }
 
-            // Поиск (показываем только на вкладках Мои, Часто и Справочник)
+            // Поиск
             if (selectedTab != 3) {
                 OutlinedTextField(
                     value = searchQuery,
@@ -218,7 +213,7 @@ fun FoodCatalogScreen(
                         item {
                             Text(recipe.description, fontSize = 14.sp)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Время: ${recipe.cookingTimeMinutes} мин", fontSize = 12.sp, color = Color.Gray)
+                            Text("Время: ${recipe.cookingTimeMinutes} мин", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Ингредиенты:", fontWeight = FontWeight.Bold)
                         }
@@ -236,7 +231,6 @@ fun FoodCatalogScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Поле ввода граммовки
                     OutlinedTextField(
                         value = recipeGrams,
                         onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) recipeGrams = v },
@@ -294,7 +288,7 @@ private fun UserProductsTab(
             Text(
                 "У вас пока нет созданных продуктов или ничего не найдено",
                 modifier = Modifier.padding(16.dp),
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             GroupedProductsList(
@@ -318,7 +312,7 @@ private fun ProductsList(
         Text(
             emptyText,
             modifier = Modifier.padding(16.dp),
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     } else {
         GroupedProductsList(
@@ -338,7 +332,7 @@ private fun GroupedProductsList(
     var expandedCategories by remember { mutableStateOf(setOf<String>()) }
 
     val grouped = products.groupBy {
-        com.practicum.fitapp.data.local.ProductCategory.fromId(it.category)
+        ProductCategory.fromId(it.category)
     }.toList().sortedBy { it.first.displayName }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -403,7 +397,7 @@ private fun ProductRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
@@ -414,15 +408,15 @@ private fun ProductRow(
                 Text(text = product.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
 
-                val categoryDisplayName = com.practicum.fitapp.data.local.ProductCategory.fromId(product.category).displayName
+                val categoryDisplayName = ProductCategory.fromId(product.category).displayName
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
                         text = categoryDisplayName,
                         fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -435,12 +429,12 @@ private fun ProductRow(
                             "Ж${"%.0f".format(product.fatPer100g)} " +
                             "У${"%.0f".format(product.carbsPer100g)}",
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (onDelete != null) {
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Удалить", tint = Color.Red)
+                    Icon(Icons.Default.Delete, contentDescription = "Удалить", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -459,13 +453,13 @@ private fun RecipesList(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp)
                     .clickable { onRecipeClick(recipe) },
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(recipe.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(recipe.description, fontSize = 12.sp, color = Color.Gray)
+                    Text(recipe.description, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         "${"%.0f".format(recipe.totalsKcal)} ккал · " +

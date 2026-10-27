@@ -60,48 +60,38 @@ private fun AchievementCard(item: AchievementUiState) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (unlocked) Color(0xFFE8F5E9) else Color(0xFFF5F5F5)
+            containerColor = if (unlocked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Эмодзи (большое)
-            Text(
-                text = item.achievement.emoji,
-                fontSize = 32.sp,
-                modifier = Modifier.padding(end = 16.dp)
-            )
+            Text(text = item.achievement.emoji, fontSize = 32.sp, modifier = Modifier.padding(end = 16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.achievement.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (unlocked) Color.Black else Color.Gray
+                    color = if (unlocked) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = item.achievement.description,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = if (unlocked) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (unlocked && item.unlockedAt != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Получено: ${DateUtils.formatShort(DateUtils.timestampToLocalDate(item.unlockedAt))}",
                         fontSize = 11.sp,
-                        color = Color(0xFF2E7D32),
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium
                     )
                 }
             }
-
-            // Галочка / замок
-            Text(
-                text = if (unlocked) "✅" else "🔒",
-                fontSize = 20.sp
-            )
+            Text(text = if (unlocked) "✅" else "🔒", fontSize = 20.sp)
         }
     }
 }

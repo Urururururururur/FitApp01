@@ -15,26 +15,44 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Светлая тема FitApp
+// Светлая тема
 private val LightColorScheme = lightColorScheme(
     primary = Green40,
     secondary = Blue40,
     tertiary = Orange40,
-    // Фон оставляем белым
+    background = androidx.compose.ui.graphics.Color(0xFFF8F8F8),
+    surface = androidx.compose.ui.graphics.Color.White,
 )
 
-// Тёмная тема FitApp
+// Темная тема (СТРОГО ЗЕЛЕНАЯ)
 private val DarkColorScheme = darkColorScheme(
-    primary = Green80,
-    secondary = Blue80,
-    tertiary = Orange80,
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = DarkOnPrimaryContainer,
+
+    // Вторичные цвета тоже делаем зелеными, чтобы убить фиолетовый
+    secondary = DarkPrimary,
+    onSecondary = DarkOnPrimary,
+    secondaryContainer = DarkPrimaryContainer,
+    onSecondaryContainer = DarkOnPrimaryContainer,
+
+    tertiary = DarkPrimary,
+    onTertiary = DarkOnPrimary,
+
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
 )
 
 @Composable
 fun FitAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color — использует цвета обоев телефона (Android 12+)
-    // Мы отключаем, чтобы FitApp всегда имел свой бренд
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

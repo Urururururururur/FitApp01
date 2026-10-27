@@ -45,8 +45,8 @@ class TrainingRepository(
     fun getExerciseStats(workoutId: Long): Flow<List<ExerciseStats>> =
         workoutDao.getExerciseStats(workoutId)
 
-    fun getDailyWorkoutCounts(startDate: Long, endDate: Long): Flow<List<DailyWorkoutCount>> =
-        workoutDao.getDailyWorkoutCounts(startDate, endDate)
+    fun getWorkoutTimestampsForMonth(startDate: Long, endDate: Long): Flow<List<Long>> =
+        workoutDao.getWorkoutTimestampsForMonth(startDate, endDate)
 
     fun getExercisesWithProgress(): Flow<List<ExerciseWithProgress>> =
         workoutDao.getExercisesWithProgress()

@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,9 +20,8 @@ import com.practicum.fitapp.presentation.training.CatalogProgram
 fun ProgramDetailsScreen(
     program: CatalogProgram,
     onBack: () -> Unit,
-    onAddToDiary: (CatalogDay) -> Unit // ← Теперь передаем выбранный День
+    onAddToDiary: (CatalogDay) -> Unit
 ) {
-    // Стейт текущего выбранного дня (по умолчанию первый)
     var selectedDayIndex by remember { mutableStateOf(0) }
     val currentDay = program.days[selectedDayIndex]
 
@@ -40,7 +38,7 @@ fun ProgramDetailsScreen(
         },
         bottomBar = {
             Button(
-                onClick = { onAddToDiary(currentDay) }, // Передаем текущий день
+                onClick = { onAddToDiary(currentDay) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -57,12 +55,11 @@ fun ProgramDetailsScreen(
             // Шапка программы
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(program.title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Text(program.subtitle, fontSize = 16.sp, color = Color.Gray)
+                Text(program.subtitle, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(program.description, fontSize = 14.sp)
             }
 
-            // Если дней больше одного, показываем табы
             if (program.days.size > 1) {
                 ScrollableTabRow(
                     selectedTabIndex = selectedDayIndex,
@@ -78,7 +75,6 @@ fun ProgramDetailsScreen(
                 }
             }
 
-            // Заголовок текущего дня
             Text(
                 text = "${currentDay.day}: ${currentDay.title}",
                 fontSize = 20.sp,
@@ -87,7 +83,6 @@ fun ProgramDetailsScreen(
                 modifier = Modifier.padding(16.dp)
             )
 
-            // Список упражнений (используем LazyColumn, чтобы прокручивалось)
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
@@ -97,7 +92,8 @@ fun ProgramDetailsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                        // ИСПОЛЬЗУЕМ ЦВЕТ ТЕМЫ
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(exercise.name, fontWeight = FontWeight.Medium, fontSize = 16.sp)
@@ -105,7 +101,7 @@ fun ProgramDetailsScreen(
                             Text(
                                 "${exercise.sets} × ${exercise.reps} · Отдых: ${exercise.rest}",
                                 fontSize = 13.sp,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (exercise.note != null) {
                                 Spacer(modifier = Modifier.height(4.dp))

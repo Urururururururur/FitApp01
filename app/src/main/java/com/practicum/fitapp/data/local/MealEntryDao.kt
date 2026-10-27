@@ -5,6 +5,10 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+data class MealEntryDailyCalories(
+    val date: Long,
+    val calories: Double
+)
 @Dao
 interface MealEntryDao {
 
@@ -29,15 +33,11 @@ interface MealEntryDao {
      * date — timestamp начала дня.
      */
     @Query("""
-    SELECT 
-        (date / 86400000) * 86400000 AS dayTimestamp,
-        SUM(grams * productCalories / 100.0) AS totalCalories
+    SELECT date, (grams * productCalories / 100.0) as calories
     FROM meal_entries
     WHERE date >= :startDate AND date < :endDate
-    GROUP BY dayTimestamp
-    ORDER BY dayTimestamp
 """)
-    fun getDailyCalories(startDate: Long, endDate: Long): Flow<List<DailyCalories>>
+    fun getMealEntriesForMonth(startDate: Long, endDate: Long): Flow<List<MealEntryDailyCalories>>
 
 
 

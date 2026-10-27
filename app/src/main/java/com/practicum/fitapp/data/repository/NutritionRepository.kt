@@ -1,6 +1,5 @@
 package com.practicum.fitapp.data.repository
-
-import com.practicum.fitapp.data.local.DailyCalories
+import com.practicum.fitapp.data.local.MealEntryDailyCalories
 import com.practicum.fitapp.data.local.MealEntryDao
 import com.practicum.fitapp.data.local.MealEntryEntity
 import com.practicum.fitapp.data.local.ProductDao
@@ -11,12 +10,14 @@ import kotlinx.coroutines.flow.Flow
  * Repository для раздела «Питание».
  * Объединяет работу со справочником продуктов и записями о приёме пищи.
  */
+
+
 class NutritionRepository(
     private val productDao: ProductDao,
     private val mealEntryDao: MealEntryDao
 ) {
-    fun getDailyCalories(startDate: Long, endDate: Long): Flow<List<DailyCalories>> =
-        mealEntryDao.getDailyCalories(startDate, endDate)
+    fun getMealEntriesForMonth(startDate: Long, endDate: Long): Flow<List<MealEntryDailyCalories>> =
+        mealEntryDao.getMealEntriesForMonth(startDate, endDate)
 
     // ==================== Продукты (справочник) ====================
 
