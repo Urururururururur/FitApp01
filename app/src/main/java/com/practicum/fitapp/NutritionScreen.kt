@@ -1,17 +1,17 @@
 package com.practicum.fitapp
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,11 +19,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.DateUtils
+import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import java.time.LocalDate
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
-
 
 @Composable
 fun NutritionScreen(
@@ -53,135 +51,185 @@ fun NutritionScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .statusBarsPadding()
-            .padding(16.dp)
+    // Теперь это просто LazyColumn, без обертки Box для кнопки
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        // Отступ сверху под статус-бар, по бокам 16dp
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 48.dp)
     ) {
         // Заголовок
-        Text(text = "Питание", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+        item {
+            Text(text = "Питание", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = DateUtils.formatMonthYear(selectedDate),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
-        // Месяц
-        Text(
-            text = DateUtils.formatMonthYear(selectedDate),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Недельная лента
-        NutritionWeekStrip(
-            selectedDate = selectedDate,
-            onDayClick = { viewModel.setSelectedDate(it) }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // Недельная лента (в стиле тренировок)
+        item {
+            NutritionWeekStrip(
+                selectedDate = selectedDate,
+                onDayClick = { viewModel.setSelectedDate(it) }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         // Дата + кнопка "Сегодня"
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = DateUtils.formatShort(selectedDate),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium
-            )
-            TextButton(onClick = { viewModel.setSelectedDate(LocalDate.now()) }) {
-                Text("Сегодня")
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Сводка за день
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(modifier = Modifier.height(8.dp))
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Съедено: ${"%.0f".format(summary.calories)} ккал",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    text = DateUtils.formatShort(selectedDate),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                if (dailyGoal != null) {
-                    Text(
-                        text = "Норма: ${"%.0f".format(dailyGoal!!)} ккал",
-                        fontSize = 14.sp
-                    )
-                    val remaining = dailyGoal!! - summary.calories
-                    Text(
-                        text = if (remaining >= 0) {
-                            "Осталось: ${"%.0f".format(remaining)} ккал"
-                        } else {
-                            "Перебор: ${"%.0f".format(-remaining)} ккал"
-                        },
-                        fontSize = 14.sp,
-                        color = if (remaining >= 0) Color(0xFF4CAF50) else Color(0xFFE53935),
-                        fontWeight = FontWeight.Medium
-                    )
-                } else {
-                    Text(
-                        text = "Заполните профиль, чтобы видеть норму",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                TextButton(onClick = { viewModel.setSelectedDate(LocalDate.now()) }) {
+                    Text("Сегодня", color = MaterialTheme.colorScheme.primary)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Б: ${"%.1f".format(summary.protein)} г · " +
-                            "Ж: ${"%.1f".format(summary.fat)} г · " +
-                            "У: ${"%.1f".format(summary.carbs)} г",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Список записей
-        Text(text = "Съедено за день", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (entries.isEmpty()) {
-            Text("Пока ничего не записано", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        } else {
-            entries.forEach { entry ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = entry.productName, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        // Сводка за день (Белая жидкая карточка)
+        item {
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                hasShadow = false,
+                hasBorder = false
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Съедено: ${"%.0f".format(summary.calories)} ккал",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (dailyGoal != null) {
                         Text(
-                            text = "${entry.grams} г — ${"%.0f".format(entry.grams * entry.productCalories / 100)} ккал",
-                            fontSize = 13.sp,
+                            text = "Норма: ${"%.0f".format(dailyGoal!!)} ккал",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        val remaining = dailyGoal!! - summary.calories
+                        Text(
+                            text = if (remaining >= 0) {
+                                "Осталось: ${"%.0f".format(remaining)} ккал"
+                            } else {
+                                "Перебор: ${"%.0f".format(-remaining)} ккал"
+                            },
+                            fontSize = 14.sp,
+                            color = if (remaining >= 0) Color(0xFF2E7D32) else Color(0xFFC62828),
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        Text(
+                            text = "Заполните профиль, чтобы видеть норму",
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    TextButton(onClick = { viewModel.deleteEntry(entry.id) }) {
-                        Text("✕", color = MaterialTheme.colorScheme.error)
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Б: ${"%.1f".format(summary.protein)} г · " +
+                                "Ж: ${"%.1f".format(summary.fat)} г · " +
+                                "У: ${"%.1f".format(summary.carbs)} г",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Заголовок списка
+        item {
+            Text(
+                text = "Съедено за день",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Список записей
+        if (entries.isEmpty()) {
+            item {
+                Text(
+                    "Пока ничего не записано",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            items(entries.size) { index ->
+                val entry = entries[index]
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = entry.productName, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                text = "${entry.grams} г — ${"%.0f".format(entry.grams * entry.productCalories / 100)} ккал",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        TextButton(onClick = { viewModel.deleteEntry(entry.id) }) {
+                            Text("✕", color = MaterialTheme.colorScheme.error, fontSize = 16.sp)
+                        }
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Кнопка "+ Добавить продукт" (Внутри списка)
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAddFood() },
+                shape = RoundedCornerShape(16.dp),
+                solidColor = Color(0xFF81C784), // Плотный зеленый
+                hasShadow = true,
+                hasBorder = false
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "+ Добавить продукт",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
 
-        // Кнопка добавления
-        Button(
-            onClick = onAddFood,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("+ Добавить продукт")
+        // ОТСТУП ПОСЛЕ КНОПКИ (чтобы можно было прокрутить выше нижнего меню)
+        item {
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 
@@ -204,7 +252,7 @@ fun NutritionScreen(
                         label = { Text("Граммы") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number) // ← ДОБАВИЛИ ЭТО
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
             },
@@ -227,6 +275,8 @@ fun NutritionScreen(
         )
     }
 }
+
+// ============ КОМПОНЕНТЫ КАЛЕНДАРЯ (в стиле Тренировок) ============
 
 @Composable
 private fun NutritionWeekStrip(
@@ -259,20 +309,23 @@ private fun NutritionDayCell(
 ) {
     val isWeekend = DateUtils.isWeekend(date)
 
-    // Используем цвета из темы
+    // Цвета из темы
     val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
     val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
-    val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant
+    // Светло-зеленый фон
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
     }
 
-    Card(
+    GlassCard(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+        glassColor = backgroundColor,
+        hasShadow = false,
+        hasBorder = false
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),

@@ -3,16 +3,15 @@ package com.practicum.fitapp
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +32,7 @@ import com.practicum.fitapp.data.local.ExerciseCategory
 import com.practicum.fitapp.data.local.ExerciseProgress
 import com.practicum.fitapp.data.local.WeightEntryEntity
 import com.practicum.fitapp.presentation.common.DateUtils
+import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.journal.ExerciseStatsViewModel
 import com.practicum.fitapp.presentation.journal.JournalViewModel
 import com.practicum.fitapp.presentation.journal.NutritionDay
@@ -59,39 +59,44 @@ fun JournalScreen(
             .statusBarsPadding()
             .padding(16.dp)
     ) {
-        Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Навигация по месяцам
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { viewModel.previousMonth() }) {
-                Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Предыдущий")
+                Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Предыдущий", tint = MaterialTheme.colorScheme.onSurface)
             }
             Text(
                 text = DateUtils.formatMonthYear(selectedMonth.atDay(1)),
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             IconButton(onClick = { viewModel.nextMonth() }) {
-                Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Следующий")
+                Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Следующий", tint = MaterialTheme.colorScheme.onSurface)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Питание", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        // Питание
+        Text(text = "Питание", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(8.dp))
         NutritionHeatmap(nutritionDays)
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(text = "Тренировки", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        // Тренировки
+        Text(text = "Тренировки", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(8.dp))
         WorkoutHeatmap(workoutDays)
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(text = "Вес", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        // Вес
+        Text(text = "Вес", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(8.dp))
         if (weightHistory.isEmpty()) {
             Text("Нет данных для графика", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -101,29 +106,37 @@ fun JournalScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(text = "Статистика упражнений", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        // Статистика упражнений
+        Text(text = "Статистика упражнений", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(8.dp))
 
         if (exercisesWithProgress.isEmpty()) {
             Text("Нет данных о подходах", color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             exercisesWithProgress.forEach { exercise ->
-                Card(
+                // Белые жидкие карточки упражнений
+                GlassCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                         .clickable { statsViewModel.selectExercise(exercise.id) },
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    shape = RoundedCornerShape(12.dp),
+                    hasShadow = false,
+                    hasBorder = false
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text(text = exercise.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(text = exercise.name, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                         Text(text = "Подходов: ${exercise.totalSets}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
+
+        // Отступ в конце, чтобы последняя карточка не пряталась за меню
+        Spacer(modifier = Modifier.height(100.dp))
     }
 
+    // Диалог с графиком упражнения
     if (selectedExerciseId != null) {
         val selected = exercisesWithProgress.find { it.id == selectedExerciseId }
         if (selected != null) {
@@ -151,7 +164,6 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
 
     val firstDay = days.first().date
     val offset = firstDay.dayOfWeek.value - 1
-    val onSurface = MaterialTheme.colorScheme.onSurface
 
     Row(modifier = Modifier.fillMaxWidth()) {
         listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
@@ -179,13 +191,17 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
                 if (dayIndex in days.indices) {
                     val day = days[dayIndex]
                     val bgColor = nutritionColor(day.ratio, day.calories)
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
                             .padding(2.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(if (day.calories <= 0.0) MaterialTheme.colorScheme.surfaceVariant else bgColor),
+                            // Если данных нет — белый фон, иначе цвет по калориям
+                            .background(if (day.calories <= 0.0) Color.White.copy(alpha = 0.8f) else bgColor)
+                            // Тонкая серая обводка
+                            .border(0.5.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(4.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -247,13 +263,16 @@ private fun WorkoutHeatmap(days: List<WorkoutDay>) {
                             .aspectRatio(1f)
                             .padding(2.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(if (day.hasWorkout) Color(0xFF4CAF50) else MaterialTheme.colorScheme.surfaceVariant),
+                            // Если тренировки нет — белый фон
+                            .background(if (!day.hasWorkout) Color.White.copy(alpha = 0.8f) else Color(0xFF4CAF50))
+                            // Тонкая серая обводка
+                            .border(0.5.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(4.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = day.date.dayOfMonth.toString(),
                             fontSize = 11.sp,
-                            color = if (day.hasWorkout) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (!day.hasWorkout) MaterialTheme.colorScheme.onSurfaceVariant else Color.White,
                             fontWeight = FontWeight.Medium
                         )
                     }

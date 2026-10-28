@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.WorkoutStatus
+import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.training.WorkoutDetailsViewModel
 import kotlinx.coroutines.delay
 
@@ -43,6 +43,8 @@ fun WorkoutDetailsScreen(
     var editedName by remember { mutableStateOf("") }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { Text("Детали тренировки") },
@@ -50,7 +52,8 @@ fun WorkoutDetailsScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
@@ -63,7 +66,8 @@ fun WorkoutDetailsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 100.dp)
             ) {
                 item {
                     Row(
@@ -75,19 +79,23 @@ fun WorkoutDetailsScreen(
                             text = workout!!.name,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
                         )
                         IconButton(onClick = {
                             editedName = workout!!.name
                             showNameDialog = true
                         }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Редактировать название")
+                            Icon(Icons.Default.Edit, contentDescription = "Редактировать название", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
                     val statusEnum = WorkoutStatus.valueOf(workout!!.status)
-                    Text(text = "Статус: ${statusEnum.displayName}")
+                    Text(
+                        text = "Статус: ${statusEnum.displayName}",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
                     Text(
                         text = "Заметка: ${workout!!.note.ifBlank { "нет" }}",
@@ -99,7 +107,7 @@ fun WorkoutDetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Блок с таймером/кнопками
+                    // Блок с таймером
                     var elapsedSeconds by remember { mutableLongStateOf(0L) }
                     LaunchedEffect(workout!!.status) {
                         if (statusEnum == WorkoutStatus.IN_PROGRESS) {
@@ -123,18 +131,41 @@ fun WorkoutDetailsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
+                    // Кнопки управления тренировкой (в стиле добавить тренировку)
                     if (statusEnum == WorkoutStatus.IN_PROGRESS) {
-                        Button(
-                            onClick = { viewModel.finishWorkout() },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
-                        ) { Text("ЗАКОНЧИТЬ ТРЕНИРОВКУ", fontSize = 16.sp) }
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.finishWorkout() },
+                            shape = RoundedCornerShape(16.dp),
+                            solidColor = Color(0xFFE53935), // Красный для "Закончить"
+                            hasShadow = true,
+                            hasBorder = false
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("ЗАКОНЧИТЬ ТРЕНИРОВКУ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                        }
                     } else if (statusEnum == WorkoutStatus.WAITING) {
-                        Button(
-                            onClick = { viewModel.startWorkout() },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047))
-                        ) { Text("НАЧАТЬ ТРЕНИРОВКУ", fontSize = 16.sp) }
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.startWorkout() },
+                            shape = RoundedCornerShape(16.dp),
+                            solidColor = Color(0xFF81C784), // Зеленый для "Начать"
+                            hasShadow = true,
+                            hasBorder = false
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("НАЧАТЬ ТРЕНИРОВКУ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                        }
                     } else if (statusEnum == WorkoutStatus.COMPLETED) {
                         Text(
                             text = "Тренировка завершена",
@@ -151,15 +182,29 @@ fun WorkoutDetailsScreen(
                     Text(
                         text = "Упражнения (${exercisesWithId.size})",
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = onAddExerciseClick,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = workout!!.status != WorkoutStatus.COMPLETED.name
-                    ) {
-                        Text("+ Добавить упражнение")
+
+                    // Кнопка добавить упражнение (в стиле добавить тренировку)
+                    if (workout!!.status != WorkoutStatus.COMPLETED.name) {
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onAddExerciseClick() },
+                            shape = RoundedCornerShape(16.dp),
+                            solidColor = Color(0xFF81C784),
+                            hasShadow = true,
+                            hasBorder = false
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("+ Добавить упражнение", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -182,36 +227,30 @@ fun WorkoutDetailsScreen(
                         SwipeToDismissBox(
                             state = dismissState,
                             backgroundContent = {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(vertical = 4.dp)
-                                        .background(Color(0xFFE53935), shape = RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Удалить",
-                                        tint = Color.White,
-                                        modifier = Modifier.padding(end = 20.dp)
-                                    )
-                                }
+                                Box(modifier = Modifier.fillMaxSize()) // Прозрачный фон при свайпе
                             },
                             enableDismissFromStartToEnd = false,
                             enableDismissFromEndToStart = true
                         ) {
-                            Card(
+                            // Белые стеклянные карточки упражнений (как карточки тренировок)
+                            GlassCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                                     .clickable(enabled = workout!!.status != WorkoutStatus.COMPLETED.name) {
                                         onExerciseClick(item.workoutExerciseId)
                                     },
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                hasShadow = false,
+                                hasBorder = false
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(item.exercise.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                                    Text(
+                                        text = item.exercise.name,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                     Text(
                                         text = item.exercise.muscleGroupList.joinToString(", ") { it.displayName },
                                         fontSize = 12.sp,

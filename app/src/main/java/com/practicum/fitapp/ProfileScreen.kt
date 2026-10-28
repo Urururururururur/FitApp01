@@ -1,10 +1,14 @@
 package com.practicum.fitapp
 
+import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -12,7 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,12 +29,8 @@ import com.practicum.fitapp.data.local.FitnessGoal
 import com.practicum.fitapp.data.local.Gender
 import com.practicum.fitapp.presentation.calculator.NutritionCalculator
 import com.practicum.fitapp.presentation.common.DateUtils
+import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.profile.ProfileViewModel
-import androidx.compose.material.icons.filled.Edit
-import android.app.Activity
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,48 +92,41 @@ fun ProfileScreen(
             .statusBarsPadding()
             .padding(16.dp)
     ) {
-        Text(text = "Профиль", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Text(text = "Профиль", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ==================== КАРТОЧКА НОРМЫ (СВЕРХУ) ====================
+        // ==================== КАРТОЧКА НОРМЫ ====================
         if (plan != null) {
             val isOutdated = NutritionCalculator.isWeightOutdated(lastWeight?.date)
 
-            Card(
+            GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                shape = RoundedCornerShape(24.dp),
+                glassColor = Color(0xFFC8E6C9).copy(alpha = 1.4f), // Однородное прозрачное стекло
+                hasShadow = false,
+                hasBorder = false
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Твоя норма",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = "Твоя норма", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = "${"%.0f".format(plan.targetCalories)} ккал/день",
                         fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     if (isOutdated) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "⚠ Норма неактуальна — пора взвеситься",
-                            fontSize = 12.sp,
-                            color = Color(0xFFC62828)
-                        )
+                        Text(text = "⚠ Норма неактуальна — пора взвеситься", fontSize = 12.sp, color = Color(0xFFC62828))
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Б: ${"%.0f".format(plan.proteinGrams)} г · " +
-                                "Ж: ${"%.0f".format(plan.fatGrams)} г · " +
-                                "У: ${"%.0f".format(plan.carbsGrams)} г",
-                        fontSize = 14.sp
+                        text = "Б: ${"%.0f".format(plan.proteinGrams)} г · Ж: ${"%.0f".format(plan.fatGrams)} г · У: ${"%.0f".format(plan.carbsGrams)} г",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -141,110 +137,82 @@ fun ProfileScreen(
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedButton(
-                        onClick = { showWeighDialog = true },
-                        modifier = Modifier.fillMaxWidth()
+
+                    // Кнопка взвеситься (жидкая)
+                    GlassCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showWeighDialog = true },
+                        shape = RoundedCornerShape(12.dp),
+                        glassColor = Color(0xFF81C784).copy(alpha = 0.7f), // Прозрачная зеленая
+                        hasShadow = false,
+                        hasBorder = false
                     ) {
-                        Text("Взвеситься сегодня")
+                        Box(Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+                            Text("Взвеситься сегодня", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
                     }
 
                     if (lastWeight != null) {
                         Text(
-                            text = "Последнее: ${DateUtils.formatShort(
-                                DateUtils.timestampToLocalDate(lastWeight!!.date)
-                            )} — ${"%.1f".format(lastWeight!!.weightKg)} кг",
+                            text = "Последнее: ${DateUtils.formatShort(DateUtils.timestampToLocalDate(lastWeight!!.date))} — ${"%.1f".format(lastWeight!!.weightKg)} кг",
                             fontSize = 12.sp,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }
             }
         } else {
-            // Профиль не заполнен
-            Card(
+            GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                shape = RoundedCornerShape(24.dp),
+                glassColor = Color.White.copy(alpha = 0.4f),
+                hasShadow = false,
+                hasBorder = false
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Заполните профиль",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Чтобы рассчитать твою норму калорий",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+                    Text(text = "Заполните профиль", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = "Чтобы рассчитать твою норму калорий", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-// Карточка "Не пью"
+        // ==================== КАРТОЧКИ ПРИВЫЧЕК ====================
         if (profile?.quitAlcohol == true) {
             val quitDate = profile?.alcoholQuitDate ?: System.currentTimeMillis()
             val days = (System.currentTimeMillis() - quitDate) / (1000 * 60 * 60 * 24)
             val dateText = DateUtils.formatShort(DateUtils.timestampToLocalDate(quitDate))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            GlassCard(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                glassColor = Color(0xFFC8E6C9).copy(alpha = 1.4f), // Как у достижений
+                hasShadow = false,
+                hasBorder = false
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Не пью алкоголь", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(
-                        text = "$days дней трезвости",
-                        fontSize = 16.sp,
-                        color = Color(0xFF2E7D32)
-                    )
+                    Text(text = "Не пью алкоголь", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = "$days дней трезвости", fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
                     if (profile!!.alcoholRelapses > 0) {
-                        Text(
-                            text = "Срывов: ${profile!!.alcoholRelapses}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                        Text(text = "Срывов: ${profile!!.alcoholRelapses}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // Строка: дата + карандаш
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "С $dateText",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(text = "С $dateText", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         IconButton(
-                            onClick = {
-                                dateInput = dateText
-                                showAlcoholDateDialog = true
-                            },
+                            onClick = { dateInput = dateText; showAlcoholDateDialog = true },
                             modifier = Modifier.size(24.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Изменить дату",
-                                tint = Color.Gray,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Icon(Icons.Default.Edit, contentDescription = "Изменить дату", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                         }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // Кнопка "Срыв"
-                    OutlinedButton(
-                        onClick = { viewModel.addAlcoholRelapse() },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    OutlinedButton(onClick = { viewModel.addAlcoholRelapse() }, modifier = Modifier.fillMaxWidth()) {
                         Text("Зафиксировать срыв")
                     }
                 }
@@ -252,65 +220,38 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-// Карточка "Не курю"
         if (profile?.quitNicotine == true) {
             val quitDate = profile?.nicotineQuitDate ?: System.currentTimeMillis()
             val days = (System.currentTimeMillis() - quitDate) / (1000 * 60 * 60 * 24)
             val dateText = DateUtils.formatShort(DateUtils.timestampToLocalDate(quitDate))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            GlassCard(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                glassColor = Color(0xFFC8E6C9).copy(alpha = 1.4f), // Как у достижений
+                hasShadow = false,
+                hasBorder = false
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Не курю", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(
-                        text = "$days дней без никотина",
-                        fontSize = 16.sp,
-                        color = Color(0xFF2E7D32)
-                    )
+                    Text(text = "Не курю", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = "$days дней без никотина", fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
                     if (profile!!.nicotineRelapses > 0) {
-                        Text(
-                            text = "Срывов: ${profile!!.nicotineRelapses}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                        Text(text = "Срывов: ${profile!!.nicotineRelapses}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // Строка: дата + карандаш
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "С $dateText",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(text = "С $dateText", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         IconButton(
-                            onClick = {
-                                dateInput = dateText
-                                showNicotineDateDialog = true
-                            },
+                            onClick = { dateInput = dateText; showNicotineDateDialog = true },
                             modifier = Modifier.size(24.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Изменить дату",
-                                tint = Color.Gray,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Icon(Icons.Default.Edit, contentDescription = "Изменить дату", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                         }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedButton(
-                        onClick = { viewModel.addNicotineRelapse() },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    OutlinedButton(onClick = { viewModel.addNicotineRelapse() }, modifier = Modifier.fillMaxWidth()) {
                         Text("Зафиксировать срыв")
                     }
                 }
@@ -318,13 +259,13 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-
-
-
         // ==================== СПОЙЛЕР "МОИ ДАННЫЕ" ====================
-        Card(
+        GlassCard(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            shape = RoundedCornerShape(24.dp),
+            glassColor = Color.White.copy(alpha = 0.4f), // Прозрачный
+            hasShadow = false,
+            hasBorder = false
         ) {
             Column {
                 // Заголовок спойлера
@@ -336,22 +277,17 @@ fun ProfileScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Мои данные",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = "Мои данные", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Icon(
-                        imageVector = if (isDataExpanded) Icons.Default.KeyboardArrowUp
-                        else Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (isDataExpanded) "Свернуть" else "Развернуть"
+                        imageVector = if (isDataExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isDataExpanded) "Свернуть" else "Развернуть",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
                 // Разворачиваемое содержимое
                 if (isDataExpanded) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        // Имя
                         OutlinedTextField(
                             value = name,
                             onValueChange = { name = it },
@@ -361,8 +297,7 @@ fun ProfileScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Пол
-                        Text(text = "Пол", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Text(text = "Пол", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Gender.entries.forEach { g ->
@@ -375,7 +310,6 @@ fun ProfileScreen(
                         }
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Возраст
                         OutlinedTextField(
                             value = age,
                             onValueChange = { v -> if (v.all { it.isDigit() }) age = v },
@@ -386,7 +320,6 @@ fun ProfileScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Рост
                         OutlinedTextField(
                             value = height,
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) height = v },
@@ -397,7 +330,6 @@ fun ProfileScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Вес
                         OutlinedTextField(
                             value = weight,
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) weight = v },
@@ -406,143 +338,180 @@ fun ProfileScreen(
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         // Уровень активности
-                        Text(text = "Уровень активности", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = "Уровень активности", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(modifier = Modifier.height(8.dp))
                         ActivityLevel.entries.forEach { level ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                            val isSelected = activityLevel == level.name
+                            GlassCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .clickable { activityLevel = level.name },
+                                shape = RoundedCornerShape(12.dp),
+                                glassColor = if (isSelected) Color(0xFFC8E6C9).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                                hasShadow = false,
+                                hasBorder = false
                             ) {
-                                RadioButton(
-                                    selected = activityLevel == level.name,
-                                    onClick = { activityLevel = level.name }
-                                )
-                                Text(text = level.displayName, fontSize = 13.sp)
+                                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    RadioButton(
+                                        selected = isSelected,
+                                        onClick = { activityLevel = level.name },
+                                        colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                                    )
+                                    Text(
+                                        text = level.displayName,
+                                        fontSize = 14.sp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
                             }
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Цель
-                        Text(text = "Цель", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            FitnessGoal.entries.forEach { fg ->
-                                FilterChip(
-                                    selected = goal == fg.name,
-                                    onClick = { goal = fg.name },
-                                    label = { Text(fg.displayName) },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(text = "Вредные привычки", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(
-                                selected = quitAlcohol,
-                                onClick = { quitAlcohol = !quitAlcohol },
-                                label = { Text("Отказ от алкоголя") }
-                            )
-                            FilterChip(
-                                selected = quitNicotine,
-                                onClick = { quitNicotine = !quitNicotine },
-                                label = { Text("Отказ от никотина") }
-                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // Цель
+                        Text(text = "Цель", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            FitnessGoal.entries.forEach { fg ->
+                                val isSelected = goal == fg.name
+                                GlassCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { goal = fg.name },
+                                    shape = RoundedCornerShape(12.dp),
+                                    glassColor = if (isSelected) Color(0xFFC8E6C9).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                                    hasShadow = false,
+                                    hasBorder = false
+                                ) {
+                                    Box(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = fg.displayName,
+                                            fontSize = 14.sp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Вредные привычки
+                        Text(text = "Вредные привычки", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            val isAlcoholSelected = quitAlcohol
+                            GlassCard(
+                                modifier = Modifier.weight(1f).clickable { quitAlcohol = !quitAlcohol },
+                                shape = RoundedCornerShape(12.dp),
+                                glassColor = if (isAlcoholSelected) Color(0xFFC8E6C9).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                                hasShadow = false,
+                                hasBorder = false
+                            ) {
+                                Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
+                                    Text("Отказ от алкоголя", fontSize = 12.sp, textAlign = TextAlign.Center, color = if (isAlcoholSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+                                }
+                            }
+                            val isNicotineSelected = quitNicotine
+                            GlassCard(
+                                modifier = Modifier.weight(1f).clickable { quitNicotine = !quitNicotine },
+                                shape = RoundedCornerShape(12.dp),
+                                glassColor = if (isNicotineSelected) Color(0xFFC8E6C9).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                                hasShadow = false,
+                                hasBorder = false
+                            ) {
+                                Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
+                                    Text("Отказ от никотина", fontSize = 12.sp, textAlign = TextAlign.Center, color = if (isNicotineSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         // Кнопка сохранить
-                        Button(
-                            onClick = {
-                                viewModel.saveProfile(
-                                    name = name,
-                                    gender = gender,
-                                    age = age.toIntOrNull() ?: 25,
-                                    heightCm = height.toDoubleOrNull() ?: 175.0,
-                                    weightKg = weight.toDoubleOrNull() ?: 70.0,
-                                    activityLevel = activityLevel,
-                                    goal = goal,
-                                    quitAlcohol = quitAlcohol,
-                                    quitNicotine = quitNicotine
-                                )
-                                showSavedMessage = true
-                                isDataExpanded = false // ← Закрывает спойлер
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.saveProfile(
+                                        name = name,
+                                        gender = gender,
+                                        age = age.toIntOrNull() ?: 25,
+                                        heightCm = height.toDoubleOrNull() ?: 175.0,
+                                        weightKg = weight.toDoubleOrNull() ?: 70.0,
+                                        activityLevel = activityLevel,
+                                        goal = goal,
+                                        quitAlcohol = quitAlcohol,
+                                        quitNicotine = quitNicotine
+                                    )
+                                    showSavedMessage = true
+                                    isDataExpanded = false
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            solidColor = Color(0xFF81C784), // Плотная зеленая
+                            hasShadow = true,
+                            hasBorder = false
                         ) {
-                            Text("Сохранить")
+                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
+                                Text("Сохранить", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
                         }
+
+                        if (showSavedMessage) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(text = "Профиль сохранён", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                        }
+
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        TextButton(
-                            onClick = { showDeleteDialog = true },
-                            modifier = Modifier.fillMaxWidth()
+                        // Кнопка удалить
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showDeleteDialog = true },
+                            shape = RoundedCornerShape(16.dp),
+                            solidColor = Color(0xFFE53935), // Плотная красная
+                            hasShadow = true,
+                            hasBorder = false
                         ) {
-                            Text(
-                                text = "Удалить все данные",
-                                color = Color.Red,
-                                fontSize = 16.sp
-                            )
+                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
+                                Text("Удалить все данные", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
                         }
+
                         if (showDeleteDialog) {
                             AlertDialog(
                                 onDismissRequest = { showDeleteDialog = false },
                                 title = { Text("Удалить все данные?") },
-                                text = {
-                                    Text(
-                                        "Все ваши тренировки, записи о питании, вес и достижения будут удалены. " +
-                                                "Это действие нельзя отменить."
-                                    )
-                                },
+                                text = { Text("Все ваши тренировки, записи о питании, вес и достижения будут удалены. Это действие нельзя отменить.") },
                                 confirmButton = {
-                                    TextButton(
-                                        onClick = {
-                                            showDeleteDialog = false
-                                            viewModel.clearAllData(context) {  // ← ДОБАВИЛИ context
-                                                // Перезапускаем Activity, чтобы все ViewModel и БД обновились
-                                                (context as Activity).recreate()
-                                            }
-                                        }
-                                    ) {
-                                        Text("Удалить", color = Color.Red)
-                                    }
+                                    TextButton(onClick = {
+                                        showDeleteDialog = false
+                                        viewModel.clearAllData(context) { (context as Activity).recreate() }
+                                    }) { Text("Удалить", color = Color.Red) }
                                 },
-                                dismissButton = {
-                                    TextButton(onClick = { showDeleteDialog = false }) {
-                                        Text("Отмена")
-                                    }
-                                }
+                                dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Отмена") } }
                             )
                         }
-                     // ← Конец Column
-
-                        if (showSavedMessage) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Профиль сохранён",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = 14.sp
-                            )
-                        }
-
                     }
                 }
             }
         }
+
+        // ОТСТУП В КОНЦЕ, ЧТОБЫ КАРТОЧКА НЕ ПРЯТАЛАСЬ ЗА МЕНЮ
+        Spacer(modifier = Modifier.height(100.dp))
     }
-// Диалог изменения даты отказа от алкоголя
+
+    // Диалоги дат
     if (showAlcoholDateDialog) {
         AlertDialog(
             onDismissRequest = { showAlcoholDateDialog = false },
             title = { Text("Дата отказа от алкоголя") },
             text = {
                 Column {
-                    Text("Введите дату в формате ДД.ММ.ГГГГ", fontSize = 12.sp, color = Color.Gray)
+                    Text("Введите дату в формате ДД.ММ.ГГГГ", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = dateInput,
@@ -557,40 +526,27 @@ fun ProfileScreen(
             confirmButton = {
                 TextButton(onClick = {
                     try {
-                        // Парсим дату "ДД.ММ.ГГГГ"
                         val parts = dateInput.split(".")
                         if (parts.size == 3) {
-                            val day = parts[0].toInt()
-                            val month = parts[1].toInt()
-                            val year = parts[2].toInt()
-                            val date = java.time.LocalDate.of(year, month, day)
+                            val date = java.time.LocalDate.of(parts[2].toInt(), parts[1].toInt(), parts[0].toInt())
                             val timestamp = date.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
                             viewModel.updateAlcoholDate(timestamp)
                             showAlcoholDateDialog = false
                         }
-                    } catch (e: Exception) {
-                        // Игнорируем некорректный ввод
-                    }
-                }) {
-                    Text("Сохранить")
-                }
+                    } catch (e: Exception) {}
+                }) { Text("Сохранить") }
             },
-            dismissButton = {
-                TextButton(onClick = { showAlcoholDateDialog = false }) {
-                    Text("Отмена")
-                }
-            }
+            dismissButton = { TextButton(onClick = { showAlcoholDateDialog = false }) { Text("Отмена") } }
         )
     }
 
-// Диалог изменения даты отказа от никотина
     if (showNicotineDateDialog) {
         AlertDialog(
             onDismissRequest = { showNicotineDateDialog = false },
             title = { Text("Дата отказа от никотина") },
             text = {
                 Column {
-                    Text("Введите дату в формате ДД.ММ.ГГГГ", fontSize = 12.sp, color = Color.Gray)
+                    Text("Введите дату в формате ДД.ММ.ГГГГ", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = dateInput,
@@ -607,26 +563,18 @@ fun ProfileScreen(
                     try {
                         val parts = dateInput.split(".")
                         if (parts.size == 3) {
-                            val day = parts[0].toInt()
-                            val month = parts[1].toInt()
-                            val year = parts[2].toInt()
-                            val date = java.time.LocalDate.of(year, month, day)
+                            val date = java.time.LocalDate.of(parts[2].toInt(), parts[1].toInt(), parts[0].toInt())
                             val timestamp = date.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
                             viewModel.updateNicotineDate(timestamp)
                             showNicotineDateDialog = false
                         }
                     } catch (e: Exception) {}
-                }) {
-                    Text("Сохранить")
-                }
+                }) { Text("Сохранить") }
             },
-            dismissButton = {
-                TextButton(onClick = { showNicotineDateDialog = false }) {
-                    Text("Отмена")
-                }
-            }
+            dismissButton = { TextButton(onClick = { showNicotineDateDialog = false }) { Text("Отмена") } }
         )
     }
+
     // Диалог взвешивания
     if (showWeighDialog) {
         AlertDialog(
@@ -650,15 +598,9 @@ fun ProfileScreen(
                         newWeightInput = ""
                         showWeighDialog = false
                     }
-                }) {
-                    Text("Сохранить")
-                }
+                }) { Text("Сохранить") }
             },
-            dismissButton = {
-                TextButton(onClick = { showWeighDialog = false }) {
-                    Text("Отмена")
-                }
-            }
+            dismissButton = { TextButton(onClick = { showWeighDialog = false }) { Text("Отмена") } }
         )
     }
 }

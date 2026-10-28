@@ -83,8 +83,16 @@ fun FitAppTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+
+            // Делаем системные панели полностью прозрачными
+            window.statusBarColor = androidx.compose.ui.graphics.Color.Transparent.toArgb()
+            window.navigationBarColor = androidx.compose.ui.graphics.Color.Transparent.toArgb()
+
+            // Настраиваем цвет иконок (темные на светлой теме, светлые на темной)
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
+            }
         }
     }
 

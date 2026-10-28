@@ -1,6 +1,7 @@
 package com.practicum.fitapp
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.training.ExerciseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,91 +40,104 @@ fun ExerciseScreen(
     val isEditable = workout?.status != com.practicum.fitapp.data.local.WorkoutStatus.COMPLETED.name
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Transparent, // Прозрачный фон для градиента
         topBar = {
             TopAppBar(
-                title = {
-                    Text(exercise?.name ?: "Упражнение")
-                },
+                title = { Text(exercise?.name ?: "Упражнение") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
         ) {
-            Text(
-                text = workoutExercise?.note ?: "Загрузка...",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(text = "Подходы", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // 1. Список подходов
             LazyColumn(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.fillMaxSize(),
+                // Отступ снизу (120dp), чтобы последняя карточка не пряталась за кнопкой
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp)
             ) {
                 items(sets, key = { it.id }) { set ->
-                    // Локальный текст для полей
-                    var weightText by remember(set.id) { mutableStateOf(set.weight?.toString() ?: "") }
-                    var repsText by remember(set.id) { mutableStateOf(set.reps?.toString() ?: "") }
-                    var distanceText by remember(set.id) { mutableStateOf(set.distance?.toString() ?: "") }
-                    var durationText by remember(set.id) { mutableStateOf(set.duration?.toString() ?: "") }
 
-                    // Синхронизация
-                    LaunchedEffect(set.weight) {
-                        if (set.weight != weightText.replace(',', '.').toDoubleOrNull()) {
-                            weightText = set.weight?.toString() ?: ""
+                    // Состояние свайпа для удаления
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value == SwipeToDismissBoxValue.EndToStart && isEditable) {
+                                viewModel.deleteSet(set.id)
+                                true
+                            } else false
                         }
-                    }
-                    LaunchedEffect(set.reps) {
-                        if (set.reps != repsText.toIntOrNull()) {
-                            repsText = set.reps?.toString() ?: ""
-                        }
-                    }
-                    LaunchedEffect(set.distance) {
-                        if (set.distance != distanceText.replace(',', '.').toDoubleOrNull()) {
-                            distanceText = set.distance?.toString() ?: ""
-                        }
-                    }
-                    LaunchedEffect(set.duration) {
-                        if (set.duration != durationText.toIntOrNull()) {
-                            durationText = set.duration?.toString() ?: ""
-                        }
-                    }
+                    )
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                    // Обертка свайпа
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        backgroundContent = {
+                            Box(modifier = Modifier.fillMaxSize()) // Прозрачный фон при свайпе
+                        },
+                        enableDismissFromStartToEnd = false,
+                        enableDismissFromEndToStart = true
                     ) {
-                        Column(
+                        // Белая стеклянная карточка подхода
+                        GlassCard(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp)
+                                .padding(vertical = 4.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            hasShadow = false,
+                            hasBorder = false
                         ) {
-                            // ВЕРХНЯЯ СТРОКА (Поля ввода + Кнопка удаления)
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
                             ) {
-                                // Контейнер для полей ввода (чтобы они были на одной строке)
+                                // Локальный текст для полей
+                                var weightText by remember(set.id) { mutableStateOf(set.weight?.toString() ?: "") }
+                                var repsText by remember(set.id) { mutableStateOf(set.reps?.toString() ?: "") }
+                                var distanceText by remember(set.id) { mutableStateOf(set.distance?.toString() ?: "") }
+                                var durationText by remember(set.id) { mutableStateOf(set.duration?.toString() ?: "") }
+
+                                // Синхронизация
+                                LaunchedEffect(set.weight) {
+                                    if (set.weight != weightText.replace(',', '.').toDoubleOrNull()) {
+                                        weightText = set.weight?.toString() ?: ""
+                                    }
+                                }
+                                LaunchedEffect(set.reps) {
+                                    if (set.reps != repsText.toIntOrNull()) {
+                                        repsText = set.reps?.toString() ?: ""
+                                    }
+                                }
+                                LaunchedEffect(set.distance) {
+                                    if (set.distance != distanceText.replace(',', '.').toDoubleOrNull()) {
+                                        distanceText = set.distance?.toString() ?: ""
+                                    }
+                                }
+                                LaunchedEffect(set.duration) {
+                                    if (set.duration != durationText.toIntOrNull()) {
+                                        durationText = set.duration?.toString() ?: ""
+                                    }
+                                }
+
+                                // ВЕРХНЯЯ СТРОКА (Поля ввода разнесены по краям)
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween, // ← Разносим по краям
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     // ---- ВЕС (для силовых) ----
                                     if (category == com.practicum.fitapp.data.local.ExerciseCategory.STRENGTH) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
+                                            // Кнопка минус (увеличена)
                                             TextButton(
                                                 onClick = {
                                                     val nw = (weightText.replace(',', '.').toDoubleOrNull() ?: 0.0) - 2.5
@@ -130,9 +145,9 @@ fun ExerciseScreen(
                                                     viewModel.updateSet(set.copy(weight = maxOf(nw, 0.0)))
                                                 },
                                                 contentPadding = PaddingValues(0.dp),
-                                                modifier = Modifier.size(28.dp),
+                                                modifier = Modifier.size(48.dp), // ← Больше размер
                                                 enabled = isEditable
-                                            ) { Text("−", fontSize = 18.sp) }
+                                            ) { Text("−", fontSize = 28.sp) } // ← Больше шрифт
 
                                             OutlinedTextField(
                                                 value = weightText,
@@ -143,13 +158,14 @@ fun ExerciseScreen(
                                                         if (parsed != null) viewModel.updateSet(set.copy(weight = parsed))
                                                     }
                                                 },
-                                                label = { Text("Вес", fontSize = 9.sp) },
-                                                modifier = Modifier.width(65.dp),
+                                                label = { Text("Вес", fontSize = 10.sp) },
+                                                modifier = Modifier.width(75.dp),
                                                 singleLine = true,
                                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                                 enabled = isEditable
                                             )
 
+                                            // Кнопка плюс (увеличена)
                                             TextButton(
                                                 onClick = {
                                                     val nw = (weightText.replace(',', '.').toDoubleOrNull() ?: 0.0) + 2.5
@@ -157,9 +173,9 @@ fun ExerciseScreen(
                                                     viewModel.updateSet(set.copy(weight = nw))
                                                 },
                                                 contentPadding = PaddingValues(0.dp),
-                                                modifier = Modifier.size(28.dp),
+                                                modifier = Modifier.size(48.dp), // ← Больше размер
                                                 enabled = isEditable
-                                            ) { Text("+", fontSize = 18.sp) }
+                                            ) { Text("+", fontSize = 28.sp) } // ← Больше шрифт
                                         }
                                     }
 
@@ -173,9 +189,9 @@ fun ExerciseScreen(
                                                     viewModel.updateSet(set.copy(reps = maxOf(nr, 0)))
                                                 },
                                                 contentPadding = PaddingValues(0.dp),
-                                                modifier = Modifier.size(28.dp),
+                                                modifier = Modifier.size(48.dp),
                                                 enabled = isEditable
-                                            ) { Text("−", fontSize = 18.sp) }
+                                            ) { Text("−", fontSize = 28.sp) }
 
                                             OutlinedTextField(
                                                 value = repsText,
@@ -186,8 +202,8 @@ fun ExerciseScreen(
                                                         if (parsed != null) viewModel.updateSet(set.copy(reps = parsed))
                                                     }
                                                 },
-                                                label = { Text("Повт.", fontSize = 9.sp) },
-                                                modifier = Modifier.width(60.dp),
+                                                label = { Text("Повт.", fontSize = 10.sp) },
+                                                modifier = Modifier.width(75.dp),
                                                 singleLine = true,
                                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                                 enabled = isEditable
@@ -200,9 +216,9 @@ fun ExerciseScreen(
                                                     viewModel.updateSet(set.copy(reps = nr))
                                                 },
                                                 contentPadding = PaddingValues(0.dp),
-                                                modifier = Modifier.size(28.dp),
+                                                modifier = Modifier.size(48.dp),
                                                 enabled = isEditable
-                                            ) { Text("+", fontSize = 18.sp) }
+                                            ) { Text("+", fontSize = 28.sp) }
                                         }
                                     }
 
@@ -217,8 +233,8 @@ fun ExerciseScreen(
                                                     if (parsed != null) viewModel.updateSet(set.copy(distance = parsed))
                                                 }
                                             },
-                                            label = { Text("Дист, м", fontSize = 9.sp) },
-                                            modifier = Modifier.width(75.dp),
+                                            label = { Text("Дист, м", fontSize = 10.sp) },
+                                            modifier = Modifier.width(90.dp),
                                             singleLine = true,
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                             enabled = isEditable
@@ -232,8 +248,8 @@ fun ExerciseScreen(
                                                     if (parsed != null) viewModel.updateSet(set.copy(duration = parsed))
                                                 }
                                             },
-                                            label = { Text("Время, с", fontSize = 9.sp) },
-                                            modifier = Modifier.width(75.dp),
+                                            label = { Text("Время, с", fontSize = 10.sp) },
+                                            modifier = Modifier.width(90.dp),
                                             singleLine = true,
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             enabled = isEditable
@@ -251,8 +267,8 @@ fun ExerciseScreen(
                                                     if (parsed != null) viewModel.updateSet(set.copy(duration = parsed))
                                                 }
                                             },
-                                            label = { Text("Время, с", fontSize = 9.sp) },
-                                            modifier = Modifier.width(100.dp),
+                                            label = { Text("Время, с", fontSize = 10.sp) },
+                                            modifier = Modifier.width(120.dp),
                                             singleLine = true,
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             enabled = isEditable
@@ -260,60 +276,71 @@ fun ExerciseScreen(
                                     }
                                 }
 
-                                // Кнопка удаления
-                                if (isEditable) {
-                                    TextButton(
-                                        onClick = { viewModel.deleteSet(set.id) },
-                                        contentPadding = PaddingValues(0.dp),
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Text("✕", color = Color.Red, fontSize = 18.sp)
-                                    }
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // ---- ИНТЕНСИВНОСТЬ ----
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    IntensityChip(
+                                        label = "РАЗМ", isSelected = set.intensity == "WARMUP",
+                                        color = Color.Gray, enabled = isEditable,
+                                        onClick = { viewModel.updateSet(set.copy(intensity = "WARMUP")) }
+                                    )
+                                    IntensityChip(
+                                        label = "ЛЕГК", isSelected = set.intensity == "EASY",
+                                        color = Color(0xFF4CAF50), enabled = isEditable,
+                                        onClick = { viewModel.updateSet(set.copy(intensity = "EASY")) }
+                                    )
+                                    IntensityChip(
+                                        label = "НОРМ", isSelected = set.intensity == "NORMAL",
+                                        color = Color(0xFFFF9800), enabled = isEditable,
+                                        onClick = { viewModel.updateSet(set.copy(intensity = "NORMAL")) }
+                                    )
+                                    IntensityChip(
+                                        label = "СЛОЖ", isSelected = set.intensity == "HARD",
+                                        color = Color(0xFFF44336), enabled = isEditable,
+                                        onClick = { viewModel.updateSet(set.copy(intensity = "HARD")) }
+                                    )
                                 }
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            // ---- ИНТЕНСИВНОСТЬ ----
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                IntensityChip(
-                                    label = "РАЗМ", isSelected = set.intensity == "WARMUP",
-                                    color = Color.Gray, enabled = isEditable,
-                                    onClick = { viewModel.updateSet(set.copy(intensity = "WARMUP")) }
-                                )
-                                IntensityChip(
-                                    label = "ЛЕГК", isSelected = set.intensity == "EASY",
-                                    color = Color(0xFF4CAF50), enabled = isEditable,
-                                    onClick = { viewModel.updateSet(set.copy(intensity = "EASY")) }
-                                )
-                                IntensityChip(
-                                    label = "НОРМ", isSelected = set.intensity == "NORMAL",
-                                    color = Color(0xFFFF9800), enabled = isEditable,
-                                    onClick = { viewModel.updateSet(set.copy(intensity = "NORMAL")) }
-                                )
-                                IntensityChip(
-                                    label = "СЛОЖ", isSelected = set.intensity == "HARD",
-                                    color = Color(0xFFF44336), enabled = isEditable,
-                                    onClick = { viewModel.updateSet(set.copy(intensity = "HARD")) }
-                                )
                             }
                         }
                     }
                 }
-            } // ← Вот здесь закрывается LazyColumn
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Кнопка добавления подхода (она ВНЕ LazyColumn, всегда внизу)
-            Button(
-                onClick = { viewModel.addSet() },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = isEditable
+            // 2. Плавающая кнопка "+ Добавить подход" (в стиле добавить тренировку)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Text("+ Добавить подход")
+                GlassCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = isEditable) { viewModel.addSet() },
+                    shape = RoundedCornerShape(16.dp),
+                    solidColor = if (isEditable) Color(0xFF81C784) else Color.Gray, // Сплошной цвет
+                    hasShadow = true,
+                    hasBorder = false
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "+ Добавить подход",
+                            color = Color.White, // Белый текст для контраста
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
             }
         }
     }

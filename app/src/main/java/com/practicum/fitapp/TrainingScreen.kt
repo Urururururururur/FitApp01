@@ -3,22 +3,53 @@ package com.practicum.fitapp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.WorkoutStatus
@@ -26,7 +57,9 @@ import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.training.TrainingViewModel
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +77,7 @@ fun TrainingScreen(
     var calendarMonth by remember { mutableStateOf(YearMonth.from(selectedDate)) }
     var showAddSheet by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LazyColumn(
         modifier = Modifier
@@ -109,37 +142,25 @@ fun TrainingScreen(
                 SwipeToDismissBox(
                     state = dismissState,
                     backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(vertical = 4.dp)
-                                .background(Color(0xFFE53935), shape = RoundedCornerShape(12.dp)),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Удалить",
-                                tint = Color.White,
-                                modifier = Modifier.padding(end = 20.dp)
-                            )
-                        }
+                        // Просто пустое пространство. Никакого красного фона и корзины.
+                        Box(modifier = Modifier.fillMaxSize())
                     },
                     enableDismissFromStartToEnd = false,
                     enableDismissFromEndToStart = true
                 ) {
-                    Card(
+                    // ЗАМЕНИЛИ Card НА GlassCard
+                    com.practicum.fitapp.presentation.common.GlassCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .clickable { onWorkoutClick(workout.id) },
-                        // ИСПОЛЬЗУЕМ ЦВЕТ ТЕМЫ
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { onWorkoutClick(workout.id) }
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
                                 text = workout.name,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface // Добавили цвет для читаемости на стекле
                             )
                             val statusEnum = WorkoutStatus.valueOf(workout.status)
                             Text(
@@ -178,21 +199,33 @@ fun TrainingScreen(
         }
 
         item {
-            Row(
+            com.practicum.fitapp.presentation.common.GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showAddSheet = true }
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 8.dp)
+                    .clickable { showAddSheet = true },
+                shape = RoundedCornerShape(16.dp),
+                solidColor = Color(0xFF81C784), // ← Сплошной зеленый цвет
+                hasShadow = true,               // Добавляем тень, чтобы кнопка выделялась
+                hasBorder = false
             ) {
-                Text(
-                    text = "+ Добавить тренировку",
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "+ Добавить тренировку",
+                        fontSize = 16.sp,
+                        color = Color.White, // ← Белый текст для контраста
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
+        }
+        item {
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 
@@ -213,40 +246,89 @@ fun TrainingScreen(
     if (showAddSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAddSheet = false },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = Color.Transparent,
+            dragHandle = {
+                BottomSheetDefaults.DragHandle(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Как создать тренировку?",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                ListItem(
-                    headlineContent = { Text("Каталог тренировок") },
-                    supportingContent = { Text("Готовые программы на выбор") },
-                    modifier = Modifier.clickable {
-                        showAddSheet = false
-                        onCatalogClick()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(16.dp)
+            ) {
+                // ГЛАВНОЕ ОКНО (плотное, светло-зеленое)
+                com.practicum.fitapp.presentation.common.GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    solidColor = Color(0xFFC8E6C9), // Плотный фон
+                    hasShadow = false,
+                    hasBorder = false
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            text = "Как создать тренировку?",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B5E20),
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        // Кнопка 1 (стеклянная, полупрозрачная)
+                        com.practicum.fitapp.presentation.common.GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { showAddSheet = false; onCatalogClick() },
+                            shape = RoundedCornerShape(16.dp),
+                            glassColor = Color.White.copy(alpha = 0.6f), // ← Вернули прозрачность
+                            hasShadow = false,
+                            hasBorder = false
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("Каталог тренировок", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Готовые программы на выбор", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+
+                        // Кнопка 2 (стеклянная, полупрозрачная)
+                        com.practicum.fitapp.presentation.common.GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { viewModel.addNewWorkout(); showAddSheet = false },
+                            shape = RoundedCornerShape(16.dp),
+                            glassColor = Color.White.copy(alpha = 0.6f), // ← Вернули прозрачность
+                            hasShadow = false,
+                            hasBorder = false
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("Чистый шаблон", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Создать пустую тренировку", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+
+                        // Кнопка 3 (стеклянная, полупрозрачная)
+                        com.practicum.fitapp.presentation.common.GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { showAddSheet = false; showHistoryDialog = true },
+                            shape = RoundedCornerShape(16.dp),
+                            glassColor = Color.White.copy(alpha = 0.6f), // ← Вернули прозрачность
+                            hasShadow = false,
+                            hasBorder = false
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("История тренировок", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Скопировать из прошлой", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
                     }
-                )
-                ListItem(
-                    headlineContent = { Text("Чистый шаблон") },
-                    supportingContent = { Text("Создать пустую тренировку") },
-                    modifier = Modifier.clickable {
-                        viewModel.addNewWorkout()
-                        showAddSheet = false
-                    }
-                )
-                ListItem(
-                    headlineContent = { Text("История тренировок") },
-                    supportingContent = { Text("Скопировать из прошлой") },
-                    modifier = Modifier.clickable {
-                        showAddSheet = false
-                        showHistoryDialog = true
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }
@@ -315,16 +397,16 @@ private fun DayCell(
     val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
     val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer
-        hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f) // Полупрозрачный зеленый для темной темы
-        else -> MaterialTheme.colorScheme.surfaceVariant
+        isSelected -> MaterialTheme.colorScheme.primaryContainer // Выбранный день (темнее)
+        hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f)       // День с тренировкой
+        else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) // ← СДЕЛАЛИ ВСЕ ДНИ СВЕТЛО-ЗЕЛЕНЫМИ
     }
 
     Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+        border = if (isSelected) BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
@@ -349,7 +431,6 @@ private fun DayCell(
         }
     }
 }
-
 @Composable
 private fun MonthCalendarDialog(
     currentMonth: YearMonth,
@@ -359,57 +440,75 @@ private fun MonthCalendarDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
-                    Icon(Icons.Default.KeyboardArrowLeft, "Предыдущий месяц")
+    // Используем базовый Dialog вместо AlertDialog, чтобы убрать стандартный белый/черный фон
+    Dialog(onDismissRequest = onDismiss) {
+        // Наш компонент "жидкого стекла" / белое окно
+        com.practicum.fitapp.presentation.common.GlassCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            // Используем solidColor, чтобы сделать фон плотным белым
+            solidColor = Color.White,
+            hasShadow = true
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Заголовок с переключением месяцев
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
+                        Icon(Icons.Default.KeyboardArrowLeft, "Предыдущий месяц", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                    Text(
+                        // Используем наш DateUtils, чтобы месяц был на русском ("Октябрь 2026")
+                        text = DateUtils.formatMonthYear(currentMonth.atDay(1)),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
+                        Icon(Icons.Default.KeyboardArrowRight, "Следующий месяц", tint = MaterialTheme.colorScheme.onSurface)
+                    }
                 }
-                Text(
-                    text = currentMonth.format(DateTimeFormatter.ofPattern("LLLL yyyy")),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
-                    Icon(Icons.Default.KeyboardArrowRight, "Следующий месяц")
-                }
-            }
-        },
-        text = {
-            Column {
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Дни недели
                 Row(modifier = Modifier.fillMaxWidth()) {
                     listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
                         Text(
                             text = name,
                             modifier = Modifier.weight(1f),
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (name == "Сб" || name == "Вс") Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Сетка дней
                 val firstDayOfMonth = currentMonth.atDay(1)
                 val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
                 val daysInMonth = currentMonth.lengthOfMonth()
                 val totalCells = firstDayOfWeek - 1 + daysInMonth
                 val rows = (totalCells + 6) / 7
+
                 for (row in 0 until rows) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         for (col in 0 until 7) {
                             val cellIndex = row * 7 + col
                             val dayNumber = cellIndex - (firstDayOfWeek - 1) + 1
+
                             if (dayNumber in 1..daysInMonth) {
                                 val date = currentMonth.atDay(dayNumber)
                                 val isSelected = date == selectedDate
                                 val isWeekend = DateUtils.isWeekend(date)
                                 val hasWorkout = date in datesWithWorkouts
+
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
@@ -418,7 +517,7 @@ private fun MonthCalendarDialog(
                                         .background(
                                             color = when {
                                                 isSelected -> MaterialTheme.colorScheme.primary
-                                                hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.4f)
+                                                hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f)
                                                 else -> Color.Transparent
                                             },
                                             shape = RoundedCornerShape(50)
@@ -443,10 +542,17 @@ private fun MonthCalendarDialog(
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Кнопка закрытия в стиле темы
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Закрыть", color = MaterialTheme.colorScheme.primary)
+                }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Закрыть") }
         }
-    )
+    }
 }
