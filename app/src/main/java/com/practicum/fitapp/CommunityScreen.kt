@@ -66,7 +66,7 @@ private fun AchievementCard(item: AchievementUiState) {
 
     // Цвет стекла: если открыто — зеленоватый, если закрыто — нейтральный белый/серый
     val cardColor = if (unlocked) {
-        Color(0xFFC8E6C9).copy(alpha = 0.6f) // Зеленоватое стекло
+        Color(0xFFC8E6C9).copy(alpha = 1.4f) // Зеленоватое стекло
     } else {
         Color.White.copy(alpha = 0.5f) // Нейтральное стекло
     }

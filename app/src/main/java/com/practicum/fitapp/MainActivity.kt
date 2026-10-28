@@ -64,9 +64,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             FitAppTheme {
-                val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+                // БЫЛО: val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+                val isDarkTheme = false // ← ТЕПЕРЬ ВСЕГДА false
 
-                // Градиентный фон для всего приложения
                 GradientBackground(isDarkTheme = isDarkTheme) {
                     val navController = rememberNavController()
                     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route

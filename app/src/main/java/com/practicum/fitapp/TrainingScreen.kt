@@ -2,6 +2,7 @@ package com.practicum.fitapp
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,6 +60,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.ui.draw.clip
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -396,22 +398,27 @@ private fun DayCell(
     val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
     val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
+    // Если день выбран — зеленый, если есть тренировка — полупрозрачный зеленый, иначе белый
     val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer // Выбранный день (темнее)
-        hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f)       // День с тренировкой
-        else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) // ← СДЕЛАЛИ ВСЕ ДНИ СВЕТЛО-ЗЕЛЕНЫМИ
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f)
+        else -> Color.White.copy(alpha = 0.8f)
     }
 
-    Card(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        border = if (isSelected) BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary) else null
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .border(
+                width = if (isSelected) 1.dp else 0.5.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = DateUtils.dayOfWeekShort(date),
                 fontSize = 11.sp,
