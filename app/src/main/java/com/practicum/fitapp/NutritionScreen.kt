@@ -1,7 +1,8 @@
 package com.practicum.fitapp
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,26 +12,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
+import com.practicum.fitapp.presentation.nutrition.AiFoodResult
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import java.time.LocalDate
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.FileProvider
-import java.io.File
 
 @Composable
 fun NutritionScreen(
@@ -38,46 +35,32 @@ fun NutritionScreen(
     savedStateHandle: SavedStateHandle,
     viewModel: NutritionViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
     val entries by viewModel.entriesForDay.collectAsStateWithLifecycle()
     val summary by viewModel.dailySummary.collectAsStateWithLifecycle()
     val dailyGoal by viewModel.dailyGoal.collectAsStateWithLifecycle()
     val products by viewModel.products.collectAsStateWithLifecycle()
-
-    var showGramsDialog by remember { mutableStateOf<ProductEntity?>(null) }
-    var gramsInput by remember { mutableStateOf("100") }
-    val context = LocalContext.current
     val isAiLoading by viewModel.isAiLoading.collectAsStateWithLifecycle()
     val aiResult by viewModel.aiResult.collectAsStateWithLifecycle()
 
-    // Стейт для хранения пути к временному фото
-    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    // Стейты для диалогов
+    var showGramsDialog by remember { mutableStateOf<ProductEntity?>(null) }
+    var gramsInput by remember { mutableStateOf("100") }
 
-    // Лаунчер для галереи
+    var showTextQueryDialog by remember { mutableStateOf(false) }
+    var textQueryInput by remember { mutableStateOf("") }
+
+    var editedGrams by remember { mutableStateOf("100") }
+
+    // Лаунчер для галереи (ВОТ ОН, ИСПРАВЛЕНИЕ ОШИБКИ)
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+    ) { uri: android.net.Uri? ->
         if (uri != null) viewModel.analyzeFoodImage(uri)
     }
 
-    // Лаунчер для камеры
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success: Boolean ->
-        if (success && tempImageUri != null) {
-            viewModel.analyzeFoodImage(tempImageUri!!)
-        }
-    }
-
-    // Функция запуска камеры
-    fun startCamera() {
-        val file = File(context.cacheDir, "temp_food_photo.jpg")
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        tempImageUri = uri
-        cameraLauncher.launch(uri)
-    }
-
-    // Обработка возврата из справочника
+    // Обработка возврата из справочника продуктов
     val selectedProductId = savedStateHandle.getStateFlow<Long?>("selectedProductId", null).collectAsStateWithLifecycle()
     LaunchedEffect(selectedProductId.value) {
         if (selectedProductId.value != null) {
@@ -90,13 +73,18 @@ fun NutritionScreen(
         }
     }
 
-    // Теперь это просто LazyColumn, без обертки Box для кнопки
+    // Инициализация граммовки при получении результата от ИИ
+    LaunchedEffect(aiResult) {
+        if (aiResult != null) {
+            editedGrams = "100"
+        }
+    }
+
+    // Основной контент
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        // Отступ сверху под статус-бар, по бокам 16dp
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 48.dp)
     ) {
-        // Заголовок
         item {
             Text(text = "Питание", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(8.dp))
@@ -109,7 +97,6 @@ fun NutritionScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Недельная лента (в стиле тренировок)
         item {
             NutritionWeekStrip(
                 selectedDate = selectedDate,
@@ -118,7 +105,6 @@ fun NutritionScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Дата + кнопка "Сегодня"
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -138,7 +124,7 @@ fun NutritionScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Сводка за день (Белая жидкая карточка)
+        // Сводка за день
         item {
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -238,22 +224,20 @@ fun NutritionScreen(
             }
         }
 
-        // Кнопка "+ Добавить продукт" (Внутри списка)
+        // Кнопка "+ Добавить продукт"
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onAddFood() },
                 shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF81C784), // Плотный зеленый
+                solidColor = Color(0xFF81C784),
                 hasShadow = true,
                 hasBorder = false
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 14.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -265,21 +249,16 @@ fun NutritionScreen(
                 }
             }
         }
-        // Кнопка ИИ-анализа
+
+        // Кнопка ИИ по фото
         item {
             Spacer(modifier = Modifier.height(8.dp))
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        // Показываем диалог выбора источника (камера или галерея)
-                        // В Compose проще всего использовать AlertDialog
-                        // Но для простоты мы прямо тут вызовем галерею.
-                        // В следующем шаге сделаем красивый выбор.
-                        galleryLauncher.launch("image/*")
-                    },
+                    .clickable { galleryLauncher.launch("image/*") }, // ВЫЗОВ ГАЛЕРЕИ ИЗ UI
                 shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF6A1B9A), // Фиолетовый цвет для магии ИИ
+                solidColor = Color(0xFF6A1B9A),
                 hasShadow = true,
                 hasBorder = false
             ) {
@@ -290,24 +269,46 @@ fun NutritionScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("✨", fontSize = 18.sp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Посчитать ккал по фото",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
+                        Text("Посчитать ккал по фото", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }
         }
 
-        // ОТСТУП ПОСЛЕ КНОПКИ (чтобы можно было прокрутить выше нижнего меню)
+        // Кнопка ИИ по тексту
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTextQueryDialog = true },
+                shape = RoundedCornerShape(16.dp),
+                solidColor = Color(0xFF6A1B9A),
+                hasShadow = true,
+                hasBorder = false
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("💬", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Спросить ИИ о еде", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                }
+            }
+        }
+
+        // ОТСТУП В КОНЦЕ
         item {
             Spacer(modifier = Modifier.height(100.dp))
         }
     }
 
-    // Диалог ввода граммов
+    // ============ ДИАЛОГИ ============
+
+    // Диалог граммов для обычного продукта
     if (showGramsDialog != null) {
         AlertDialog(
             onDismissRequest = { showGramsDialog = null },
@@ -348,52 +349,145 @@ fun NutritionScreen(
             }
         )
     }
-    // Индикатор загрузки
+
+    // Диалог текстового запроса к ИИ
+    if (showTextQueryDialog) {
+        AlertDialog(
+            onDismissRequest = { showTextQueryDialog = false },
+            title = { Text("Спросить ИИ") },
+            text = {
+                OutlinedTextField(
+                    value = textQueryInput,
+                    onValueChange = { textQueryInput = it },
+                    label = { Text("Например: 2 яйца и тост") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.analyzeFoodText(textQueryInput)
+                    textQueryInput = ""
+                    showTextQueryDialog = false
+                }) { Text("Спросить") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTextQueryDialog = false }) { Text("Отмена") }
+            }
+        )
+    }
+
+    // Индикатор загрузки ИИ
     if (isAiLoading) {
         AlertDialog(
-            onDismissRequest = { }, // Нельзя закрыть
+            onDismissRequest = { },
             confirmButton = { },
-            title = { Text("Анализируем фото...") },
+            title = { Text("Анализируем...") },
             text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text("Нейросеть смотрит на твою еду...")
+                    Text("Нейросеть обрабатывает запрос...")
                 }
             }
         )
     }
 
-    // Диалог с результатом
+    // Результат ИИ
     if (aiResult != null) {
-        AlertDialog(
-            onDismissRequest = { viewModel.clearAiResult() },
-            title = { Text("Результат распознавания") },
-            text = {
-                Column {
-                    Text(aiResult!!) // Тут будет сырой JSON или текст ошибки
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("(Данные можно будет отредактировать перед сохранением)", fontSize = 12.sp, color = Color.Gray)
+        val result = aiResult!!
+
+        if (result.error != null) {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearAiResult() },
+                title = { Text("Ошибка") },
+                text = { Text("Не удалось распознать: ${result.error}") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearAiResult() }) { Text("Понятно") }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    // Здесь мы потом добавим парсинг JSON и сохранение в БД
-                    viewModel.clearAiResult()
-                }) {
-                    Text("Сохранить")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.clearAiResult() }) {
-                    Text("Отмена")
+            )
+        } else {
+            // Красивая карточка результата с возможностью правки граммов
+            Dialog(onDismissRequest = { viewModel.clearAiResult() }) {
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    solidColor = Color.White,
+                    hasShadow = true
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            text = "✨ Что на фото/в запросе?",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = result.name ?: "Неизвестное блюдо",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Поле ввода граммов
+                        OutlinedTextField(
+                            value = editedGrams,
+                            onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) editedGrams = v },
+                            label = { Text("Порция, грамм") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Динамический расчет КБЖУ
+                        val grams = editedGrams.toDoubleOrNull() ?: 100.0
+                        val factor = grams / 100.0
+                        val cal = (result.caloriesPer100g ?: 0) * factor
+                        val prot = (result.proteinPer100g ?: 0.0) * factor
+                        val fat = (result.fatPer100g ?: 0.0) * factor
+                        val carb = (result.carbsPer100g ?: 0.0) * factor
+
+                        Text("🔥 ${"%.0f".format(cal)} ккал", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text("Б: ${"%.1f".format(prot)} г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Ж: ${"%.1f".format(fat)} г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("У: ${"%.1f".format(carb)} г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = { viewModel.clearAiResult() }) {
+                                Text("Отмена", color = Color.Gray)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = { viewModel.saveAiResultToDiary(result, grams) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF81C784))
+                            ) {
+                                Text("Сохранить", color = Color.White)
+                            }
+                        }
+                    }
                 }
             }
-        )
+        }
     }
 }
 
-// ============ КОМПОНЕНТЫ КАЛЕНДАРЯ (в стиле Тренировок) ============
+// ============ КОМПОНЕНТЫ КАЛЕНДАРЯ ============
 
 @Composable
 private fun NutritionWeekStrip(
@@ -429,27 +523,23 @@ private fun NutritionDayCell(
     val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
     val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
-    // Белый фон для невыбранных дней, зеленый контейнер для выбранного
     val backgroundColor = if (isSelected) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
-        Color.White.copy(alpha = 0.8f)
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
     }
 
-    Box(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .border(
-                width = if (isSelected) 1.dp else 0.5.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
+    GlassCard(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        glassColor = backgroundColor,
+        hasShadow = false,
+        hasBorder = false
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = DateUtils.dayOfWeekShort(date),
                 fontSize = 11.sp,

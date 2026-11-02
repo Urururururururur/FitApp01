@@ -12,7 +12,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
 
 object GigaChatClient {
-    private const val BASE_URL = "https://gigachat.devices.sberbank.ru/"
+    private const val BASE_URL = "https://api.giga.chat/"
 
     fun createApi(context: Context): GigaChatApi {
         // 1. Загружаем сертификат из res/raw (как обсуждали)
@@ -38,7 +38,7 @@ object GigaChatClient {
 
         // 5. Настраиваем логирование (чтобы видеть запросы в Logcat)
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.BASIC // Теперь будем видеть только URL и код ответа
         }
 
         // 6. Собираем OkHttpClient

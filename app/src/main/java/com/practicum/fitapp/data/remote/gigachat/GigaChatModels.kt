@@ -12,16 +12,22 @@ data class AuthResponse(
     @SerializedName("expires_at") val expiresAt: Long
 )
 
+// --- Модель для загрузки файла ---
+data class FileUploadResponse(
+    @SerializedName("id") val id: String
+)
+
 // --- Модели для чата (запрос) ---
 data class ChatRequest(
-    @SerializedName("model") val model: String = "GigaChat",
+    @SerializedName("model") val model: String = "GigaChat-2-Max", // Используем модель, которая видит картинки
     @SerializedName("messages") val messages: List<Message>,
     @SerializedName("temperature") val temperature: Double = 0.1
 )
 
 data class Message(
-    @SerializedName("role") val role: String, // "user" или "system"
-    @SerializedName("content") val content: String // Текст или Base64 картинки
+    @SerializedName("role") val role: String, // "user"
+    @SerializedName("content") val content: String, // Текст запроса
+    @SerializedName("attachments") val attachments: List<String>? = null // ID загруженного файла
 )
 
 // --- Модели для чата (ответ) ---

@@ -21,7 +21,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
-
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
     private val repository: NutritionRepository,
@@ -29,44 +28,11 @@ class NutritionViewModel @Inject constructor(
     private val aiCalorieRepository: AiCalorieRepository
 ) : ViewModel() {
 
-    // Стейт загрузки (крутится ли спиннер)
-    private val _isAiLoading = MutableStateFlow(false)
-    val isAiLoading = _isAiLoading.asStateFlow()
-
-    // Стейт результата от нейросети
-    private val _aiResult = MutableStateFlow<String?>(null)
-    val aiResult = _aiResult.asStateFlow()
-
-    // Функция запуска анализа
-    fun analyzeFoodImage(uri: android.net.Uri) {
-        viewModelScope.launch {
-            _isAiLoading.value = true
-            _aiResult.value = null
-
-            val result = aiCalorieRepository.analyzeFoodImage(uri)
-
-            _isAiLoading.value = false
-            if (result != null) {
-                // Наша нейросеть вернет JSON. Пока просто сохраним его в стейт.
-                _aiResult.value = result
-            } else {
-                _aiResult.value = "Ошибка: не удалось распознать фото"
-            }
-        }
-    }
-
-    // Сброс результата (когда закрываем диалог)
-    fun clearAiResult() {
-        _aiResult.value = null
-    }
-
-    // ==================== Выбранная дата (LocalDate) ====================
-
+    // ==================== Выбранная дата ====================
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
     // ==================== Продукты ====================
-
     val products: StateFlow<List<ProductEntity>> = repository
         .getAllProducts()
         .stateIn(
@@ -76,7 +42,6 @@ class NutritionViewModel @Inject constructor(
         )
 
     // ==================== Норма калорий ====================
-
     val dailyGoal: StateFlow<Double?> = userRepository
         .getProfile()
         .map { profile ->
@@ -89,7 +54,6 @@ class NutritionViewModel @Inject constructor(
         )
 
     // ==================== Записи за день ====================
-
     val entriesForDay: StateFlow<List<MealEntryEntity>> = _selectedDate
         .flatMapLatest { date ->
             val timestamp = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -102,7 +66,6 @@ class NutritionViewModel @Inject constructor(
         )
 
     // ==================== Сводка ====================
-
     val dailySummary: StateFlow<DailySummary> = entriesForDay
         .map { entries ->
             var calories = 0.0
@@ -124,8 +87,57 @@ class NutritionViewModel @Inject constructor(
             initialValue = DailySummary()
         )
 
-    // ==================== Действия ====================
+    // ==================== ИИ Состояния ====================
+    private val _isAiLoading = MutableStateFlow(false)
+    val isAiLoading = _isAiLoading.asStateFlow()
 
+    private val _aiResult = MutableStateFlow<AiFoodResult?>(null)
+    val aiResult = _aiResult.asStateFlow()
+
+    fun analyzeFoodImage(uri: android.net.Uri) {
+        viewModelScope.launch {
+            _isAiLoading.value = true
+            _aiResult.value = null
+            _aiResult.value = aiCalorieRepository.analyzeFoodImage(uri)
+            _isAiLoading.value = false
+        }
+    }
+
+    fun analyzeFoodText(query: String) {
+        if (query.isBlank()) return
+        viewModelScope.launch {
+            _isAiLoading.value = true
+            _aiResult.value = null
+            _aiResult.value = aiCalorieRepository.analyzeFoodText(query)
+            _isAiLoading.value = false
+        }
+    }
+
+    fun clearAiResult() {
+        _aiResult.value = null
+    }
+
+    fun saveAiResultToDiary(result: AiFoodResult, grams: Double) {
+        if (result.name == null || result.caloriesPer100g == null) return
+        viewModelScope.launch {
+            val timestamp = _selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            repository.addMealEntry(
+                MealEntryEntity(
+                    date = timestamp,
+                    productId = 0L,
+                    productName = result.name,
+                    productCalories = result.caloriesPer100g,
+                    productProtein = result.proteinPer100g ?: 0.0,
+                    productFat = result.fatPer100g ?: 0.0,
+                    productCarbs = result.carbsPer100g ?: 0.0,
+                    grams = grams
+                )
+            )
+            _aiResult.value = null
+        }
+    }
+
+    // ==================== Действия ====================
     fun setSelectedDate(date: LocalDate) {
         _selectedDate.value = date
     }
