@@ -1,6 +1,8 @@
 package com.practicum.fitapp
 
 import android.graphics.Paint
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.ExerciseCategory
@@ -47,10 +50,28 @@ fun JournalScreen(
     val workoutDays by viewModel.workoutDays.collectAsStateWithLifecycle()
     val weightHistory by viewModel.weightHistory.collectAsStateWithLifecycle()
     val selectedMonth by viewModel.selectedMonth.collectAsStateWithLifecycle()
+    val steps by viewModel.stepsState.collectAsStateWithLifecycle()
 
     val exercisesWithProgress by statsViewModel.exercisesWithProgress.collectAsStateWithLifecycle()
     val progressData by statsViewModel.progressData.collectAsStateWithLifecycle()
     val selectedExerciseId by statsViewModel.selectedExerciseId.collectAsStateWithLifecycle()
+
+    // Запрос разрешений Health Connect
+    val permissionsLauncher = rememberLauncherForActivityResult(
+        contract = PermissionController.createRequestPermissionResultContract()
+    ) { granted ->
+        if (granted.containsAll(viewModel.hcPermissions)) {
+            viewModel.loadSteps()
+        } else {
+            Log.d("HealthConnect", "Permissions denied.")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (steps == null) {
+            permissionsLauncher.launch(viewModel.hcPermissions)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -60,6 +81,35 @@ fun JournalScreen(
             .padding(16.dp)
     ) {
         Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // КАРТОЧКА ШАГОВ
+        GlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            glassColor = Color(0xFFC8E6C9).copy(alpha = 0.4f),
+            hasShadow = false,
+            hasBorder = false
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text("Шаги сегодня", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = if (steps != null) "$steps шагов" else "Нет данных",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Text("👟", fontSize = 32.sp)
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Навигация по месяцам
@@ -114,7 +164,6 @@ fun JournalScreen(
             Text("Нет данных о подходах", color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             exercisesWithProgress.forEach { exercise ->
-                // Белые жидкие карточки упражнений
                 GlassCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -132,7 +181,6 @@ fun JournalScreen(
             }
         }
 
-        // Отступ в конце, чтобы последняя карточка не пряталась за меню
         Spacer(modifier = Modifier.height(100.dp))
     }
 
@@ -299,7 +347,6 @@ private fun nutritionColor(ratio: Double, calories: Double): Color {
         else -> Color(0xFFB71C1C)
     }
 }
-
 @Composable
 private fun WeightChart(history: List<WeightEntryEntity>) {
     val sorted = history.sortedBy { it.date }

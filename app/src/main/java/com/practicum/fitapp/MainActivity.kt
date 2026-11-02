@@ -43,8 +43,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-
-        // Включаем Edge-to-Edge
         enableEdgeToEdge(
             statusBarStyle = androidx.activity.SystemBarStyle.auto(
                 android.graphics.Color.TRANSPARENT,
@@ -55,17 +53,9 @@ class MainActivity : ComponentActivity() {
                 android.graphics.Color.TRANSPARENT
             )
         )
-
-        // 👇 ОТКЛЮЧАЕМ ПРИНУДИТЕЛЬНЫЙ ЧЕРНЫЙ ФОН СИСТЕМНЫХ ПАНЕЛЕЙ 👇
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-            window.isStatusBarContrastEnforced = false
-        }
-
         setContent {
             FitAppTheme {
-                // БЫЛО: val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
-                val isDarkTheme = false // ← ТЕПЕРЬ ВСЕГДА false
+                val isDarkTheme = false // Всегда светлая тема
 
                 GradientBackground(isDarkTheme = isDarkTheme) {
                     val navController = rememberNavController()
@@ -73,7 +63,7 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
-                        containerColor = Color.Transparent, // Прозрачный фон, чтобы видеть градиент
+                        containerColor = Color.Transparent,
                         bottomBar = {
                             if (currentRoute in listOf("community", "training", "nutrition", "journal", "profile")) {
                                 Box(
@@ -85,7 +75,6 @@ class MainActivity : ComponentActivity() {
                                     GlassCard(
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(30.dp),
-                                        // 👇 Уменьшили прозрачность (было 0.7f, стало 0.25f)
                                         glassColor = Color.White.copy(alpha = 0.7f),
                                         hasShadow = false,
                                         hasBorder = false
@@ -100,14 +89,8 @@ class MainActivity : ComponentActivity() {
                                             val activeColor = MaterialTheme.colorScheme.primary
                                             val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-                                            // Вспомогательная функция для иконок
                                             @Composable
-                                            fun NavIcon(
-                                                route: String,
-                                                filledIcon: ImageVector,
-                                                outlinedIcon: ImageVector,
-                                                label: String
-                                            ) {
+                                            fun NavIcon(route: String, filledIcon: ImageVector, outlinedIcon: ImageVector, label: String) {
                                                 val isSelected = currentRoute == route
                                                 Box(
                                                     modifier = Modifier
@@ -115,7 +98,7 @@ class MainActivity : ComponentActivity() {
                                                         .fillMaxHeight()
                                                         .clickable(
                                                             interactionSource = remember { MutableInteractionSource() },
-                                                            indication = null // Убираем эффект волны
+                                                            indication = null
                                                         ) {
                                                             navController.navigate(route) {
                                                                 popUpTo(navController.graph.startDestinationId) { saveState = true }
@@ -147,59 +130,33 @@ class MainActivity : ComponentActivity() {
                         NavHost(
                             navController = navController,
                             startDestination = "training",
-                            modifier = Modifier.fillMaxSize() // ← Теперь контент заполняет весь экран
+                            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                         ) {
                             composable("community") { CommunityScreen() }
                             composable("training") {
                                 TrainingScreen(
-                                    onWorkoutClick = { workoutId ->
-                                        navController.navigate("workout_details/$workoutId")
-                                    },
-                                    onCatalogClick = {
-                                        navController.navigate("program_catalog")
-                                    }
+                                    onWorkoutClick = { workoutId -> navController.navigate("workout_details/$workoutId") },
+                                    onCatalogClick = { navController.navigate("program_catalog") }
                                 )
                             }
-                            composable(
-                                route = "exercise_catalog/{workoutId}",
-                                arguments = listOf(androidx.navigation.navArgument("workoutId") { type = androidx.navigation.NavType.LongType })
-                            ) { backStackEntry ->
-                                ExerciseCatalogScreen(
-                                    onBack = { navController.popBackStack() },
-                                    onExerciseAdded = { navController.popBackStack() }
-                                )
+                            composable("exercise_catalog/{workoutId}") {
+                                ExerciseCatalogScreen(onBack = { navController.popBackStack() }, onExerciseAdded = { navController.popBackStack() })
                             }
-                            composable(
-                                route = "workout_details/{workoutId}",
-                                arguments = listOf(androidx.navigation.navArgument("workoutId") { type = androidx.navigation.NavType.LongType })
-                            ) { backStackEntry ->
-                                val workoutId = backStackEntry.arguments?.getLong("workoutId") ?: 0L
+                            composable("workout_details/{workoutId}") { backStackEntry ->
+                                val workoutId = backStackEntry.arguments?.getString("workoutId")?.toLongOrNull() ?: 0L
                                 WorkoutDetailsScreen(
                                     workoutId = workoutId,
                                     onBack = { navController.popBackStack() },
-                                    onExerciseClick = { workoutExerciseId ->
-                                        navController.navigate("exercise/$workoutExerciseId")
-                                    },
-                                    onAddExerciseClick = {
-                                        navController.navigate("exercise_catalog/$workoutId")
-                                    }
+                                    onExerciseClick = { navController.navigate("exercise/$it") },
+                                    onAddExerciseClick = { navController.navigate("exercise_catalog/$workoutId") }
                                 )
                             }
-                            composable(
-                                route = "exercise/{workoutExerciseId}",
-                                arguments = listOf(androidx.navigation.navArgument("workoutExerciseId") { type = androidx.navigation.NavType.LongType })
-                            ) { backStackEntry ->
-                                val workoutExerciseId = backStackEntry.arguments?.getLong("workoutExerciseId") ?: 0L
-                                ExerciseScreen(
-                                    workoutExerciseId = workoutExerciseId,
-                                    onBack = { navController.popBackStack() }
-                                )
+                            composable("exercise/{workoutExerciseId}") { backStackEntry ->
+                                val workoutExerciseId = backStackEntry.arguments?.getString("workoutExerciseId")?.toLongOrNull() ?: 0L
+                                ExerciseScreen(workoutExerciseId = workoutExerciseId, onBack = { navController.popBackStack() })
                             }
                             composable("nutrition") { backStackEntry ->
-                                NutritionScreen(
-                                    onAddFood = { navController.navigate("food_catalog") },
-                                    savedStateHandle = backStackEntry.savedStateHandle
-                                )
+                                NutritionScreen(onAddFood = { navController.navigate("food_catalog") }, savedStateHandle = backStackEntry.savedStateHandle)
                             }
                             composable("food_catalog") {
                                 FoodCatalogScreen(
@@ -213,21 +170,13 @@ class MainActivity : ComponentActivity() {
                             composable("journal") { JournalScreen() }
                             composable("profile") { ProfileScreen() }
                             composable("program_catalog") {
-                                ProgramCatalogScreen(
-                                    onBack = { navController.popBackStack() },
-                                    onProgramClick = { program ->
-                                        navController.navigate("program_details/${program.id}")
-                                    }
-                                )
+                                ProgramCatalogScreen(onBack = { navController.popBackStack() }, onProgramClick = { navController.navigate("program_details/${it.id}") })
                             }
                             composable("program_details/{programId}") { backStackEntry ->
                                 val programId = backStackEntry.arguments?.getString("programId")
                                 val program = com.practicum.fitapp.presentation.training.builtInPrograms.find { it.id == programId }
-
                                 if (program != null) {
-                                    val trainingViewModel: com.practicum.fitapp.presentation.training.TrainingViewModel =
-                                        androidx.hilt.navigation.compose.hiltViewModel()
-
+                                    val trainingViewModel: com.practicum.fitapp.presentation.training.TrainingViewModel = androidx.hilt.navigation.compose.hiltViewModel()
                                     ProgramDetailsScreen(
                                         program = program,
                                         onBack = { navController.popBackStack() },

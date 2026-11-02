@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.practicum.fitapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.vico.compose.m3)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.health.connect:connect-client:1.1.0")
 }
 hilt {
     enableAggregatingTask = false
