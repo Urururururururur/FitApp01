@@ -1,8 +1,5 @@
 package com.practicum.fitapp
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -35,7 +31,6 @@ fun NutritionScreen(
     savedStateHandle: SavedStateHandle,
     viewModel: NutritionViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
     val entries by viewModel.entriesForDay.collectAsStateWithLifecycle()
     val summary by viewModel.dailySummary.collectAsStateWithLifecycle()
@@ -52,13 +47,6 @@ fun NutritionScreen(
     var textQueryInput by remember { mutableStateOf("") }
 
     var editedGrams by remember { mutableStateOf("100") }
-
-    // Лаунчер для галереи (ВОТ ОН, ИСПРАВЛЕНИЕ ОШИБКИ)
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: android.net.Uri? ->
-        if (uri != null) viewModel.analyzeFoodImage(uri)
-    }
 
     // Обработка возврата из справочника продуктов
     val selectedProductId = savedStateHandle.getStateFlow<Long?>("selectedProductId", null).collectAsStateWithLifecycle()
@@ -250,32 +238,7 @@ fun NutritionScreen(
             }
         }
 
-        // Кнопка ИИ по фото
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { galleryLauncher.launch("image/*") }, // ВЫЗОВ ГАЛЕРЕИ ИЗ UI
-                shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF6A1B9A),
-                hasShadow = true,
-                hasBorder = false
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("✨", fontSize = 18.sp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Посчитать ккал по фото", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    }
-                }
-            }
-        }
-
-        // Кнопка ИИ по тексту
+        // Кнопка ИИ по тексту (единственная оставшаяся)
         item {
             Spacer(modifier = Modifier.height(8.dp))
             GlassCard(
@@ -406,7 +369,6 @@ fun NutritionScreen(
                 }
             )
         } else {
-            // Красивая карточка результата с возможностью правки граммов
             Dialog(onDismissRequest = { viewModel.clearAiResult() }) {
                 GlassCard(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -416,7 +378,7 @@ fun NutritionScreen(
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Text(
-                            text = "✨ Что на фото/в запросе?",
+                            text = "✨ Результат от ИИ",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -432,7 +394,6 @@ fun NutritionScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Поле ввода граммов
                         OutlinedTextField(
                             value = editedGrams,
                             onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) editedGrams = v },
@@ -444,7 +405,6 @@ fun NutritionScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Динамический расчет КБЖУ
                         val grams = editedGrams.toDoubleOrNull() ?: 100.0
                         val factor = grams / 100.0
                         val cal = (result.caloriesPer100g ?: 0) * factor
