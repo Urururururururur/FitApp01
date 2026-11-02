@@ -70,6 +70,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.health.connect:connect-client:1.1.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
 }
 hilt {
     enableAggregatingTask = false

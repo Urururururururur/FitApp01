@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.fitapp.data.local.MealEntryEntity
 import com.practicum.fitapp.data.local.ProductEntity
+import com.practicum.fitapp.data.repository.AiCalorieRepository
 import com.practicum.fitapp.data.repository.NutritionRepository
 import com.practicum.fitapp.data.repository.UserRepository
 import com.practicum.fitapp.presentation.calculator.NutritionCalculator
@@ -24,8 +25,40 @@ import javax.inject.Inject
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
     private val repository: NutritionRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val aiCalorieRepository: AiCalorieRepository
 ) : ViewModel() {
+
+    // Стейт загрузки (крутится ли спиннер)
+    private val _isAiLoading = MutableStateFlow(false)
+    val isAiLoading = _isAiLoading.asStateFlow()
+
+    // Стейт результата от нейросети
+    private val _aiResult = MutableStateFlow<String?>(null)
+    val aiResult = _aiResult.asStateFlow()
+
+    // Функция запуска анализа
+    fun analyzeFoodImage(uri: android.net.Uri) {
+        viewModelScope.launch {
+            _isAiLoading.value = true
+            _aiResult.value = null
+
+            val result = aiCalorieRepository.analyzeFoodImage(uri)
+
+            _isAiLoading.value = false
+            if (result != null) {
+                // Наша нейросеть вернет JSON. Пока просто сохраним его в стейт.
+                _aiResult.value = result
+            } else {
+                _aiResult.value = "Ошибка: не удалось распознать фото"
+            }
+        }
+    }
+
+    // Сброс результата (когда закрываем диалог)
+    fun clearAiResult() {
+        _aiResult.value = null
+    }
 
     // ==================== Выбранная дата (LocalDate) ====================
 

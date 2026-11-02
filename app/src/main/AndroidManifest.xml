@@ -2,15 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Разрешения для работы с фитнес-данными и Health Connect -->
+    <!-- Разрешения для Health Connect и фитнеса -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <uses-permission android:name="android.permission.health.READ_SLEEP" />
-    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
-    <uses-permission android:name="android.permission.health.READ_SLEEP" />
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
-    <!-- Если планируешь записывать данные (например, вес), добавь соответствующие READ/WRITE разрешения -->
+
+    <!-- Разрешения для камеры (для ИИ) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Разрешение на интернет (для GigaChat) -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".FitAppApplication"
@@ -22,9 +26,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FitApp"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
 
-        <!-- Главная активность приложения -->
+        <!-- Главная активность -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -35,8 +40,7 @@
             </intent-filter>
         </activity>
 
-        <!-- ОБЯЗАТЕЛЬНЫЙ activity-alias для Health Connect -->
-        <!-- Он должен находиться ВНУТРИ тега <application> -->
+        <!-- Обязательный activity-alias для Health Connect -->
         <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"
@@ -48,18 +52,16 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Для публикации в Google Play потребуется также activity-alias для политики конфиденциальности -->
-        <!-- (Пока не обязательно для локальной разработки, но полезно иметь в виду) -->
-        <!--
-        <activity-alias
-            android:name="HealthConnectPrivacyPolicyActivity"
-            android:exported="true"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-            </intent-filter>
-        </activity-alias>
-        -->
+        <!-- Провайдер для камеры (чтобы сохранить фото во временный файл) -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

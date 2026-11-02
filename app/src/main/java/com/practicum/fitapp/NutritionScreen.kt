@@ -25,6 +25,12 @@ import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import java.time.LocalDate
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import java.io.File
 
 @Composable
 fun NutritionScreen(
@@ -40,6 +46,36 @@ fun NutritionScreen(
 
     var showGramsDialog by remember { mutableStateOf<ProductEntity?>(null) }
     var gramsInput by remember { mutableStateOf("100") }
+    val context = LocalContext.current
+    val isAiLoading by viewModel.isAiLoading.collectAsStateWithLifecycle()
+    val aiResult by viewModel.aiResult.collectAsStateWithLifecycle()
+
+    // Стейт для хранения пути к временному фото
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Лаунчер для галереи
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) viewModel.analyzeFoodImage(uri)
+    }
+
+    // Лаунчер для камеры
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success && tempImageUri != null) {
+            viewModel.analyzeFoodImage(tempImageUri!!)
+        }
+    }
+
+    // Функция запуска камеры
+    fun startCamera() {
+        val file = File(context.cacheDir, "temp_food_photo.jpg")
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        tempImageUri = uri
+        cameraLauncher.launch(uri)
+    }
 
     // Обработка возврата из справочника
     val selectedProductId = savedStateHandle.getStateFlow<Long?>("selectedProductId", null).collectAsStateWithLifecycle()
@@ -229,6 +265,41 @@ fun NutritionScreen(
                 }
             }
         }
+        // Кнопка ИИ-анализа
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        // Показываем диалог выбора источника (камера или галерея)
+                        // В Compose проще всего использовать AlertDialog
+                        // Но для простоты мы прямо тут вызовем галерею.
+                        // В следующем шаге сделаем красивый выбор.
+                        galleryLauncher.launch("image/*")
+                    },
+                shape = RoundedCornerShape(16.dp),
+                solidColor = Color(0xFF6A1B9A), // Фиолетовый цвет для магии ИИ
+                hasShadow = true,
+                hasBorder = false
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("✨", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Посчитать ккал по фото",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+            }
+        }
 
         // ОТСТУП ПОСЛЕ КНОПКИ (чтобы можно было прокрутить выше нижнего меню)
         item {
@@ -272,6 +343,49 @@ fun NutritionScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showGramsDialog = null }) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
+    // Индикатор загрузки
+    if (isAiLoading) {
+        AlertDialog(
+            onDismissRequest = { }, // Нельзя закрыть
+            confirmButton = { },
+            title = { Text("Анализируем фото...") },
+            text = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Нейросеть смотрит на твою еду...")
+                }
+            }
+        )
+    }
+
+    // Диалог с результатом
+    if (aiResult != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearAiResult() },
+            title = { Text("Результат распознавания") },
+            text = {
+                Column {
+                    Text(aiResult!!) // Тут будет сырой JSON или текст ошибки
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("(Данные можно будет отредактировать перед сохранением)", fontSize = 12.sp, color = Color.Gray)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    // Здесь мы потом добавим парсинг JSON и сохранение в БД
+                    viewModel.clearAiResult()
+                }) {
+                    Text("Сохранить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.clearAiResult() }) {
                     Text("Отмена")
                 }
             }
