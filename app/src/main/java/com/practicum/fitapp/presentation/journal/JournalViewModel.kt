@@ -41,20 +41,21 @@ class JournalViewModel @Inject constructor(
     // Список разрешений для UI (чтобы запросить их)
     val hcPermissions = healthConnectManager.permissions
 
-    private val _stepsState = MutableStateFlow<Long?>(null)
-    val stepsState = _stepsState.asStateFlow()
+    // Стейт для метрик здоровья
+    private val _healthMetrics = MutableStateFlow<HealthConnectManager.HealthMetrics?>(null)
+    val healthMetrics = _healthMetrics.asStateFlow()
 
-    fun loadSteps() {
+    fun loadHealthData() {
         viewModelScope.launch {
             try {
                 if (healthConnectManager.hasAllPermissions()) {
-                    val steps = healthConnectManager.readStepsToday()
-                    _stepsState.value = steps
+                    val metrics = healthConnectManager.readHealthMetrics()
+                    _healthMetrics.value = metrics
                 } else {
-                    _stepsState.value = null
+                    _healthMetrics.value = null
                 }
             } catch (e: Exception) {
-                _stepsState.value = null
+                _healthMetrics.value = null
             }
         }
     }

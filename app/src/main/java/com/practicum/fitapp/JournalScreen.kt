@@ -50,7 +50,7 @@ fun JournalScreen(
     val workoutDays by viewModel.workoutDays.collectAsStateWithLifecycle()
     val weightHistory by viewModel.weightHistory.collectAsStateWithLifecycle()
     val selectedMonth by viewModel.selectedMonth.collectAsStateWithLifecycle()
-    val steps by viewModel.stepsState.collectAsStateWithLifecycle()
+    val metrics by viewModel.healthMetrics.collectAsStateWithLifecycle()
 
     val exercisesWithProgress by statsViewModel.exercisesWithProgress.collectAsStateWithLifecycle()
     val progressData by statsViewModel.progressData.collectAsStateWithLifecycle()
@@ -61,15 +61,17 @@ fun JournalScreen(
         contract = PermissionController.createRequestPermissionResultContract()
     ) { granted ->
         if (granted.containsAll(viewModel.hcPermissions)) {
-            viewModel.loadSteps()
+            viewModel.loadHealthData() // ← ИСПРАВЛЕНО (было loadSteps)
         } else {
             Log.d("HealthConnect", "Permissions denied.")
         }
     }
 
     LaunchedEffect(Unit) {
-        if (steps == null) {
+        if (metrics == null) {
             permissionsLauncher.launch(viewModel.hcPermissions)
+        } else {
+            viewModel.loadHealthData() // Обновляем данные при входе
         }
     }
 
@@ -84,30 +86,46 @@ fun JournalScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // КАРТОЧКА ШАГОВ
-        GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            glassColor = Color(0xFFC8E6C9).copy(alpha = 0.4f),
-            hasShadow = false,
-            hasBorder = false
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+        // ДАШБОРД ЗДОРОВЬЯ
+        if (metrics != null) {
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                glassColor = Color(0xFFC8E6C9).copy(alpha = 0.4f),
+                hasShadow = false,
+                hasBorder = false
             ) {
-                Column {
-                    Text("Шаги сегодня", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(
-                        text = if (steps != null) "$steps шагов" else "Нет данных",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Здоровье сегодня", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Сетка 2x2 (ИСПРАВЛЕНО: передаем modifier = Modifier.weight(1f))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        HealthMetricItem("👟 Шаги", "${metrics!!.steps}", modifier = Modifier.weight(1f))
+                        HealthMetricItem("🔥 Сожжено", "${"%.0f".format(metrics!!.calories)} ккал", modifier = Modifier.weight(1f))
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        HealthMetricItem("❤️ Пульс", if (metrics!!.avgHeartRate != null) "${metrics!!.avgHeartRate} уд/мин" else "Нет данных", modifier = Modifier.weight(1f))
+                        HealthMetricItem("😴 Сон", if (metrics!!.sleepMinutes > 0) "${metrics!!.sleepMinutes / 60}ч ${metrics!!.sleepMinutes % 60}м" else "Нет данных", modifier = Modifier.weight(1f))
+                    }
                 }
-                Text("👟", fontSize = 32.sp)
             }
+            Spacer(modifier = Modifier.height(16.dp))
+        } else {
+            // Если нет разрешений или данных
+            GlassCard(
+                modifier = Modifier.fillMaxWidth().clickable { permissionsLauncher.launch(viewModel.hcPermissions) },
+                shape = RoundedCornerShape(16.dp),
+                glassColor = Color.White.copy(alpha = 0.5f),
+                hasShadow = false,
+                hasBorder = false
+            ) {
+                Box(modifier = Modifier.padding(16.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("Нет доступа к данным здоровья. Нажмите для запроса.", color = MaterialTheme.colorScheme.primary)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -246,9 +264,7 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
                             .aspectRatio(1f)
                             .padding(2.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            // Если данных нет — белый фон, иначе цвет по калориям
                             .background(if (day.calories <= 0.0) Color.White.copy(alpha = 0.8f) else bgColor)
-                            // Тонкая серая обводка
                             .border(0.5.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(4.dp)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -266,7 +282,6 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
         }
     }
 
-    // Легенда
     Spacer(modifier = Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text("Мало", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -311,9 +326,7 @@ private fun WorkoutHeatmap(days: List<WorkoutDay>) {
                             .aspectRatio(1f)
                             .padding(2.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            // Если тренировки нет — белый фон
                             .background(if (!day.hasWorkout) Color.White.copy(alpha = 0.8f) else Color(0xFF4CAF50))
-                            // Тонкая серая обводка
                             .border(0.5.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(4.dp)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -347,6 +360,7 @@ private fun nutritionColor(ratio: Double, calories: Double): Color {
         else -> Color(0xFFB71C1C)
     }
 }
+
 @Composable
 private fun WeightChart(history: List<WeightEntryEntity>) {
     val sorted = history.sortedBy { it.date }
@@ -475,5 +489,14 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
             Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(data.first().dayTimestamp)), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(DateUtils.formatShort(DateUtils.timestampToLocalDate(data.last().dayTimestamp)), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+// Вспомогательный компонент для дашборда (ИСПРАВЛЕНО: добавлен modifier)
+@Composable
+private fun HealthMetricItem(title: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
     }
 }
