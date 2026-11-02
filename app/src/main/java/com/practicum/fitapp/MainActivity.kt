@@ -29,12 +29,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.common.GradientBackground
+import com.practicum.fitapp.presentation.training.TrainingViewModel
+import com.practicum.fitapp.presentation.training.builtInPrograms
 import com.practicum.fitapp.ui.theme.FitAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -43,6 +48,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge(
             statusBarStyle = androidx.activity.SystemBarStyle.auto(
                 android.graphics.Color.TRANSPARENT,
@@ -53,6 +59,13 @@ class MainActivity : ComponentActivity() {
                 android.graphics.Color.TRANSPARENT
             )
         )
+
+        // Отключаем принудительный контраст для системных панелей
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
+
         setContent {
             FitAppTheme {
                 val isDarkTheme = false // Всегда светлая тема
@@ -65,6 +78,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         containerColor = Color.Transparent,
                         bottomBar = {
+                            // Прячем нижнее меню, когда мы внутри справочника/деталей
                             if (currentRoute in listOf("community", "training", "nutrition", "journal", "profile")) {
                                 Box(
                                     modifier = Modifier
@@ -127,56 +141,87 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) { innerPadding ->
+                        // Навигационный хост со всеми экранами приложения
                         NavHost(
                             navController = navController,
                             startDestination = "training",
                             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                         ) {
-                            composable("community") { CommunityScreen() }
+                            // --- 1. Достижения ---
+                            composable("community") {
+                                CommunityScreen()
+                            }
+
+                            // --- 2. Тренировки (Главный экран) ---
                             composable("training") {
                                 TrainingScreen(
-                                    onWorkoutClick = { workoutId -> navController.navigate("workout_details/$workoutId") },
-                                    onCatalogClick = { navController.navigate("program_catalog") }
-                                )
-                            }
-                            composable("exercise_catalog/{workoutId}") {
-                                ExerciseCatalogScreen(onBack = { navController.popBackStack() }, onExerciseAdded = { navController.popBackStack() })
-                            }
-                            composable("workout_details/{workoutId}") { backStackEntry ->
-                                val workoutId = backStackEntry.arguments?.getString("workoutId")?.toLongOrNull() ?: 0L
-                                WorkoutDetailsScreen(
-                                    workoutId = workoutId,
-                                    onBack = { navController.popBackStack() },
-                                    onExerciseClick = { navController.navigate("exercise/$it") },
-                                    onAddExerciseClick = { navController.navigate("exercise_catalog/$workoutId") }
-                                )
-                            }
-                            composable("exercise/{workoutExerciseId}") { backStackEntry ->
-                                val workoutExerciseId = backStackEntry.arguments?.getString("workoutExerciseId")?.toLongOrNull() ?: 0L
-                                ExerciseScreen(workoutExerciseId = workoutExerciseId, onBack = { navController.popBackStack() })
-                            }
-                            composable("nutrition") { backStackEntry ->
-                                NutritionScreen(onAddFood = { navController.navigate("food_catalog") }, savedStateHandle = backStackEntry.savedStateHandle)
-                            }
-                            composable("food_catalog") {
-                                FoodCatalogScreen(
-                                    onBack = { navController.popBackStack() },
-                                    onProductSelected = { product ->
-                                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedProductId", product.id)
-                                        navController.popBackStack()
+                                    onWorkoutClick = { workoutId ->
+                                        navController.navigate("workout_details/$workoutId")
+                                    },
+                                    onCatalogClick = {
+                                        navController.navigate("program_catalog")
                                     }
                                 )
                             }
-                            composable("journal") { JournalScreen() }
-                            composable("profile") { ProfileScreen() }
-                            composable("program_catalog") {
-                                ProgramCatalogScreen(onBack = { navController.popBackStack() }, onProgramClick = { navController.navigate("program_details/${it.id}") })
+
+                            // --- Детали тренировки ---
+                            composable(
+                                route = "workout_details/{workoutId}",
+                                arguments = listOf(navArgument("workoutId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val workoutId = backStackEntry.arguments?.getLong("workoutId") ?: 0L
+                                WorkoutDetailsScreen(
+                                    workoutId = workoutId,
+                                    onBack = { navController.popBackStack() },
+                                    onExerciseClick = { workoutExerciseId ->
+                                        navController.navigate("exercise/$workoutExerciseId")
+                                    },
+                                    onAddExerciseClick = {
+                                        navController.navigate("exercise_catalog/$workoutId")
+                                    }
+                                )
                             }
+
+                            // --- Экран упражнения (Подходы) ---
+                            composable(
+                                route = "exercise/{workoutExerciseId}",
+                                arguments = listOf(navArgument("workoutExerciseId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val workoutExerciseId = backStackEntry.arguments?.getLong("workoutExerciseId") ?: 0L
+                                ExerciseScreen(
+                                    workoutExerciseId = workoutExerciseId,
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            // --- Каталог упражнений (Выбор упражнения) ---
+                            composable(
+                                route = "exercise_catalog/{workoutId}",
+                                arguments = listOf(navArgument("workoutId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                ExerciseCatalogScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onExerciseAdded = { navController.popBackStack() }
+                                )
+                            }
+
+                            // --- Каталог программ тренировок ---
+                            composable("program_catalog") {
+                                ProgramCatalogScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onProgramClick = { program ->
+                                        navController.navigate("program_details/${program.id}")
+                                    }
+                                )
+                            }
+
+                            // --- Детали программы тренировок ---
                             composable("program_details/{programId}") { backStackEntry ->
                                 val programId = backStackEntry.arguments?.getString("programId")
-                                val program = com.practicum.fitapp.presentation.training.builtInPrograms.find { it.id == programId }
+                                val program = builtInPrograms.find { it.id == programId }
+
                                 if (program != null) {
-                                    val trainingViewModel: com.practicum.fitapp.presentation.training.TrainingViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                                    val trainingViewModel: TrainingViewModel = hiltViewModel()
                                     ProgramDetailsScreen(
                                         program = program,
                                         onBack = { navController.popBackStack() },
@@ -186,6 +231,35 @@ class MainActivity : ComponentActivity() {
                                         }
                                     )
                                 }
+                            }
+
+                            // --- 3. Питание ---
+                            composable("nutrition") { backStackEntry ->
+                                NutritionScreen(
+                                    onAddFood = { navController.navigate("food_catalog") },
+                                    savedStateHandle = backStackEntry.savedStateHandle
+                                )
+                            }
+
+                            // --- Справочник продуктов ---
+                            composable("food_catalog") {
+                                FoodCatalogScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onProductSelected = { product ->
+                                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedProductId", product.id)
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+
+                            // --- 4. Журнал ---
+                            composable("journal") {
+                                JournalScreen()
+                            }
+
+                            // --- 5. Профиль ---
+                            composable("profile") {
+                                ProfileScreen()
                             }
                         }
                     }

@@ -74,7 +74,6 @@
 1.  Склонируйте репозиторий:
     ```bash
     git clone https://github.com/Urururururururur/FitApp01.git
-    Откройте проект в Android Studio.
 
 2. Откройте проект в Android Studio.
 3. Настройка GigaChat API:
