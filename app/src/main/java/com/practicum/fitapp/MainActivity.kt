@@ -9,14 +9,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
@@ -60,7 +58,6 @@ class MainActivity : ComponentActivity() {
             )
         )
 
-        // Отключаем принудительный контраст для системных панелей
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
             window.isStatusBarContrastEnforced = false
@@ -76,10 +73,9 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
-                        containerColor = Color.Transparent,
+                        containerColor = Color.Transparent, // Прозрачный Scaffold
                         bottomBar = {
-                            // Прячем нижнее меню, когда мы внутри справочника/деталей
-                            if (currentRoute in listOf("community", "training", "nutrition", "journal", "profile")) {
+                            if (currentRoute in listOf("dashboard", "nutrition", "training", "profile")) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -89,7 +85,7 @@ class MainActivity : ComponentActivity() {
                                     GlassCard(
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(30.dp),
-                                        glassColor = Color.White.copy(alpha = 0.7f),
+                                        glassColor = Color.White.copy(alpha = 0.85f), // Чуть плотнее, чтобы текст читался
                                         hasShadow = false,
                                         hasBorder = false
                                     ) {
@@ -130,10 +126,9 @@ class MainActivity : ComponentActivity() {
                                                 }
                                             }
 
-                                            NavIcon("community", Icons.Filled.EmojiEvents, Icons.Outlined.EmojiEvents, "Достижения")
-                                            NavIcon("training", Icons.Filled.FitnessCenter, Icons.Outlined.FitnessCenter, "Тренировка")
+                                            NavIcon("dashboard", Icons.Filled.Home, Icons.Outlined.Home, "Главная")
                                             NavIcon("nutrition", Icons.Filled.Restaurant, Icons.Outlined.Restaurant, "Питание")
-                                            NavIcon("journal", Icons.Filled.BarChart, Icons.Outlined.BarChart, "Статистика")
+                                            NavIcon("training", Icons.Filled.FitnessCenter, Icons.Outlined.FitnessCenter, "Тренировки")
                                             NavIcon("profile", Icons.Filled.Person, Icons.Outlined.Person, "Профиль")
                                         }
                                     }
@@ -141,18 +136,46 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) { innerPadding ->
-                        // Навигационный хост со всеми экранами приложения
+                        // ВАЖНО: Мы НЕ добавляем innerPadding снизу, чтобы контент уходил под меню
                         NavHost(
                             navController = navController,
-                            startDestination = "training",
-                            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                            startDestination = "onboarding",
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            // --- 1. Достижения ---
-                            composable("community") {
-                                CommunityScreen()
+                            composable("onboarding") {
+                                OnboardingScreen(
+                                    onComplete = {
+                                        navController.navigate("dashboard") {
+                                            popUpTo("onboarding") { inclusive = true } // Удаляем онбординг из стека, чтобы нельзя было вернуться назад
+                                        }
+                                    }
+                                )
+                            }
+                            // --- Главная (Дашборд) ---
+                            composable("dashboard") {
+                                DashboardScreen()
                             }
 
-                            // --- 2. Тренировки (Главный экран) ---
+                            // --- Питание ---
+                            composable("nutrition") { backStackEntry ->
+                                NutritionScreen(
+                                    onAddFood = { navController.navigate("food_catalog") },
+                                    savedStateHandle = backStackEntry.savedStateHandle
+                                )
+                            }
+
+                            // --- Справочник продуктов ---
+                            composable("food_catalog") {
+                                FoodCatalogScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onProductSelected = { product ->
+                                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedProductId", product.id)
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+
+                            // --- Тренировки (Главный экран) ---
                             composable("training") {
                                 TrainingScreen(
                                     onWorkoutClick = { workoutId ->
@@ -194,7 +217,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            // --- Каталог упражнений (Выбор упражнения) ---
+                            // --- Каталог упражнений ---
                             composable(
                                 route = "exercise_catalog/{workoutId}",
                                 arguments = listOf(navArgument("workoutId") { type = NavType.LongType })
@@ -233,33 +256,19 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            // --- 3. Питание ---
-                            composable("nutrition") { backStackEntry ->
-                                NutritionScreen(
-                                    onAddFood = { navController.navigate("food_catalog") },
-                                    savedStateHandle = backStackEntry.savedStateHandle
-                                )
-                            }
-
-                            // --- Справочник продуктов ---
-                            composable("food_catalog") {
-                                FoodCatalogScreen(
-                                    onBack = { navController.popBackStack() },
-                                    onProductSelected = { product ->
-                                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedProductId", product.id)
-                                        navController.popBackStack()
-                                    }
-                                )
-                            }
-
-                            // --- 4. Журнал ---
-                            composable("journal") {
-                                JournalScreen()
-                            }
-
-                            // --- 5. Профиль ---
+                            // --- Профиль ---
                             composable("profile") {
                                 ProfileScreen()
+                            }
+
+                            // --- Достижения (если нужно будет открыть из профиля) ---
+                            composable("community") {
+                                CommunityScreen()
+                            }
+
+                            // --- Журнал (если нужно будет открыть из профиля) ---
+                            composable("journal") {
+                                JournalScreen()
                             }
                         }
                     }
