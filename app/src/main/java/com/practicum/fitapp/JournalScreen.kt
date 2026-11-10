@@ -40,7 +40,11 @@ import com.practicum.fitapp.presentation.journal.ExerciseStatsViewModel
 import com.practicum.fitapp.presentation.journal.JournalViewModel
 import com.practicum.fitapp.presentation.journal.NutritionDay
 import com.practicum.fitapp.presentation.journal.WorkoutDay
-
+import androidx.compose.material.icons.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Bedtime
+import androidx.compose.ui.graphics.vector.ImageVector
 @Composable
 fun JournalScreen(
     viewModel: JournalViewModel = hiltViewModel(),
@@ -82,52 +86,36 @@ fun JournalScreen(
             .statusBarsPadding()
             .padding(16.dp)
     ) {
-        Text(text = "Журнал", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
-        Spacer(modifier = Modifier.height(16.dp))
 
         // ДАШБОРД ЗДОРОВЬЯ
         if (metrics != null) {
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                glassColor = Color(0xFFC8E6C9).copy(alpha = 0.4f),
-                hasShadow = false,
-                hasBorder = false
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Здоровье сегодня", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Сетка 2x2 (ИСПРАВЛЕНО: передаем modifier = Modifier.weight(1f))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HealthMetricItem("👟 Шаги", "${metrics!!.steps}", modifier = Modifier.weight(1f))
-                        HealthMetricItem("🔥 Сожжено", "${"%.0f".format(metrics!!.calories)} ккал", modifier = Modifier.weight(1f))
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HealthMetricItem("❤️ Пульс", if (metrics!!.avgHeartRate != null) "${metrics!!.avgHeartRate} уд/мин" else "Нет данных", modifier = Modifier.weight(1f))
-                        HealthMetricItem("😴 Сон", if (metrics!!.sleepMinutes > 0) "${metrics!!.sleepMinutes / 60}ч ${metrics!!.sleepMinutes % 60}м" else "Нет данных", modifier = Modifier.weight(1f))
-                    }
-                }
-            }
+            HealthMetricsCard(metrics = metrics!!)
             Spacer(modifier = Modifier.height(16.dp))
         } else {
             // Если нет разрешений или данных
-            GlassCard(
-                modifier = Modifier.fillMaxWidth().clickable { permissionsLauncher.launch(viewModel.hcPermissions) },
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { permissionsLauncher.launch(viewModel.hcPermissions) },
+                colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
-                glassColor = Color.White.copy(alpha = 0.5f),
-                hasShadow = false,
-                hasBorder = false
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Box(modifier = Modifier.padding(16.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text("Нет доступа к данным здоровья. Нажмите для запроса.", color = MaterialTheme.colorScheme.primary)
+                Box(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Нет доступа к данным здоровья. Нажмите для запроса.",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // Навигация по месяцам
@@ -498,5 +486,94 @@ private fun HealthMetricItem(title: String, value: String, modifier: Modifier = 
     Column(modifier = modifier) {
         Text(title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+    }
+}
+@Composable
+private fun HealthMetricsCard(metrics: com.practicum.fitapp.data.HealthConnectManager.HealthMetrics) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "Данные с браслета",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Шаги
+            HealthMetricRow(
+                icon = Icons.Outlined.DirectionsWalk,
+                iconTint = Color(0xFFFF9800), // Оранжевый
+                title = "Шаги",
+                value = "${metrics.steps} шага"
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
+
+            // Калории
+            HealthMetricRow(
+                icon = Icons.Outlined.LocalFireDepartment,
+                iconTint = Color(0xFFFF9800), // Оранжевый
+                title = "Активные калории",
+                value = "${metrics.calories.toInt()} ккал"
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
+
+            // Пульс
+            HealthMetricRow(
+                icon = Icons.Outlined.FavoriteBorder,
+                iconTint = Color(0xFF2196F3), // Синий
+                title = "Пульс",
+                value = if (metrics.avgHeartRate != null) "${metrics.avgHeartRate} уд/мин" else "Нет данных"
+            )
+
+            // Сон (добавил, так как он тоже полезен, если данные есть)
+            if (metrics.sleepMinutes > 0) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
+                HealthMetricRow(
+                    icon = Icons.Outlined.Bedtime,
+                    iconTint = Color(0xFF9C27B0), // Фиолетовый
+                    title = "Сон",
+                    value = "${metrics.sleepMinutes / 60}ч ${metrics.sleepMinutes % 60}м"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HealthMetricRow(icon: ImageVector, iconTint: Color, title: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Иконка
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // Текст в столбик
+        Column {
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = value,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

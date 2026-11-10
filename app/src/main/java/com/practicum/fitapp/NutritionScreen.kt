@@ -1,5 +1,7 @@
 package com.practicum.fitapp
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,7 +24,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
-import com.practicum.fitapp.presentation.nutrition.AiFoodResult
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import java.time.LocalDate
 
@@ -70,19 +72,19 @@ fun NutritionScreen(
 
     // Основной контент
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 48.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding() // <-- Добавили отступ под статус-бар
+            .padding(16.dp)      // <-- Заменили contentPadding на общий padding
     ) {
         item {
-            Text(text = "Питание", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = DateUtils.formatMonthYear(selectedDate),
-                fontSize = 20.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         item {
@@ -90,7 +92,7 @@ fun NutritionScreen(
                 selectedDate = selectedDate,
                 onDayClick = { viewModel.setSelectedDate(it) }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
         item {
@@ -105,20 +107,17 @@ fun NutritionScreen(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                TextButton(onClick = { viewModel.setSelectedDate(LocalDate.now()) }) {
-                    Text("Сегодня", color = MaterialTheme.colorScheme.primary)
-                }
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Сводка за день
+        // Сводка за день (Сделали белой, как карточки в Журнале)
         item {
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
-                hasShadow = false,
-                hasBorder = false
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
@@ -160,6 +159,32 @@ fun NutritionScreen(
                                 "У: ${"%.1f".format(summary.carbs)} г",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // === КНОПКА "+ ДОБАВИТЬ ПРОДУКТ" ТЕПЕРЬ ЗДЕСЬ ===
+        item {
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAddFood() },
+                shape = RoundedCornerShape(16.dp),
+                solidColor = Color(0xFF81C784),
+                hasShadow = true,
+                hasBorder = false
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "+ Добавить продукт",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
                 }
             }
@@ -212,35 +237,10 @@ fun NutritionScreen(
             }
         }
 
-        // Кнопка "+ Добавить продукт"
+        // === КНОПКА ИИ ЗАКОММЕНТИРОВАНА ===
+        /*
         item {
             Spacer(modifier = Modifier.height(24.dp))
-            GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onAddFood() },
-                shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF81C784),
-                hasShadow = true,
-                hasBorder = false
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "+ Добавить продукт",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-        }
-
-        // Кнопка ИИ по тексту (единственная оставшаяся)
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -262,6 +262,7 @@ fun NutritionScreen(
                 }
             }
         }
+        */
 
         // ОТСТУП В КОНЦЕ
         item {
@@ -313,7 +314,7 @@ fun NutritionScreen(
         )
     }
 
-    // Диалог текстового запроса к ИИ
+    // Диалог текстового запроса к ИИ (логика осталась, но кнопку мы скрыли)
     if (showTextQueryDialog) {
         AlertDialog(
             onDismissRequest = { showTextQueryDialog = false },
@@ -479,27 +480,28 @@ private fun NutritionDayCell(
     modifier: Modifier = Modifier
 ) {
     val isWeekend = DateUtils.isWeekend(date)
-
     val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
     val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
-    val backgroundColor = if (isSelected) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+    val backgroundColor = when {
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        else -> Color.White.copy(alpha = 0.8f)
     }
 
-    GlassCard(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        glassColor = backgroundColor,
-        hasShadow = false,
-        hasBorder = false
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .border(
+                width = if (isSelected) 1.dp else 0.5.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = DateUtils.dayOfWeekShort(date),
                 fontSize = 11.sp,

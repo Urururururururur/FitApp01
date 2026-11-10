@@ -48,6 +48,7 @@ fun FoodCatalogScreen(
     val usedProducts by viewModel.usedProducts.collectAsStateWithLifecycle()
     val builtInProducts by viewModel.builtInProducts.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val isAiLoading by viewModel.isAiLoading.collectAsStateWithLifecycle() // <-- Стейт загрузки ИИ
 
     var selectedTab by remember { mutableStateOf(0) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -63,6 +64,9 @@ fun FoodCatalogScreen(
     var newProtein by remember { mutableStateOf("") }
     var newFat by remember { mutableStateOf("") }
     var newCarbs by remember { mutableStateOf("") }
+
+    // Стейт для тумблера ИИ
+    var useAi by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -288,15 +292,15 @@ fun FoodCatalogScreen(
         }
     }
 
-    // ============ ДИАЛОГ ДОБАВЛЕНИЯ ПРОДУКТА (В стиле Glass) ============
+    // ============ ДИАЛОГ ДОБАВЛЕНИЯ ПРОДУКТА (С ИИ) ============
     if (showAddDialog) {
-        Dialog(onDismissRequest = { showAddDialog = false }) {
+        Dialog(onDismissRequest = { if (!isAiLoading) showAddDialog = false }) {
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
                 shape = RoundedCornerShape(24.dp),
-                solidColor = Color(0xFFF1F8E9), // Плотный светло-зеленый фон
+                solidColor = Color(0xFFF1F8E9),
                 hasShadow = true,
                 hasBorder = false
             ) {
@@ -315,7 +319,8 @@ fun FoodCatalogScreen(
                         label = { Text("Название") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = !isAiLoading
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -325,7 +330,8 @@ fun FoodCatalogScreen(
                         label = { Text("Категория") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = !useAi && !isAiLoading // Блокируем, если включен ИИ
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -335,6 +341,7 @@ fun FoodCatalogScreen(
                         label = { Text("Ккал / 100 г") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        enabled = !useAi && !isAiLoading, // Блокируем, если включен ИИ
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -347,6 +354,7 @@ fun FoodCatalogScreen(
                             label = { Text("Белки", fontSize = 11.sp, maxLines = 1) },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
+                            enabled = !useAi && !isAiLoading, // Блокируем
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -356,6 +364,7 @@ fun FoodCatalogScreen(
                             label = { Text("Жиры", fontSize = 11.sp, maxLines = 1) },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
+                            enabled = !useAi && !isAiLoading, // Блокируем
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -365,8 +374,34 @@ fun FoodCatalogScreen(
                             label = { Text("Углев.", fontSize = 11.sp, maxLines = 1) },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
+                            enabled = !useAi && !isAiLoading, // Блокируем
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // ============ ТУМБЛЕР ИИ ============
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("✨ ИИ БЖУ", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF6A1B9A))
+                        }
+                        Switch(
+                            checked = useAi,
+                            onCheckedChange = {
+                                useAi = it
+                                // При включении ИИ очищаем ручные поля, чтобы не путать пользователя
+                                if (it) {
+                                    newCategory = ""; newCalories = ""; newProtein = ""; newFat = ""; newCarbs = ""
+                                }
+                            },
+                            enabled = !isAiLoading,
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF6A1B9A))
                         )
                     }
 
@@ -377,26 +412,47 @@ fun FoodCatalogScreen(
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(onClick = { showAddDialog = false }) {
+                        TextButton(
+                            onClick = { showAddDialog = false },
+                            enabled = !isAiLoading
+                        ) {
                             Text("Отмена", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = {
-                                viewModel.addProduct(
-                                    name = newName, category = newCategory,
-                                    calories = newCalories.toIntOrNull() ?: 0,
-                                    protein = newProtein.toDoubleOrNull() ?: 0.0,
-                                    fat = newFat.toDoubleOrNull() ?: 0.0,
-                                    carbs = newCarbs.toDoubleOrNull() ?: 0.0
-                                )
+                                if (useAi) {
+                                    viewModel.addProductWithAi(newName)
+                                } else {
+                                    viewModel.addProduct(
+                                        name = newName, category = newCategory,
+                                        calories = newCalories.toIntOrNull() ?: 0,
+                                        protein = newProtein.toDoubleOrNull() ?: 0.0,
+                                        fat = newFat.toDoubleOrNull() ?: 0.0,
+                                        carbs = newCarbs.toDoubleOrNull() ?: 0.0
+                                    )
+                                }
+                                // Очистка и закрытие
                                 newName = ""; newCategory = ""; newCalories = ""; newProtein = ""; newFat = ""; newCarbs = ""
+                                useAi = false
                                 showAddDialog = false
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF81C784)),
+                            enabled = newName.isNotBlank() && !isAiLoading, // Блокируем, если нет названия или идет загрузка
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (useAi) Color(0xFF6A1B9A) else Color(0xFF81C784),
+                                disabledContainerColor = Color.Gray.copy(alpha = 0.5f)
+                            ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Добавить", color = Color.White, fontWeight = FontWeight.Bold)
+                            if (isAiLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text("Добавить", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -404,7 +460,7 @@ fun FoodCatalogScreen(
         }
     }
 
-    // ============ ДИАЛОГ РЕЦЕПТА (Оставил стандартный, но можно тоже переделать при желании) ============
+    // ============ ДИАЛОГ РЕЦЕПТА ============
     if (selectedRecipe != null) {
         val recipe = selectedRecipe!!
         AlertDialog(
@@ -463,17 +519,26 @@ private fun LazyListScope.groupedProductsList(
     onProductClick: (ProductEntity) -> Unit,
     onDelete: ((ProductEntity) -> Unit)?
 ) {
-    val grouped = products.groupBy { ProductCategory.fromId(it.category) }.toList().sortedBy { it.first.displayName }
+    // ИСПРАВЛЕНИЕ: Группируем по строковому названию категории
+    val grouped = products.groupBy { product ->
+        // Пытаемся найти красивый DisplayName, если пользователь ввел ID (например, "FRUITS")
+        val matchedEnum = ProductCategory.entries.find {
+            it.id.equals(product.category, ignoreCase = true) ||
+                    it.displayName.equals(product.category, ignoreCase = true)
+        }
+        // Если нашли — используем красивое имя. Если нет — оставляем то, что ввел пользователь.
+        matchedEnum?.displayName ?: product.category.ifBlank { "Прочее" }
+    }.toList().sortedBy { it.first }
 
-    grouped.forEach { (category, categoryProducts) ->
-        val isExpanded = expandedCategories.contains(category.displayName)
+    grouped.forEach { (categoryName, categoryProducts) ->
+        val isExpanded = expandedCategories.contains(categoryName)
 
         item {
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
-                    .clickable { onToggleCategory(category.displayName) },
+                    .clickable { onToggleCategory(categoryName) },
                 shape = RoundedCornerShape(12.dp),
                 glassColor = Color(0xFFC8E6C9).copy(alpha = 0.5f),
                 hasShadow = false,
@@ -484,7 +549,7 @@ private fun LazyListScope.groupedProductsList(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("${category.displayName} (${categoryProducts.size})", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("$categoryName (${categoryProducts.size})", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Icon(if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
