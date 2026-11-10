@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,57 +22,83 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
+data class DailyMacros(
+    val calories: Double = 0.0,
+    val protein: Double = 0.0,
+    val fat: Double = 0.0,
+    val carbs: Double = 0.0
+)
+
+data class Goals(
+    val calories: Double = 2000.0,
+    val protein: Double = 100.0,
+    val fat: Double = 60.0,
+    val carbs: Double = 250.0
+)
+
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val achievementRepository: AchievementRepository,
     private val nutritionRepository: NutritionRepository,
     private val userRepository: UserRepository,
     private val healthConnectManager: HealthConnectManager,
-    private val trainingRepository: TrainingRepository
+    private val trainingRepository: TrainingRepository,
+    private val achievementRepository: AchievementRepository
 ) : ViewModel() {
+    val hcPermissions = healthConnectManager.permissions
 
-    // ==================== 1. КАЛОРИИ ====================
+    // Безопасное получение имени
+    val userName: StateFlow<String> = userRepository.getProfile()
+        .map { profile -> profile?.name ?: "Андрей" }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Андрей")
 
-    // Получаем норму калорий (упрощено через map)
-    private val dailyGoal: StateFlow<Double> = userRepository.getProfile()
+    // Нормы (цели) пользователя
+    val goals: StateFlow<Goals> = userRepository.getProfile()
         .map { profile ->
-            if (profile != null) NutritionCalculator.calculatePlan(profile).targetCalories else 2000.0
+            if (profile != null) {
+                val plan = NutritionCalculator.calculatePlan(profile)
+                Goals(plan.targetCalories, plan.proteinGrams, plan.fatGrams, plan.carbsGrams)
+            } else Goals()
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2000.0)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Goals())
 
-    // Получаем съеденные калории за сегодня (используем правильное имя метода)
-    private val consumedCalories: StateFlow<Double> = nutritionRepository
-        .getMealEntriesForMonth(
-            startDate = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-            endDate = LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        )
+    // Съеденное за сегодня (Калории и БЖУ)
+    private val todayStart = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+    val consumed: StateFlow<DailyMacros> = nutritionRepository
+        .getEntriesByDate(todayStart)
         .map { list ->
-            list.sumOf { it.calories } // Используем поле calories
+            var cal = 0.0
+            var prot = 0.0
+            var f = 0.0
+            var carb = 0.0
+
+            list.forEach { entry ->
+                val factor = entry.grams / 100.0
+                cal += entry.productCalories * factor
+                prot += entry.productProtein * factor
+                f += entry.productFat * factor
+                carb += entry.productCarbs * factor
+            }
+
+            DailyMacros(
+                calories = cal,
+                protein = prot,
+                fat = f,
+                carbs = carb
+            )
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DailyMacros())
 
-    // Соединяем их в один стейт для UI
-    val calorieProgress: StateFlow<Pair<Double, Double>> = combine(dailyGoal, consumedCalories) { goal, consumed ->
-        Pair(consumed, goal)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Pair(0.0, 2000.0))
-
-    // ==================== 2. ВОДА (Пока локально) ====================
-    private val _waterConsumed = MutableStateFlow(1200) // Пока 1200 мл
+    // Вода (пока локально)
+    private val _waterConsumed = MutableStateFlow(1200)
     val waterConsumed = _waterConsumed.asStateFlow()
-    val waterGoal = 2000 // 2 литра
+    val waterGoal = 2200
 
     fun addWater(ml: Int) {
         _waterConsumed.value += ml
     }
-    val todayWorkout: StateFlow<WorkoutEntity?> = trainingRepository
-        .getWorkoutsByDay(
-            startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-            endOfDay = LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        )
-        .map { list -> list.firstOrNull() } // Берем первую тренировку за день
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    // ==================== 3. АКТИВНОСТЬ (Health Connect) ====================
+    // Активность (Health Connect)
     private val _healthMetrics = MutableStateFlow<HealthConnectManager.HealthMetrics?>(null)
     val healthMetrics = _healthMetrics.asStateFlow()
 
@@ -85,9 +110,19 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    // Тренировка на сегодня
+    val todayWorkout: StateFlow<WorkoutEntity?> = trainingRepository
+        .getWorkoutsByDay(
+            startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            endOfDay = LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
+        .map { list -> list.firstOrNull() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Награды
     val unlockedAchievements: StateFlow<List<Achievement>> = achievementRepository.getUnlocked()
         .map { unlockedList ->
-            unlockedList.take(4).mapNotNull { Achievement.fromId(it.achievementId) }
+            unlockedList.take(3).mapNotNull { Achievement.fromId(it.achievementId) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

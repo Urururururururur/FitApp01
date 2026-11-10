@@ -1,5 +1,8 @@
 package com.practicum.fitapp.presentation.training
 
+import com.practicum.fitapp.R
+
+
 val builtInPrograms: List<CatalogProgram> = listOf(
     CatalogProgram(
         id = "fullbody_novice",
@@ -10,6 +13,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Форма",
         tags = listOf("Базовые", "Всё тело"),
         description = "Идеальная программа для старта. Прорабатывает все основные группы мышц за одну тренировку.",
+        imageResId = R.drawable.img_fullbody,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -37,6 +41,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Форма",
         tags = listOf("Спина", "Ягодицы", "Осанка"),
         description = "Компенсация сидячего образа жизни. Укрепляет мышцы спины и раскрывает грудной отдел.",
+        imageResId = R.drawable.img_office_worker,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -63,6 +68,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Форма",
         tags = listOf("Ноги", "Ягодицы", "Сплит"),
         description = "Трёхдневная программа, сфокусированная на проработке ягодиц, бицепса бедра и квадрицепса.",
+        imageResId = R.drawable.img_female_lower_body,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -109,6 +115,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Масса",
         tags = listOf("Грудь", "Масса", "Сплит"),
         description = "Классический трёхдневный сплит для набора мышечной массы, с акцентом на жимовые движения.",
+        imageResId = R.drawable.img_male_chest,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -156,6 +163,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Масса",
         tags = listOf("Плечи", "Трапеция", "Продвинутый"),
         description = "Интенсивная программа для проработки всех пучков дельтовидных мышц с большим объемом.",
+        imageResId = R.drawable.img_shoulders_like_cutler,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -182,6 +190,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Масса",
         tags = listOf("Золотая эра", "Сплит", "Масса"),
         description = "Классический сплит Арнольда, где грудь тренируется вместе со спиной, а ноги — отдельно.",
+        imageResId = R.drawable.img_schwarzenegger,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -227,6 +236,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Выносливость",
         tags = listOf("Функционал", "Круговая", "Выносливость"),
         description = "Программа на основе собственного веса и минимального инвентаря для развития общей выносливости.",
+        imageResId = R.drawable.img_tom_holland,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -254,6 +264,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Похудение",
         tags = listOf("Пресс", "Кор", "Новичок"),
         description = "Программа, сфокусированная на мышцах живота и стабилизаторах корпуса.",
+        imageResId = R.drawable.img_flat_stomach,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -279,6 +290,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Выносливость",
         tags = listOf("Круговая", "Кардио", "Выносливость"),
         description = "Высокоинтенсивная круговая тренировка для развития выносливости и сжигания калорий.",
+        imageResId = R.drawable.img_endurance_circuit,
         days = listOf(
             CatalogDay(
                 day = "День 1",
@@ -304,6 +316,7 @@ val builtInPrograms: List<CatalogProgram> = listOf(
         goal = "Масса",
         tags = listOf("Руки", "Бицепс", "Трицепс"),
         description = "Специализированная программа для накачки рук. Большой объем и изоляция.",
+        imageResId = R.drawable.img_arms_bazooka,
         days = listOf(
             CatalogDay(
                 day = "День 1",

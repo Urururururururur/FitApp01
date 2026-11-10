@@ -1,6 +1,7 @@
 package com.practicum.fitapp
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,18 +54,13 @@ fun ProgramCatalogScreen(
             )
         }
     ) { padding ->
-        // Box позволяет накладывать элементы друг на друга
         Box(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            // 1. Список программ (нижний слой)
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                // contentPadding задает отступы внутри списка.
-                // Top = 80.dp нужен, чтобы первая карточка не пряталась за фильтром.
-                // Bottom = 100.dp, чтобы последняя карточка не пряталась за меню.
                 contentPadding = PaddingValues(top = 80.dp, bottom = 100.dp, start = 16.dp, end = 16.dp)
             ) {
                 items(filteredPrograms) { program ->
@@ -70,15 +68,15 @@ fun ProgramCatalogScreen(
                 }
             }
 
-            // 2. Парящий фильтр (верхний слой)
+            // Парящий фильтр
             GlassCard(
                 modifier = Modifier
-                    .align(Alignment.TopCenter) // Прижимаем к верху
+                    .align(Alignment.TopCenter)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(30.dp),
-                glassColor = Color(0xFFC8E6C9).copy(alpha = 0.75f), // Зеленоватое стекло
-                hasShadow = true, // Включаем тень, чтобы он "парил"
+                glassColor = Color(0xFFC8E6C9).copy(alpha = 0.75f),
+                hasShadow = true,
                 hasBorder = false
             ) {
                 Row(
@@ -134,70 +132,95 @@ private fun ProgramGlassCard(program: CatalogProgram, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         hasShadow = false,
         hasBorder = false
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = program.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = program.subtitle,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically // Центрируем по вертикали
+        ) {
+            // ЛЕВАЯ ЧАСТЬ: Текст
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = program.title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = program.subtitle,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(6.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Text(
-                        text = program.level,
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                ) {
-                    Text(
-                        text = program.goal,
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-
-                program.tags.take(2).forEach { tag ->
+                // Теги
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Text(
-                            text = tag,
+                            text = program.level,
                             fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                    ) {
+                        Text(
+                            text = program.goal,
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                    program.tags.take(1).forEach { tag -> // Оставил 1 тег, чтобы не было переноса строки из-за картинки
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        ) {
+                            Text(
+                                text = tag,
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "${program.days.size} ${if (program.days.size == 1) "день" else "дня"} · ${program.gender}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-            Text(
-                text = "${program.days.size} ${if (program.days.size == 1) "день" else "дня"} · ${program.gender}",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // ПРАВАЯ ЧАСТЬ: Картинка
+            Box(
+                modifier = Modifier
+                    .size(80.dp) // Размер квадрата
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFE0E0E0)) // Заглушка, если картинки нет
+            ) {
+                if (program.imageResId != null) {
+                    Image(
+                        painter = painterResource(id = program.imageResId),
+                        contentDescription = "Картинка программы",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop // Обрезает картинку, чтобы заполнить квадрат
+                    )
+                }
+            }
         }
     }
 }

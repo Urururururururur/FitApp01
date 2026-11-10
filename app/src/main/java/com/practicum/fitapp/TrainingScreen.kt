@@ -1,6 +1,6 @@
 package com.practicum.fitapp
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,27 +9,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -46,7 +48,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,10 +63,6 @@ import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.training.TrainingViewModel
 import java.time.LocalDate
 import java.time.YearMonth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.ui.draw.clip
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,53 +145,89 @@ fun TrainingScreen(
                 SwipeToDismissBox(
                     state = dismissState,
                     backgroundContent = {
-                        // Просто пустое пространство. Никакого красного фона и корзины.
                         Box(modifier = Modifier.fillMaxSize())
                     },
                     enableDismissFromStartToEnd = false,
                     enableDismissFromEndToStart = true
                 ) {
-                    // ЗАМЕНИЛИ Card НА GlassCard
+                    // === ДОБАВЛЕН ПОИСК КАРТИНКИ ===
+                    val programImage = com.practicum.fitapp.presentation.training.builtInPrograms.find { program ->
+                        workout.name.contains(program.title, ignoreCase = true) ||
+                                program.title.contains(workout.name, ignoreCase = true)
+                    }?.imageResId
+
                     com.practicum.fitapp.presentation.common.GlassCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable { onWorkoutClick(workout.id) }
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = workout.name,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface // Добавили цвет для читаемости на стекле
-                            )
-                            val statusEnum = WorkoutStatus.valueOf(workout.status)
-                            Text(
-                                text = statusEnum.displayName,
-                                fontSize = 12.sp,
-                                color = when (statusEnum) {
-                                    WorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
-                                    WorkoutStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
-                                    WorkoutStatus.WAITING -> MaterialTheme.colorScheme.onSurfaceVariant
-                                }
-                            )
-                            val workoutTags = tags[workout.id] ?: emptyList()
-                            if (workoutTags.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    workoutTags.take(4).forEach { group ->
-                                        Surface(
-                                            shape = RoundedCornerShape(50),
-                                            color = MaterialTheme.colorScheme.primaryContainer
-                                        ) {
-                                            Text(
-                                                text = group.displayName,
-                                                fontSize = 10.sp,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                            )
+                        // ИЗМЕНЕНО: Column заменен на Row
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // ЛЕВАЯ ЧАСТЬ: Текст и теги
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = workout.name,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                val statusEnum = WorkoutStatus.valueOf(workout.status)
+                                Text(
+                                    text = statusEnum.displayName,
+                                    fontSize = 12.sp,
+                                    color = when (statusEnum) {
+                                        WorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
+                                        WorkoutStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
+                                        WorkoutStatus.WAITING -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    }
+                                )
+                                val workoutTags = tags[workout.id] ?: emptyList()
+                                if (workoutTags.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        workoutTags.take(3).forEach { group -> // Уменьшил до 3, чтобы влезло с картинкой
+                                            Surface(
+                                                shape = RoundedCornerShape(50),
+                                                color = MaterialTheme.colorScheme.primaryContainer
+                                            ) {
+                                                Text(
+                                                    text = group.displayName,
+                                                    fontSize = 10.sp,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                )
+                                            }
                                         }
                                     }
+                                }
+                            }
+
+                            // ПРАВАЯ ЧАСТЬ: Картинка
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp) // Размер квадрата
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0xFFE0E0E0)), // Заглушка
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (programImage != null) {
+                                    Image(
+                                        painter = painterResource(id = programImage),
+                                        contentDescription = "Обложка тренировки",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Default.FitnessCenter,
+                                        contentDescription = null,
+                                        tint = Color.Gray
+                                    )
                                 }
                             }
                         }
@@ -207,8 +244,8 @@ fun TrainingScreen(
                     .padding(vertical = 8.dp)
                     .clickable { showAddSheet = true },
                 shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF81C784), // ← Сплошной зеленый цвет
-                hasShadow = true,               // Добавляем тень, чтобы кнопка выделялась
+                solidColor = Color(0xFF81C784),
+                hasShadow = true,
                 hasBorder = false
             ) {
                 Box(
@@ -220,7 +257,7 @@ fun TrainingScreen(
                     Text(
                         text = "+ Добавить тренировку",
                         fontSize = 16.sp,
-                        color = Color.White, // ← Белый текст для контраста
+                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -262,11 +299,10 @@ fun TrainingScreen(
                     .navigationBarsPadding()
                     .padding(16.dp)
             ) {
-                // ГЛАВНОЕ ОКНО (плотное, светло-зеленое)
                 com.practicum.fitapp.presentation.common.GlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),
-                    solidColor = Color(0xFFC8E6C9), // Плотный фон
+                    solidColor = Color(0xFFC8E6C9),
                     hasShadow = false,
                     hasBorder = false
                 ) {
@@ -279,14 +315,13 @@ fun TrainingScreen(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
-                        // Кнопка 1 (стеклянная, полупрозрачная)
                         com.practicum.fitapp.presentation.common.GlassCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clickable { showAddSheet = false; onCatalogClick() },
                             shape = RoundedCornerShape(16.dp),
-                            glassColor = Color.White.copy(alpha = 0.6f), // ← Вернули прозрачность
+                            glassColor = Color.White.copy(alpha = 0.6f),
                             hasShadow = false,
                             hasBorder = false
                         ) {
@@ -296,14 +331,13 @@ fun TrainingScreen(
                             }
                         }
 
-                        // Кнопка 2 (стеклянная, полупрозрачная)
                         com.practicum.fitapp.presentation.common.GlassCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clickable { viewModel.addNewWorkout(); showAddSheet = false },
                             shape = RoundedCornerShape(16.dp),
-                            glassColor = Color.White.copy(alpha = 0.6f), // ← Вернули прозрачность
+                            glassColor = Color.White.copy(alpha = 0.6f),
                             hasShadow = false,
                             hasBorder = false
                         ) {
@@ -313,14 +347,13 @@ fun TrainingScreen(
                             }
                         }
 
-                        // Кнопка 3 (стеклянная, полупрозрачная)
                         com.practicum.fitapp.presentation.common.GlassCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clickable { showAddSheet = false; showHistoryDialog = true },
                             shape = RoundedCornerShape(16.dp),
-                            glassColor = Color.White.copy(alpha = 0.6f), // ← Вернули прозрачность
+                            glassColor = Color.White.copy(alpha = 0.6f),
                             hasShadow = false,
                             hasBorder = false
                         ) {
@@ -398,7 +431,6 @@ private fun DayCell(
     val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
     val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
-    // Если день выбран — зеленый, если есть тренировка — полупрозрачный зеленый, иначе белый
     val backgroundColor = when {
         isSelected -> MaterialTheme.colorScheme.primaryContainer
         hasWorkout -> Color(0xFF4CAF50).copy(alpha = 0.3f)
@@ -438,6 +470,7 @@ private fun DayCell(
         }
     }
 }
+
 @Composable
 private fun MonthCalendarDialog(
     currentMonth: YearMonth,
@@ -447,19 +480,15 @@ private fun MonthCalendarDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // Используем базовый Dialog вместо AlertDialog, чтобы убрать стандартный белый/черный фон
     Dialog(onDismissRequest = onDismiss) {
-        // Наш компонент "жидкого стекла" / белое окно
         com.practicum.fitapp.presentation.common.GlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            // Используем solidColor, чтобы сделать фон плотным белым
             solidColor = Color.White,
             hasShadow = true
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Заголовок с переключением месяцев
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -469,7 +498,6 @@ private fun MonthCalendarDialog(
                         Icon(Icons.Default.KeyboardArrowLeft, "Предыдущий месяц", tint = MaterialTheme.colorScheme.onSurface)
                     }
                     Text(
-                        // Используем наш DateUtils, чтобы месяц был на русском ("Октябрь 2026")
                         text = DateUtils.formatMonthYear(currentMonth.atDay(1)),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -482,7 +510,6 @@ private fun MonthCalendarDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Дни недели
                 Row(modifier = Modifier.fillMaxWidth()) {
                     listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
                         Text(
@@ -497,7 +524,6 @@ private fun MonthCalendarDialog(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Сетка дней
                 val firstDayOfMonth = currentMonth.atDay(1)
                 val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
                 val daysInMonth = currentMonth.lengthOfMonth()
@@ -552,7 +578,6 @@ private fun MonthCalendarDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Кнопка закрытия в стиле темы
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.End)

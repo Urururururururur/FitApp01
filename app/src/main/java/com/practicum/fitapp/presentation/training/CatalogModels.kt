@@ -26,5 +26,6 @@ data class CatalogProgram(
     val goal: String,       // "Масса", "Похудение", "Выносливость", "Форма"
     val tags: List<String>,
     val description: String,
+    val imageResId: Int? = null,
     val days: List<CatalogDay>
 )

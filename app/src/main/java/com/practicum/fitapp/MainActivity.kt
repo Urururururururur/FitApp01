@@ -9,13 +9,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -40,6 +40,8 @@ import com.practicum.fitapp.presentation.training.TrainingViewModel
 import com.practicum.fitapp.presentation.training.builtInPrograms
 import com.practicum.fitapp.ui.theme.FitAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import com.practicum.fitapp.presentation.dashboard.DashboardScreen
+import com.practicum.fitapp.WelcomeScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -73,9 +75,10 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
-                        containerColor = Color.Transparent, // Прозрачный Scaffold
+                        containerColor = Color.Transparent,
                         bottomBar = {
-                            if (currentRoute in listOf("dashboard", "nutrition", "training", "profile")) {
+                            // ДОБАВЛЕН "journal" В СПИСОК
+                            if (currentRoute in listOf("dashboard", "nutrition", "training", "journal")) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -85,7 +88,7 @@ class MainActivity : ComponentActivity() {
                                     GlassCard(
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(30.dp),
-                                        glassColor = Color.White.copy(alpha = 0.85f), // Чуть плотнее, чтобы текст читался
+                                        glassColor = Color.White.copy(alpha = 0.85f),
                                         hasShadow = false,
                                         hasBorder = false
                                     ) {
@@ -129,31 +132,49 @@ class MainActivity : ComponentActivity() {
                                             NavIcon("dashboard", Icons.Filled.Home, Icons.Outlined.Home, "Главная")
                                             NavIcon("nutrition", Icons.Filled.Restaurant, Icons.Outlined.Restaurant, "Питание")
                                             NavIcon("training", Icons.Filled.FitnessCenter, Icons.Outlined.FitnessCenter, "Тренировки")
-                                            NavIcon("profile", Icons.Filled.Person, Icons.Outlined.Person, "Профиль")
+                                            NavIcon("journal", Icons.Filled.List, Icons.Outlined.List, "Журнал")
                                         }
                                     }
                                 }
                             }
                         }
                     ) { innerPadding ->
-                        // ВАЖНО: Мы НЕ добавляем innerPadding снизу, чтобы контент уходил под меню
                         NavHost(
                             navController = navController,
-                            startDestination = "onboarding",
+                            startDestination = "welcome", // <-- ИЗМЕНЕНО: теперь стартуем с приветствия
                             modifier = Modifier.fillMaxSize()
                         ) {
+                            // --- НОВЫЙ ЭКРАН ПРИВЕТСТВИЯ ---
+                            composable("welcome") {
+                                WelcomeScreen(
+                                    onStartClick = {
+                                        navController.navigate("onboarding") {
+                                            // Удаляем welcome из стека, чтобы нельзя было вернуться назад кнопкой "Назад"
+                                            popUpTo("welcome") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+
+                            // --- ОНБОРДИНГ ---
                             composable("onboarding") {
                                 OnboardingScreen(
                                     onComplete = {
                                         navController.navigate("dashboard") {
-                                            popUpTo("onboarding") { inclusive = true } // Удаляем онбординг из стека, чтобы нельзя было вернуться назад
+                                            popUpTo("onboarding") { inclusive = true }
                                         }
                                     }
                                 )
                             }
                             // --- Главная (Дашборд) ---
                             composable("dashboard") {
-                                DashboardScreen()
+                                DashboardScreen(
+                                    onNavigateToNutrition = { navController.navigate("nutrition") },
+                                    onNavigateToWorkout = { navController.navigate("training") },
+                                    onNavigateToJournal = { navController.navigate("journal") },
+                                    onNavigateToProfile = { navController.navigate("profile") },
+                                    onNavigateToCommunity = { navController.navigate("community") } // <-- ДОБАВЛЕНО
+                                )
                             }
 
                             // --- Питание ---
@@ -258,15 +279,19 @@ class MainActivity : ComponentActivity() {
 
                             // --- Профиль ---
                             composable("profile") {
-                                ProfileScreen()
+                                ProfileScreen(
+                                    onBack = { navController.popBackStack() } // <-- ДОБАВЛЕНО
+                                )
                             }
 
-                            // --- Достижения (если нужно будет открыть из профиля) ---
+                            // --- Достижения (Community) ---
                             composable("community") {
-                                CommunityScreen()
+                                CommunityScreen(
+                                    onBack = { navController.popBackStack() } // <-- ДОБАВЛЕНО
+                                )
                             }
 
-                            // --- Журнал (если нужно будет открыть из профиля) ---
+                            // --- Журнал ---
                             composable("journal") {
                                 JournalScreen()
                             }
