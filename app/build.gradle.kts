@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp.logging)
     implementation(libs.gson)
+    implementation("dev.chrisbanes.haze:haze:1.6.10")
 }
 hilt {
     enableAggregatingTask = false

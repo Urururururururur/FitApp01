@@ -1,20 +1,45 @@
 package com.practicum.fitapp
 
+
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,11 +49,15 @@ import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.community.AchievementUiState
 import com.practicum.fitapp.presentation.community.CommunityViewModel
-import androidx.compose.foundation.border
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
+import com.practicum.fitapp.ui.theme.BgColor
+import com.practicum.fitapp.ui.theme.Manrope
+import com.practicum.fitapp.ui.theme.PrimaryGreen
+import com.practicum.fitapp.ui.theme.TextPrimary
+import com.practicum.fitapp.ui.theme.TextSecondary
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import android.annotation.SuppressLint
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,99 +67,97 @@ fun CommunityScreen(
 ) {
     val achievements by viewModel.achievements.collectAsStateWithLifecycle()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                // ИСПРАВЛЕНИЕ: Заголовок теперь прямо в TopAppBar, рядом со стрелкой
-                title = {
-                    Text(
-                        text = "Достижения",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        }
-    ) { padding ->
-        Column(
+    // Стейт для размытия
+    val hazeState = remember { HazeState() }
+
+    Box(modifier = Modifier.fillMaxSize().background(BgColor)) {
+        // Фон
+        Image(
+            painter = painterResource(id = com.practicum.fitapp.R.drawable.app_background),
+            contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            // ИСПРАВЛЕНИЕ: Убрал отсюда старый дублирующийся Text("Достижения")
+                .hazeSource(hazeState),
+            contentScale = ContentScale.Crop
+        )
 
-            Text(
-                text = "Получено: ${achievements.count { it.isUnlocked }} из ${achievements.size}",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Достижения",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary,
+                            fontFamily = Manrope
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Назад",
+                                tint = TextPrimary
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
+                )
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = "Получено: ${achievements.count { it.isUnlocked }} из ${achievements.size}",
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    fontFamily = Manrope
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn {
-                items(achievements) { item ->
-                    AchievementCard(item)
-                }
-                item {
-                    Spacer(modifier = Modifier.height(100.dp))
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 100.dp)
+                ) {
+                    items(achievements) { item ->
+                        AchievementCard(item = item, hazeState = hazeState)
+                    }
                 }
             }
         }
     }
 }
-
+@SuppressLint("DiscouragedApi")
 @Composable
-private fun AchievementCard(item: AchievementUiState) {
+fun getAchievementImageResId(id: String): Int {
+    val context = LocalContext.current
+    return context.resources.getIdentifier("ic_ach_$id", "drawable", context.packageName)
+}
+@Composable
+private fun AchievementCard(item: AchievementUiState, hazeState: HazeState) {
     val unlocked = item.isUnlocked
 
-    // Цвета в зависимости от статуса
-    val cardColor = if (unlocked) {
-        Color(0xFFE8F5E9) // Светло-зеленый для открытых
-    } else {
-        Color(0xFFF5F5F5) // Серый для закрытых
-    }
+    // Цвета текста
+    val titleColor = if (unlocked) TextPrimary else Color.Black.copy(alpha = 0.4f)
+    val descColor = if (unlocked) TextSecondary else Color.Black.copy(alpha = 0.4f)
 
-    val titleColor = if (unlocked) MaterialTheme.colorScheme.onSurface else Color(0xFF9E9E9E)
-    val descColor = if (unlocked) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFFBDBDBD)
-
-    // Находим картинку (
-    val imageResId = when (item.achievement.id) {
-        "first_workout" -> R.drawable.ic_ach_first_workout
-        "ten_workouts" -> R.drawable.ic_ach_ten_workouts
-        "fifty_workouts" -> R.drawable.ic_ach_fifty_workouts
-          "first_ton" -> R.drawable.ic_ach_first_ton
-          "ten_tons" -> R.drawable.ic_ach_ten_tons
-          "first_5km" -> R.drawable.ic_ach_first_5km
-         "first_10km" -> R.drawable.ic_ach_first_10km
-         "diary_7" -> R.drawable.ic_ach_diary_7
-         "diary_30" -> R.drawable.ic_ach_diary_30
-         "ten_exercises" -> R.drawable.ic_ach_ten_exercises
-        "first_pr" -> R.drawable.ic_first_pr
-        "calorie_balance_5" -> R.drawable.ic_calorie_balance_5
-        "perfect_day" -> R.drawable.ic_perfect_day
-        "return_after_break" -> R.drawable.ic_return_after_break
-        else -> 0
-    }
+    // Находим картинку (ИСПРАВЛЕНО: item.achievement.id)
+    val imageResId = getAchievementImageResId(item.achievement.id)
 
     GlassCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(16.dp),
-        glassColor = cardColor,
-        hasShadow = false, // Тень убрана
-        hasBorder = false  // Рамка убрана
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        hazeState = hazeState
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -139,22 +166,21 @@ private fun AchievementCard(item: AchievementUiState) {
             // === КРУГЛАЯ КАРТИНКА ===
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(80.dp)
                     .clip(CircleShape)
-                    .background(if (unlocked) Color.White else Color(0xFFE0E0E0)), // Подложка
+                    .background(Color.White.copy(alpha = 0.6f)),
                 contentAlignment = Alignment.Center
             ) {
                 if (imageResId != 0) {
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(id = imageResId),
+                    Image(
+                        painter = painterResource(id = imageResId),
                         contentDescription = item.achievement.title,
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(CircleShape),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                        // Если ачивка закрыта — делаем картинку черно-белой
-                        colorFilter = if (unlocked) null else androidx.compose.ui.graphics.ColorFilter.colorMatrix(
-                            androidx.compose.ui.graphics.ColorMatrix().apply { setToSaturation(0f) }
+                        contentScale = ContentScale.Crop,
+                        colorFilter = if (unlocked) null else ColorFilter.colorMatrix(
+                            ColorMatrix().apply { setToSaturation(0f) }
                         )
                     )
                 } else {
@@ -174,22 +200,35 @@ private fun AchievementCard(item: AchievementUiState) {
                     text = item.achievement.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = titleColor
+                    color = titleColor,
+                    fontFamily = Manrope
                 )
                 Text(
                     text = item.achievement.description,
                     fontSize = 12.sp,
-                    color = descColor
+                    color = descColor,
+                    fontFamily = Manrope
                 )
                 if (unlocked && item.unlockedAt != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Получено: ${DateUtils.formatShort(DateUtils.timestampToLocalDate(item.unlockedAt))}",
                         fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium
+                        color = PrimaryGreen,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = Manrope
                     )
                 }
+            }
+
+            // === ИКОНКА ГАЛОЧКИ (Только для открытых) ===
+            if (unlocked) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Выполнено",
+                    tint = PrimaryGreen,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }

@@ -1,27 +1,38 @@
 package com.practicum.fitapp
 
 import android.app.Activity
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.MonitorWeight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.ActivityLevel
@@ -31,6 +42,11 @@ import com.practicum.fitapp.presentation.calculator.NutritionCalculator
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.profile.ProfileViewModel
+import com.practicum.fitapp.ui.theme.*
+
+// Импорты для Haze
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,8 +74,8 @@ fun ProfileScreen(
     var showActivity by remember { mutableStateOf(true) }
     var quitAlcohol by remember { mutableStateOf(false) }
     var quitNicotine by remember { mutableStateOf(false) }
-    var showNutrition by remember { mutableStateOf(true) }       // <-- НОВОЕ
-    var showWorkoutPlan by remember { mutableStateOf(true) }     // <-- НОВОЕ
+    var showNutrition by remember { mutableStateOf(true) }
+    var showWorkoutPlan by remember { mutableStateOf(true) }
 
     var isDataExpanded by remember { mutableStateOf(false) }
     var showWeighDialog by remember { mutableStateOf(false) }
@@ -67,6 +83,9 @@ fun ProfileScreen(
 
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // Стейт для Haze
+    val hazeState = remember { HazeState() }
 
     LaunchedEffect(profile) {
         profile?.let { p ->
@@ -88,357 +107,418 @@ fun ProfileScreen(
 
     val plan = profile?.let { NutritionCalculator.calculatePlan(it) }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Настройки",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { padding ->
-        Column(
+    Box(modifier = Modifier.fillMaxSize().background(BgColor)) {
+        // Фон
+        Image(
+            painter = painterResource(id = com.practicum.fitapp.R.drawable.app_background),
+            contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
-            // ==================== КАРТОЧКА НОРМЫ ====================
-            if (plan != null) {
-                val isOutdated = NutritionCalculator.isWeightOutdated(lastWeight?.date)
+                .hazeSource(hazeState),
+            contentScale = ContentScale.Crop
+        )
 
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Настройки",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary,
+                            fontFamily = Manrope
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Назад", tint = TextPrimary)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 100.dp)
+            ) {
+                // ==================== КАРТОЧКА НОРМЫ ====================
+                if (plan != null) {
+                    val isOutdated = NutritionCalculator.isWeightOutdated(lastWeight?.date)
+
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        hazeState = hazeState,
+                        hasBorder = true
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(text = "Твоя норма", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "${"%.0f".format(plan.targetCalories)} ккал/день",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = PrimaryGreen,
+                                fontFamily = Manrope
+                            )
+
+                            if (isOutdated) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(text = "⚠ Норма неактуальна — пора взвеситься", fontSize = 12.sp, color = Color(0xFFEF4444), fontFamily = Manrope)
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Б: ${"%.0f".format(plan.proteinGrams)} г · Ж: ${"%.0f".format(plan.fatGrams)} г · У: ${"%.0f".format(plan.carbsGrams)} г",
+                                fontSize = 14.sp,
+                                color = TextSecondary,
+                                fontFamily = Manrope
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "BMR: ${"%.0f".format(plan.bmr)} ккал · TDEE: ${"%.0f".format(plan.tdee)} ккал",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                fontFamily = Manrope
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Кнопка взвеситься (Secondary glass pill)
+                            OutlinedButton(
+                                onClick = { showWeighDialog = true },
+                                modifier = Modifier.fillMaxWidth().height(48.dp),
+                                shape = RoundedCornerShape(50),
+                                border = BorderStroke(1.dp, PrimaryGreen),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryGreen)
+                            ) {
+                                Icon(Icons.Outlined.MonitorWeight, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Взвеситься сегодня", fontWeight = FontWeight.Bold, fontFamily = Manrope)
+                            }
+
+                            if (lastWeight != null) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Последнее: ${DateUtils.formatShort(DateUtils.timestampToLocalDate(lastWeight!!.date))} — ${"%.1f".format(lastWeight!!.weightKg)} кг",
+                                    fontSize = 12.sp,
+                                    color = TextSecondary,
+                                    fontFamily = Manrope,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        hazeState = hazeState,
+                        hasBorder = true
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(text = "Заполните профиль", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
+                            Text(text = "Чтобы рассчитать твою норму калорий", fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ==================== КАРТОЧКА НАСТРОЕК ДАШБОРДА ====================
                 GlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    glassColor = Color(0xFFC8E6C9).copy(alpha = 1.4f),
-                    hasShadow = false,
-                    hasBorder = false
+                    hazeState = hazeState,
+                    hasBorder = true
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Твоя норма", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(modifier = Modifier.height(8.dp))
-
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Text(
-                            text = "${"%.0f".format(plan.targetCalories)} ккал/день",
-                            fontSize = 28.sp,
+                            text = "Настройки главного экрана",
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = TextPrimary,
+                            fontFamily = Manrope
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        if (isOutdated) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = "⚠ Норма неактуальна — пора взвеситься", fontSize = 12.sp, color = Color(0xFFC62828))
+                        SettingsSwitchRow("Питание", showNutrition) { isChecked ->
+                            showNutrition = isChecked
+                            viewModel.updateDashboardSettings(
+                                showWater = showWaterBalance, showActivity = showActivity,
+                                quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
+                                showNutrition = isChecked, showWorkoutPlan = showWorkoutPlan
+                            )
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Б: ${"%.0f".format(plan.proteinGrams)} г · Ж: ${"%.0f".format(plan.fatGrams)} г · У: ${"%.0f".format(plan.carbsGrams)} г",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "BMR: ${"%.0f".format(plan.bmr)} ккал · TDEE: ${"%.0f".format(plan.tdee)} ккал",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        GlassCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showWeighDialog = true },
-                            shape = RoundedCornerShape(12.dp),
-                            glassColor = Color(0xFF81C784).copy(alpha = 0.7f),
-                            hasShadow = false,
-                            hasBorder = false
-                        ) {
-                            Box(Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
-                                Text("Взвеситься сегодня", color = Color.White, fontWeight = FontWeight.Bold)
-                            }
+                        SettingsSwitchRow("Водный баланс", showWaterBalance) { isChecked ->
+                            showWaterBalance = isChecked
+                            viewModel.updateDashboardSettings(
+                                showWater = isChecked, showActivity = showActivity,
+                                quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
+                                showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
+                            )
                         }
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                        if (lastWeight != null) {
-                            Text(
-                                text = "Последнее: ${DateUtils.formatShort(DateUtils.timestampToLocalDate(lastWeight!!.date))} — ${"%.1f".format(lastWeight!!.weightKg)} кг",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 4.dp)
+                        SettingsSwitchRow("Активность (Health Connect)", showActivity) { isChecked ->
+                            showActivity = isChecked
+                            viewModel.updateDashboardSettings(
+                                showWater = showWaterBalance, showActivity = isChecked,
+                                quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
+                                showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        SettingsSwitchRow("Мой план (Тренировки)", showWorkoutPlan) { isChecked ->
+                            showWorkoutPlan = isChecked
+                            viewModel.updateDashboardSettings(
+                                showWater = showWaterBalance, showActivity = showActivity,
+                                quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
+                                showNutrition = showNutrition, showWorkoutPlan = isChecked
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        SettingsSwitchRow("Отказ от алкоголя", quitAlcohol) { isChecked ->
+                            quitAlcohol = isChecked
+                            viewModel.updateDashboardSettings(
+                                showWater = showWaterBalance, showActivity = showActivity,
+                                quitAlcohol = isChecked, quitNicotine = quitNicotine,
+                                showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        SettingsSwitchRow("Отказ от никотина", quitNicotine) { isChecked ->
+                            quitNicotine = isChecked
+                            viewModel.updateDashboardSettings(
+                                showWater = showWaterBalance, showActivity = showActivity,
+                                quitAlcohol = quitAlcohol, quitNicotine = isChecked,
+                                showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
                             )
                         }
                     }
                 }
-            } else {
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ==================== СПОЙЛЕР "МОИ ДАННЫЕ" ====================
                 GlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    glassColor = Color.White.copy(alpha = 0.4f),
-                    hasShadow = false,
-                    hasBorder = false
+                    hazeState = hazeState,
+                    hasBorder = true
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Заполните профиль", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Text(text = "Чтобы рассчитать твою норму калорий", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ==================== КАРТОЧКА НАСТРОЕК ДАШБОРДА ====================
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Настройки главного экрана",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    SettingsSwitchRow("Питание", showNutrition) { isChecked ->
-                        showNutrition = isChecked
-                        viewModel.updateDashboardSettings(
-                            showWater = showWaterBalance, showActivity = showActivity,
-                            quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
-                            showNutrition = isChecked, showWorkoutPlan = showWorkoutPlan
-                        )
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
-
-                    SettingsSwitchRow("Водный баланс", showWaterBalance) { isChecked ->
-                        showWaterBalance = isChecked
-                        viewModel.updateDashboardSettings(
-                            showWater = isChecked, showActivity = showActivity,
-                            quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
-                            showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
-                        )
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
-
-                    SettingsSwitchRow("Активность (Health Connect)", showActivity) { isChecked ->
-                        showActivity = isChecked
-                        viewModel.updateDashboardSettings(
-                            showWater = showWaterBalance, showActivity = isChecked,
-                            quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
-                            showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
-                        )
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
-
-                    SettingsSwitchRow("Мой план (Тренировки)", showWorkoutPlan) { isChecked ->
-                        showWorkoutPlan = isChecked
-                        viewModel.updateDashboardSettings(
-                            showWater = showWaterBalance, showActivity = showActivity,
-                            quitAlcohol = quitAlcohol, quitNicotine = quitNicotine,
-                            showNutrition = showNutrition, showWorkoutPlan = isChecked
-                        )
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
-
-                    SettingsSwitchRow("Отказ от алкоголя", quitAlcohol) { isChecked ->
-                        quitAlcohol = isChecked
-                        viewModel.updateDashboardSettings(
-                            showWater = showWaterBalance, showActivity = showActivity,
-                            quitAlcohol = isChecked, quitNicotine = quitNicotine,
-                            showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
-                        )
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
-
-                    SettingsSwitchRow("Отказ от никотина", quitNicotine) { isChecked ->
-                        quitNicotine = isChecked
-                        viewModel.updateDashboardSettings(
-                            showWater = showWaterBalance, showActivity = showActivity,
-                            quitAlcohol = quitAlcohol, quitNicotine = isChecked,
-                            showNutrition = showNutrition, showWorkoutPlan = showWorkoutPlan
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ==================== СПОЙЛЕР "МОИ ДАННЫЕ" ====================
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                glassColor = Color.White.copy(alpha = 0.4f),
-                hasShadow = false,
-                hasBorder = false
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { isDataExpanded = !isDataExpanded }
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Мои данные", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Icon(
-                            imageVector = if (isDataExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = if (isDataExpanded) "Свернуть" else "Развернуть",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    if (isDataExpanded) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            OutlinedTextField(
-                                value = name,
-                                onValueChange = { newValue ->
-                                    if (newValue.length <= 30 && newValue.matches(Regex("^[a-zA-Zа-яА-ЯёЁ\\s-]*$"))) {
-                                        name = newValue
-                                    }
-                                },
-                                label = { Text("Имя") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                isError = name.isBlank()
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { isDataExpanded = !isDataExpanded }
+                                .padding(20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "Мои данные", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
+                            Icon(
+                                imageVector = if (isDataExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (isDataExpanded) "Свернуть" else "Развернуть",
+                                tint = TextSecondary
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                        }
 
-                            Text(text = "Пол", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Gender.entries.forEach { g ->
-                                    FilterChip(
-                                        selected = gender == g.name,
-                                        onClick = { gender = g.name },
-                                        label = { Text(g.displayName) }
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
+                        if (isDataExpanded) {
+                            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)) {
+                                // Поля ввода (Прозрачные с зеленой рамкой при фокусе)
+                                val textFieldColors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = PrimaryGreen,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.5f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
+                                    focusedTextColor = TextPrimary,
+                                    unfocusedTextColor = TextPrimary
+                                )
 
-                            val ageInt = age.toIntOrNull() ?: 0
-                            OutlinedTextField(
-                                value = age,
-                                onValueChange = { newValue -> if (newValue.length <= 3 && newValue.all { it.isDigit() }) age = newValue },
-                                label = { Text("Возраст") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                isError = ageInt < 10 || ageInt > 100,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                            if (ageInt < 10 || ageInt > 100) {
-                                Text("Возраст должен быть от 10 до 100 лет", color = Color.Red, fontSize = 12.sp)
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            val heightDouble = height.toDoubleOrNull() ?: 0.0
-                            OutlinedTextField(
-                                value = height,
-                                onValueChange = { newValue -> if (newValue.length <= 5 && newValue.matches(Regex("^\\d{0,3}(\\.\\d{0,1})?$"))) height = newValue },
-                                label = { Text("Рост, см") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                isError = heightDouble < 50.0 || heightDouble > 250.0,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                            )
-                            if (heightDouble < 50.0 || heightDouble > 250.0) {
-                                Text("Рост должен быть от 50 до 250 см", color = Color.Red, fontSize = 12.sp)
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            val weightDouble = weight.toDoubleOrNull() ?: 0.0
-                            OutlinedTextField(
-                                value = weight,
-                                onValueChange = { newValue -> if (newValue.length <= 5 && newValue.matches(Regex("^\\d{0,3}(\\.\\d{0,1})?$"))) weight = newValue },
-                                label = { Text("Вес, кг") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                isError = weightDouble < 20.0 || weightDouble > 300.0,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                            )
-                            if (weightDouble < 20.0 || weightDouble > 300.0) {
-                                Text("Вес должен быть от 20 до 300 кг", color = Color.Red, fontSize = 12.sp)
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Text(text = "Уровень активности", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            ActivityLevel.entries.forEach { level ->
-                                val isSelected = activityLevel == level.name
-                                GlassCard(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                        .clickable { activityLevel = level.name },
+                                OutlinedTextField(
+                                    value = name,
+                                    onValueChange = { newValue ->
+                                        if (newValue.length <= 30 && newValue.matches(Regex("^[a-zA-Zа-яА-ЯёЁ\\s-]*$"))) {
+                                            name = newValue
+                                        }
+                                    },
+                                    label = { Text("Имя", color = TextSecondary, fontFamily = Manrope) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                    isError = name.isBlank(),
                                     shape = RoundedCornerShape(12.dp),
-                                    glassColor = if (isSelected) Color(0xFFC8E6C9).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
-                                    hasShadow = false,
-                                    hasBorder = false
-                                ) {
-                                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        RadioButton(
-                                            selected = isSelected,
-                                            onClick = { activityLevel = level.name },
-                                            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
-                                        )
-                                        Text(
-                                            text = level.displayName,
-                                            fontSize = 14.sp,
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
+                                    colors = textFieldColors
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            Text(text = "Цель", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                FitnessGoal.entries.forEach { fg ->
-                                    val isSelected = goal == fg.name
-                                    GlassCard(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { goal = fg.name },
-                                        shape = RoundedCornerShape(12.dp),
-                                        glassColor = if (isSelected) Color(0xFFC8E6C9).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
-                                        hasShadow = false,
-                                        hasBorder = false
-                                    ) {
-                                        Box(modifier = Modifier.padding(12.dp)) {
+                                Text(text = "Пол", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextSecondary, fontFamily = Manrope)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Gender.entries.forEach { g ->
+                                        val isSelected = gender == g.name
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(40.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(if (isSelected) PrimaryGreen else Color.White.copy(alpha = 0.3f))
+                                                .border(1.dp, if (isSelected) Color.Transparent else Color.White.copy(alpha = 0.5f), RoundedCornerShape(50))
+                                                .clickable { gender = g.name },
+                                            contentAlignment = Alignment.Center
+                                        ) {
                                             Text(
-                                                text = fg.displayName,
+                                                text = g.displayName,
                                                 fontSize = 14.sp,
-                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (isSelected) Color.White else TextPrimary,
+                                                fontFamily = Manrope
                                             )
                                         }
                                     }
                                 }
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            GlassCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
+                                val ageInt = age.toIntOrNull() ?: 0
+                                OutlinedTextField(
+                                    value = age,
+                                    onValueChange = { newValue -> if (newValue.length <= 3 && newValue.all { it.isDigit() }) age = newValue },
+                                    label = { Text("Возраст", color = TextSecondary, fontFamily = Manrope) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                    isError = ageInt < 10 || ageInt > 100,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = textFieldColors
+                                )
+                                if (ageInt < 10 || ageInt > 100) {
+                                    Text("Возраст должен быть от 10 до 100 лет", color = Color(0xFFEF4444), fontSize = 12.sp, fontFamily = Manrope, modifier = Modifier.padding(start = 8.dp))
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                val heightDouble = height.toDoubleOrNull() ?: 0.0
+                                OutlinedTextField(
+                                    value = height,
+                                    onValueChange = { newValue -> if (newValue.length <= 5 && newValue.matches(Regex("^\\d{0,3}(\\.\\d{0,1})?$"))) height = newValue },
+                                    label = { Text("Рост, см", color = TextSecondary, fontFamily = Manrope) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                    isError = heightDouble < 50.0 || heightDouble > 250.0,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = textFieldColors
+                                )
+                                if (heightDouble < 50.0 || heightDouble > 250.0) {
+                                    Text("Рост должен быть от 50 до 250 см", color = Color(0xFFEF4444), fontSize = 12.sp, fontFamily = Manrope, modifier = Modifier.padding(start = 8.dp))
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                val weightDouble = weight.toDoubleOrNull() ?: 0.0
+                                OutlinedTextField(
+                                    value = weight,
+                                    onValueChange = { newValue -> if (newValue.length <= 5 && newValue.matches(Regex("^\\d{0,3}(\\.\\d{0,1})?$"))) weight = newValue },
+                                    label = { Text("Вес, кг", color = TextSecondary, fontFamily = Manrope) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                    isError = weightDouble < 20.0 || weightDouble > 300.0,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = textFieldColors
+                                )
+                                if (weightDouble < 20.0 || weightDouble > 300.0) {
+                                    Text("Вес должен быть от 20 до 300 кг", color = Color(0xFFEF4444), fontSize = 12.sp, fontFamily = Manrope, modifier = Modifier.padding(start = 8.dp))
+                                }
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                // Выбор активности
+                                Text(text = "Уровень активности", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextSecondary, fontFamily = Manrope)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                ActivityLevel.entries.forEach { level ->
+                                    val isSelected = activityLevel == level.name
+                                    GlassCard(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .clickable { activityLevel = level.name }
+                                            .then(if (isSelected) Modifier.border(1.5.dp, PrimaryGreen, RoundedCornerShape(16.dp)) else Modifier),
+                                        shape = RoundedCornerShape(16.dp),
+                                        glassColor = if (isSelected) PrimaryGreen.copy(alpha = 0.15f) else Color.Transparent,
+                                        hazeState = hazeState,
+                                        hasBorder = !isSelected // Кастомная обводка для выбранного
+                                    ) {
+                                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            if (isSelected) {
+                                                Icon(Icons.Default.CheckCircle, contentDescription = "Выбрано", tint = PrimaryGreen, modifier = Modifier.size(24.dp))
+                                            } else {
+                                                Box(modifier = Modifier.size(24.dp).border(2.dp, TextSecondary.copy(alpha = 0.5f), CircleShape))
+                                            }
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                text = level.displayName,
+                                                fontSize = 16.sp,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (isSelected) PrimaryGreen else TextPrimary,
+                                                fontFamily = Manrope
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                // Выбор цели
+                                Text(text = "Цель", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextSecondary, fontFamily = Manrope)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    FitnessGoal.entries.forEach { fg ->
+                                        val isSelected = goal == fg.name
+                                        GlassCard(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { goal = fg.name }
+                                                .then(if (isSelected) Modifier.border(1.5.dp, PrimaryGreen, RoundedCornerShape(16.dp)) else Modifier),
+                                            shape = RoundedCornerShape(16.dp),
+                                            glassColor = if (isSelected) PrimaryGreen.copy(alpha = 0.15f) else Color.Transparent,
+                                            hazeState = hazeState,
+                                            hasBorder = !isSelected
+                                        ) {
+                                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                if (isSelected) {
+                                                    Icon(Icons.Default.CheckCircle, contentDescription = "Выбрано", tint = PrimaryGreen, modifier = Modifier.size(24.dp))
+                                                } else {
+                                                    Box(modifier = Modifier.size(24.dp).border(2.dp, TextSecondary.copy(alpha = 0.5f), CircleShape))
+                                                }
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = fg.displayName,
+                                                    fontSize = 16.sp,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isSelected) PrimaryGreen else TextPrimary,
+                                                    fontFamily = Manrope
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                // Кнопка Сохранить
+                                Button(
+                                    onClick = {
                                         viewModel.saveProfile(
                                             name = name,
                                             gender = gender,
@@ -457,86 +537,116 @@ fun ProfileScreen(
                                         showSavedMessage = true
                                         isDataExpanded = false
                                     },
-                                shape = RoundedCornerShape(16.dp),
-                                solidColor = Color(0xFF81C784),
-                                hasShadow = true,
-                                hasBorder = false
-                            ) {
-                                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
-                                    Text("Сохранить", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Text("Сохранить", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = Manrope)
                                 }
-                            }
 
-                            if (showSavedMessage) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(text = "Профиль сохранён", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
-                            }
-
-                            Spacer(modifier = Modifier.height(32.dp))
-
-                            GlassCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { showDeleteDialog = true },
-                                shape = RoundedCornerShape(16.dp),
-                                solidColor = Color(0xFFE53935),
-                                hasShadow = true,
-                                hasBorder = false
-                            ) {
-                                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
-                                    Text("Удалить все данные", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                if (showSavedMessage) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(text = "Профиль сохранён", color = PrimaryGreen, fontSize = 14.sp, fontFamily = Manrope, modifier = Modifier.align(Alignment.CenterHorizontally))
                                 }
-                            }
 
-                            if (showDeleteDialog) {
-                                AlertDialog(
-                                    onDismissRequest = { showDeleteDialog = false },
-                                    title = { Text("Удалить все данные?") },
-                                    text = { Text("Все ваши тренировки, записи о питании, вес и достижения будут удалены. Это действие нельзя отменить.") },
-                                    confirmButton = {
-                                        TextButton(onClick = {
-                                            showDeleteDialog = false
-                                            viewModel.clearAllData(context) { (context as Activity).recreate() }
-                                        }) { Text("Удалить", color = Color.Red) }
-                                    },
-                                    dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Отмена") } }
-                                )
+                                Spacer(modifier = Modifier.height(32.dp))
+
+                                // Кнопка Удалить (Ghost button)
+                                TextButton(
+                                    onClick = { showDeleteDialog = true },
+                                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = TextSecondary, // <-- Изменили цвет иконки
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Удалить все данные",
+                                        color = TextSecondary, // <-- Изменили цвет текста
+                                        fontFamily = Manrope
+                                    )
+                                }
+
+                                if (showDeleteDialog) {
+                                    AlertDialog(
+                                        onDismissRequest = { showDeleteDialog = false },
+                                        title = { Text("Удалить все данные?", fontFamily = Manrope) },
+                                        text = { Text("Все ваши тренировки, записи о питании, вес и достижения будут удалены. Это действие нельзя отменить.", fontFamily = Manrope) },
+                                        confirmButton = {
+                                            TextButton(onClick = {
+                                                showDeleteDialog = false
+                                                viewModel.clearAllData(context) { (context as Activity).recreate() }
+                                            }) { Text("Удалить", color = Color(0xFFEF4444), fontFamily = Manrope) }
+                                        },
+                                        dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Отмена", color = TextSecondary, fontFamily = Manrope) } }
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(20.dp))
                             }
                         }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 
-    // Диалоги дат и взвешивания (остаются без изменений)
+    // Диалог взвешивания
     if (showWeighDialog) {
-        AlertDialog(
-            onDismissRequest = { showWeighDialog = false },
-            title = { Text("Взвешивание") },
-            text = {
-                OutlinedTextField(
-                    value = newWeightInput,
-                    onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) newWeightInput = v },
-                    label = { Text("Текущий вес, кг") },
-                    modifier = Modifier.fillMaxWidth(), singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    val w = newWeightInput.toDoubleOrNull()
-                    if (w != null && w > 0) {
-                        viewModel.addWeight(w)
-                        newWeightInput = ""
-                        showWeighDialog = false
+        Dialog(onDismissRequest = { showWeighDialog = false }) {
+            GlassCard(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                shape = RoundedCornerShape(24.dp),
+                hazeState = hazeState,
+                hasBorder = true
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text("Взвешивание", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = newWeightInput,
+                        onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) newWeightInput = v },
+                        label = { Text("Текущий вес, кг", color = TextSecondary, fontFamily = Manrope) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedContainerColor = Color.White.copy(alpha = 0.5f),
+                            unfocusedContainerColor = Color.White.copy(alpha = 0.3f)
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = { showWeighDialog = false }) {
+                            Text("Отмена", color = TextSecondary, fontFamily = Manrope)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                val w = newWeightInput.toDoubleOrNull()
+                                if (w != null && w > 0) {
+                                    viewModel.addWeight(w)
+                                    newWeightInput = ""
+                                    showWeighDialog = false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Сохранить", color = Color.White, fontFamily = Manrope)
+                        }
                     }
-                }) { Text("Сохранить") }
-            },
-            dismissButton = { TextButton(onClick = { showWeighDialog = false }) { Text("Отмена") } }
-        )
+                }
+            }
+        }
     }
 }
 
@@ -551,13 +661,15 @@ private fun SettingsSwitchRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = title, fontSize = 16.sp, color = TextPrimary, fontFamily = Manrope)
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF81C784)
+                checkedTrackColor = PrimaryGreen,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = TextSecondary.copy(alpha = 0.3f)
             )
         )
     }

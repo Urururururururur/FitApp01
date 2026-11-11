@@ -1,20 +1,27 @@
 package com.practicum.fitapp
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -25,7 +32,12 @@ import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
+import com.practicum.fitapp.ui.theme.*
 import java.time.LocalDate
+
+// Импорты для Haze
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 @Composable
 fun NutritionScreen(
@@ -44,11 +56,12 @@ fun NutritionScreen(
     // Стейты для диалогов
     var showGramsDialog by remember { mutableStateOf<ProductEntity?>(null) }
     var gramsInput by remember { mutableStateOf("100") }
-
     var showTextQueryDialog by remember { mutableStateOf(false) }
     var textQueryInput by remember { mutableStateOf("") }
-
     var editedGrams by remember { mutableStateOf("100") }
+
+    // Стейт для Haze
+    val hazeState = remember { HazeState() }
 
     // Обработка возврата из справочника продуктов
     val selectedProductId = savedStateHandle.getStateFlow<Long?>("selectedProductId", null).collectAsStateWithLifecycle()
@@ -70,219 +83,243 @@ fun NutritionScreen(
         }
     }
 
-    // Основной контент
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding() // <-- Добавили отступ под статус-бар
-            .padding(16.dp)      // <-- Заменили contentPadding на общий padding
-    ) {
-        item {
-            Text(
-                text = DateUtils.formatMonthYear(selectedDate),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+    // ОСНОВНОЙ КОНТЕЙНЕР
+    Box(modifier = Modifier.fillMaxSize().background(BgColor)) {
+        // Фон
+        Image(
+            painter = painterResource(id = com.practicum.fitapp.R.drawable.app_background),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(hazeState),
+            contentScale = ContentScale.Crop
+        )
 
-        item {
-            NutritionWeekStrip(
-                selectedDate = selectedDate,
-                onDayClick = { viewModel.setSelectedDate(it) }
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = DateUtils.formatShort(selectedDate),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Сводка за день (Сделали белой, как карточки в Журнале)
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Съедено: ${"%.0f".format(summary.calories)} ккал",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    if (dailyGoal != null) {
-                        Text(
-                            text = "Норма: ${"%.0f".format(dailyGoal!!)} ккал",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        val remaining = dailyGoal!! - summary.calories
-                        Text(
-                            text = if (remaining >= 0) {
-                                "Осталось: ${"%.0f".format(remaining)} ккал"
-                            } else {
-                                "Перебор: ${"%.0f".format(-remaining)} ккал"
-                            },
-                            fontSize = 14.sp,
-                            color = if (remaining >= 0) Color(0xFF2E7D32) else Color(0xFFC62828),
-                            fontWeight = FontWeight.Medium
-                        )
-                    } else {
-                        Text(
-                            text = "Заполните профиль, чтобы видеть норму",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Б: ${"%.1f".format(summary.protein)} г · " +
-                                "Ж: ${"%.1f".format(summary.fat)} г · " +
-                                "У: ${"%.1f".format(summary.carbs)} г",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // === КНОПКА "+ ДОБАВИТЬ ПРОДУКТ" ТЕПЕРЬ ЗДЕСЬ ===
-        item {
-            GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onAddFood() },
-                shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF81C784),
-                hasShadow = true,
-                hasBorder = false
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "+ Добавить продукт",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // Заголовок списка
-        item {
-            Text(
-                text = "Съедено за день",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        // Список записей
-        if (entries.isEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(16.dp)
+        ) {
             item {
                 Text(
-                    "Пока ничего не записано",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = DateUtils.formatMonthYear(selectedDate),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    fontFamily = Manrope
                 )
+                Spacer(modifier = Modifier.height(16.dp))
             }
-        } else {
-            items(entries.size) { index ->
-                val entry = entries[index]
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = entry.productName, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+
+            item {
+                NutritionWeekStrip(
+                    selectedDate = selectedDate,
+                    onDayClick = { viewModel.setSelectedDate(it) },
+                    hazeState = hazeState
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = DateUtils.formatShort(selectedDate),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextPrimary,
+                        fontFamily = Manrope
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // СВОДКА ЗА ДЕНЬ
+            item {
+                GlassCard(modifier = Modifier.fillMaxWidth(), hazeState = hazeState) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, fontFamily = Manrope)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (dailyGoal != null) {
+                            val remaining = dailyGoal!! - summary.calories
+                            val isOver = remaining < 0
+                            val absRemaining = kotlin.math.abs(remaining)
+
+                            // Главный акцент
                             Text(
-                                text = "${entry.grams} г — ${"%.0f".format(entry.grams * entry.productCalories / 100)} ккал",
-                                fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "%,.0f".format(absRemaining),
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (isOver) Color(0xFFEF4444) else PrimaryGreen,
+                                fontFamily = Manrope,
+                                lineHeight = 48.sp
+                            )
+                            Text(
+                                text = if (isOver) "ккал перебор" else "ккал осталось",
+                                fontSize = 14.sp,
+                                color = if (isOver) Color(0xFFEF4444) else PrimaryGreen,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = Manrope
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Съедено: ${"%.0f".format(summary.calories)} из ${"%.0f".format(dailyGoal!!)}",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                fontFamily = Manrope
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Прогресс-бар
+                            val calProgress = (summary.calories / dailyGoal!!).toFloat().coerceIn(0f, 1f)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Black.copy(alpha = 0.1f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(calProgress)
+                                        .fillMaxHeight()
+                                        .background(if (isOver) Color(0xFFEF4444) else PrimaryGreen)
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "Заполните профиль, чтобы видеть норму",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                fontFamily = Manrope
                             )
                         }
-                        TextButton(onClick = { viewModel.deleteEntry(entry.id) }) {
-                            Text("✕", color = MaterialTheme.colorScheme.error, fontSize = 16.sp)
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Макросы (капсулы)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            MacroCapsule("Белки", summary.protein, PrimaryGreen, Modifier.weight(1f))
+                            MacroCapsule("Жиры", summary.fat, AccentOrange, Modifier.weight(1f))
+                            MacroCapsule("Углеводы", summary.carbs, AccentBlue, Modifier.weight(1f))
                         }
                     }
-                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
                 }
+                Spacer(modifier = Modifier.height(24.dp))
             }
-        }
 
-        // === КНОПКА ИИ ЗАКОММЕНТИРОВАНА ===
-        /*
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-            GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showTextQueryDialog = true },
-                shape = RoundedCornerShape(16.dp),
-                solidColor = Color(0xFF6A1B9A),
-                hasShadow = true,
-                hasBorder = false
-            ) {
+            // КНОПКА ДОБАВИТЬ
+            item {
                 Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = PrimaryGreen.copy(alpha = 0.3f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(PrimaryGreen)
+                        .clickable { onAddFood() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("💬", fontSize = 18.sp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Спросить ИИ о еде", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        text = "Добавить продукт",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        fontFamily = Manrope
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // СПИСОК ПРОДУКТОВ
+            item {
+                Text(
+                    text = "Съедено за день",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    fontFamily = Manrope
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            if (entries.isEmpty()) {
+                item {
+                    Text(
+                        "Пока ничего не записано",
+                        fontSize = 14.sp,
+                        color = TextSecondary,
+                        fontFamily = Manrope
+                    )
+                }
+            } else {
+                items(entries.size) { index ->
+                    val entry = entries[index]
+                    GlassCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        hazeState = hazeState
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = entry.productName,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary,
+                                    fontFamily = Manrope
+                                )
+                                Text(
+                                    text = "${entry.grams} г — ${"%.0f".format(entry.grams * entry.productCalories / 100)} ккал",
+                                    fontSize = 12.sp,
+                                    color = TextSecondary,
+                                    fontFamily = Manrope
+                                )
+                            }
+                            IconButton(onClick = { viewModel.deleteEntry(entry.id) }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = "Удалить",
+                                    tint = TextSecondary
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
-        */
 
-        // ОТСТУП В КОНЦЕ
-        item {
-            Spacer(modifier = Modifier.height(100.dp))
+            // ОТСТУП В КОНЦЕ
+            item {
+                Spacer(modifier = Modifier.height(100.dp))
+            }
         }
     }
 
     // ============ ДИАЛОГИ ============
 
-    // Диалог граммов для обычного продукта
     if (showGramsDialog != null) {
         AlertDialog(
             onDismissRequest = { showGramsDialog = null },
-            title = { Text(showGramsDialog!!.name) },
+            title = { Text(showGramsDialog!!.name, fontFamily = Manrope) },
             text = {
                 Column {
                     Text(
                         text = "${showGramsDialog!!.caloriesPer100g} ккал/100г",
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextSecondary,
+                        fontFamily = Manrope
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -296,29 +333,31 @@ fun NutritionScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    val grams = gramsInput.toDoubleOrNull()
-                    if (grams != null && grams > 0) {
-                        viewModel.addEntry(showGramsDialog!!, grams)
-                        showGramsDialog = null
-                    }
-                }) {
-                    Text("Добавить")
+                Button(
+                    onClick = {
+                        val grams = gramsInput.toDoubleOrNull()
+                        if (grams != null && grams > 0) {
+                            viewModel.addEntry(showGramsDialog!!, grams)
+                            showGramsDialog = null
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                ) {
+                    Text("Добавить", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showGramsDialog = null }) {
-                    Text("Отмена")
+                    Text("Отмена", color = TextSecondary)
                 }
             }
         )
     }
 
-    // Диалог текстового запроса к ИИ (логика осталась, но кнопку мы скрыли)
     if (showTextQueryDialog) {
         AlertDialog(
             onDismissRequest = { showTextQueryDialog = false },
-            title = { Text("Спросить ИИ") },
+            title = { Text("Спросить ИИ", fontFamily = Manrope) },
             text = {
                 OutlinedTextField(
                     value = textQueryInput,
@@ -328,43 +367,45 @@ fun NutritionScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.analyzeFoodText(textQueryInput)
-                    textQueryInput = ""
-                    showTextQueryDialog = false
-                }) { Text("Спросить") }
+                Button(
+                    onClick = {
+                        viewModel.analyzeFoodText(textQueryInput)
+                        textQueryInput = ""
+                        showTextQueryDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                ) { Text("Спросить", color = Color.White) }
             },
             dismissButton = {
-                TextButton(onClick = { showTextQueryDialog = false }) { Text("Отмена") }
+                TextButton(onClick = { showTextQueryDialog = false }) { Text("Отмена", color = TextSecondary) }
             }
         )
     }
 
-    // Индикатор загрузки ИИ
     if (isAiLoading) {
         AlertDialog(
             onDismissRequest = { },
             confirmButton = { },
-            title = { Text("Анализируем...") },
+            title = { Text("Анализируем...", fontFamily = Manrope) },
             text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    CircularProgressIndicator(color = PrimaryGreen)
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text("Нейросеть обрабатывает запрос...")
+                    Text("Нейросеть обрабатывает запрос...", fontFamily = Manrope)
                 }
             }
         )
     }
 
-    // Результат ИИ
+    // РЕЗУЛЬТАТ ИИ
     if (aiResult != null) {
         val result = aiResult!!
 
         if (result.error != null) {
             AlertDialog(
                 onDismissRequest = { viewModel.clearAiResult() },
-                title = { Text("Ошибка") },
-                text = { Text("Не удалось распознать: ${result.error}") },
+                title = { Text("Ошибка", fontFamily = Manrope) },
+                text = { Text("Не удалось распознать: ${result.error}", fontFamily = Manrope) },
                 confirmButton = {
                     TextButton(onClick = { viewModel.clearAiResult() }) { Text("Понятно") }
                 }
@@ -374,15 +415,15 @@ fun NutritionScreen(
                 GlassCard(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
                     shape = RoundedCornerShape(24.dp),
-                    solidColor = Color.White,
-                    hasShadow = true
+                    hazeState = hazeState // <-- ДОБАВИЛИ HAZE СЮДА
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Text(
                             text = "✨ Результат от ИИ",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = TextPrimary,
+                            fontFamily = Manrope
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -390,7 +431,8 @@ fun NutritionScreen(
                             text = result.name ?: "Неизвестное блюдо",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = PrimaryGreen,
+                            fontFamily = Manrope
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -413,15 +455,15 @@ fun NutritionScreen(
                         val fat = (result.fatPer100g ?: 0.0) * factor
                         val carb = (result.carbsPer100g ?: 0.0) * factor
 
-                        Text("🔥 ${"%.0f".format(cal)} ккал", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                        Text("🔥 ${"%.0f".format(cal)} ккал", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary, fontFamily = Manrope)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text("Б: ${"%.1f".format(prot)} г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Ж: ${"%.1f".format(fat)} г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("У: ${"%.1f".format(carb)} г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Б: ${"%.1f".format(prot)} г", fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
+                            Text("Ж: ${"%.1f".format(fat)} г", fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
+                            Text("У: ${"%.1f".format(carb)} г", fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -431,12 +473,12 @@ fun NutritionScreen(
                             horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(onClick = { viewModel.clearAiResult() }) {
-                                Text("Отмена", color = Color.Gray)
+                                Text("Отмена", color = TextSecondary)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = { viewModel.saveAiResultToDiary(result, grams) },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF81C784))
+                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen) // <-- ЦВЕТ ИЗ ТЕМЫ
                             ) {
                                 Text("Сохранить", color = Color.White)
                             }
@@ -448,12 +490,13 @@ fun NutritionScreen(
     }
 }
 
-// ============ КОМПОНЕНТЫ КАЛЕНДАРЯ ============
+// ============ КОМПОНЕНТЫ ============
 
 @Composable
 private fun NutritionWeekStrip(
     selectedDate: LocalDate,
-    onDayClick: (LocalDate) -> Unit
+    onDayClick: (LocalDate) -> Unit,
+    hazeState: HazeState
 ) {
     val week = DateUtils.weekDays(selectedDate)
 
@@ -466,6 +509,7 @@ private fun NutritionWeekStrip(
                 date = date,
                 isSelected = date == selectedDate,
                 onClick = { onDayClick(date) },
+                hazeState = hazeState,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -477,36 +521,31 @@ private fun NutritionDayCell(
     date: LocalDate,
     isSelected: Boolean,
     onClick: () -> Unit,
+    hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
     val isWeekend = DateUtils.isWeekend(date)
-    val dayNameColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurfaceVariant
-    val dayNumberColor = if (isWeekend) Color(0xFFE57373) else MaterialTheme.colorScheme.onSurface
 
-    val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer
-        else -> Color.White.copy(alpha = 0.8f)
-    }
+    // Выбор цветов: если выбран — белый, если выходной — красный, иначе — стандартный
+    val dayNameColor = if (isSelected) Color.White.copy(alpha = 0.8f) else if (isWeekend) Color(0xFFEF4444) else TextSecondary
+    val dayNumberColor = if (isSelected) Color.White else if (isWeekend) Color(0xFFEF4444) else TextPrimary
 
-    Box(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .border(
-                width = if (isSelected) 1.dp else 0.5.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
+    GlassCard(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        hazeState = hazeState,
+        solidColor = if (isSelected) PrimaryGreen else null // Если выбран, заливаем сплошным цветом
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = DateUtils.dayOfWeekShort(date),
                 fontSize = 11.sp,
                 color = dayNameColor,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                textAlign = TextAlign.Center,
+                fontFamily = Manrope,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -515,9 +554,35 @@ private fun NutritionDayCell(
                 fontSize = 16.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = dayNumberColor,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                textAlign = TextAlign.Center,
+                fontFamily = Manrope,
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Composable
+fun MacroCapsule(name: String, current: Double, color: Color, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text("$name", fontSize = 10.sp, color = TextSecondary, fontFamily = Manrope)
+        Spacer(modifier = Modifier.height(4.dp))
+        // Так как у нас нет цели по макросам в этом экране, просто закрашиваем полоску полностью
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.1f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .fillMaxHeight()
+                    .background(color)
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text("${current.toInt()} г", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
     }
 }
