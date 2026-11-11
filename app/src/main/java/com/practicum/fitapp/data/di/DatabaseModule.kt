@@ -2,31 +2,15 @@ package com.practicum.fitapp.data.di
 
 import android.content.Context
 import androidx.room.Room
-import com.practicum.fitapp.data.local.AchievementDao
-import com.practicum.fitapp.data.local.ExerciseDao
-import com.practicum.fitapp.data.local.FitAppDatabase
-import com.practicum.fitapp.data.local.MealEntryDao
-import com.practicum.fitapp.data.local.ProductDao
-import com.practicum.fitapp.data.local.SetDao
-import com.practicum.fitapp.data.local.WorkoutDao
-import com.practicum.fitapp.data.local.WorkoutExerciseDao
-import com.practicum.fitapp.data.repository.NutritionRepository
-import com.practicum.fitapp.data.repository.TrainingRepository
+import com.practicum.fitapp.data.local.*
+import com.practicum.fitapp.data.repository.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import com.practicum.fitapp.data.local.UserProfileDao
-import com.practicum.fitapp.data.local.WeightEntryDao
-import com.practicum.fitapp.data.repository.AchievementRepository
-import com.practicum.fitapp.data.repository.UserRepository
 
-/**
- * Модуль Hilt: объясняет, как создавать объекты для БД.
- * SingletonComponent — все объекты живут столько же, сколько приложение.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -52,7 +36,9 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_10_11,
                 FitAppDatabase.MIGRATION_11_12,
                 FitAppDatabase.MIGRATION_12_13,
-                FitAppDatabase.MIGRATION_13_14
+                FitAppDatabase.MIGRATION_13_14,
+                FitAppDatabase.MIGRATION_14_15,
+                FitAppDatabase.MIGRATION_15_16 // <-- ДОБАВИЛИ СЮДА
             )
             .build()
     }
@@ -84,6 +70,7 @@ object DatabaseModule {
 
     @Provides
     fun provideExerciseDao(db: FitAppDatabase): ExerciseDao = db.exerciseDao()
+
     @Provides
     @Singleton
     fun provideTrainingRepository(
@@ -92,6 +79,7 @@ object DatabaseModule {
         setDao: SetDao,
         exerciseDao: ExerciseDao
     ): TrainingRepository = TrainingRepository(workoutDao, workoutExerciseDao, setDao, exerciseDao)
+
     @Provides
     fun provideWeightEntryDao(db: FitAppDatabase): WeightEntryDao = db.weightEntryDao()
 

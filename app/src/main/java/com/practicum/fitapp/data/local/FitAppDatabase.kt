@@ -25,7 +25,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UnlockedAchievementEntity::class
 
     ],
-    version = 14,
+    version = 16,
     exportSchema = false
 )
 
@@ -284,7 +284,19 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE meal_entries_new RENAME TO meal_entries")
             }
         }
-
+        // Настройка дашборда
+        val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN showWaterBalance INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN showActivity INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN showNutrition INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE user_profile ADD COLUMN showWorkoutPlan INTEGER NOT NULL DEFAULT 1")
+            }
+        }
 
         fun getInstance(context: Context): FitAppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -295,7 +307,8 @@ abstract class FitAppDatabase : RoomDatabase() {
                 )
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
                         MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
-                        MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
+                        MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
+                        MIGRATION_15_16)
                     .build()
                     .also { INSTANCE = it }
             }

@@ -19,11 +19,16 @@ data class UserProfileEntity(
     val weightKg: Double = 70.0,
     val activityLevel: String = "MODERATE",
     val goal: String = "MAINTAIN",
-    // --- Новые поля для трекеров ---
+    // --- Трекеры привычек ---
     val quitAlcohol: Boolean = false,
     val alcoholQuitDate: Long? = null,
     val alcoholRelapses: Int = 0,
     val quitNicotine: Boolean = false,
     val nicotineQuitDate: Long? = null,
-    val nicotineRelapses: Int = 0
+    val nicotineRelapses: Int = 0,
+    // --- Настройки отображения на Дашборде ---
+    val showWaterBalance: Boolean = true,
+    val showActivity: Boolean = true,
+    val showNutrition: Boolean = true,
+    val showWorkoutPlan: Boolean = true
 )

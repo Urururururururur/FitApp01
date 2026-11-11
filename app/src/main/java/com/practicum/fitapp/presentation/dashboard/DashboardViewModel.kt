@@ -36,6 +36,20 @@ data class Goals(
     val carbs: Double = 250.0
 )
 
+// ОБНОВЛЕНО: Добавлены showNutrition и showWorkoutPlan
+data class DashboardSettings(
+    val showNutrition: Boolean = true,
+    val showWater: Boolean = true,
+    val showActivity: Boolean = true,
+    val showWorkoutPlan: Boolean = true,
+    val quitAlcohol: Boolean = false,
+    val alcoholQuitDate: Long? = null,
+    val alcoholRelapses: Int = 0,
+    val quitNicotine: Boolean = false,
+    val nicotineQuitDate: Long? = null,
+    val nicotineRelapses: Int = 0
+)
+
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val nutritionRepository: NutritionRepository,
@@ -46,12 +60,28 @@ class DashboardViewModel @Inject constructor(
 ) : ViewModel() {
     val hcPermissions = healthConnectManager.permissions
 
-    // Безопасное получение имени
     val userName: StateFlow<String> = userRepository.getProfile()
         .map { profile -> profile?.name ?: "Андрей" }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Андрей")
 
-    // Нормы (цели) пользователя
+    // СЛУШАЕМ НАСТРОЙКИ
+    val settings: StateFlow<DashboardSettings> = userRepository.getProfile()
+        .map { profile ->
+            DashboardSettings(
+                showNutrition = profile?.showNutrition ?: true,
+                showWater = profile?.showWaterBalance ?: true,
+                showActivity = profile?.showActivity ?: true,
+                showWorkoutPlan = profile?.showWorkoutPlan ?: true,
+                quitAlcohol = profile?.quitAlcohol ?: false,
+                alcoholQuitDate = profile?.alcoholQuitDate,
+                alcoholRelapses = profile?.alcoholRelapses ?: 0,
+                quitNicotine = profile?.quitNicotine ?: false,
+                nicotineQuitDate = profile?.nicotineQuitDate,
+                nicotineRelapses = profile?.nicotineRelapses ?: 0
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DashboardSettings())
+
     val goals: StateFlow<Goals> = userRepository.getProfile()
         .map { profile ->
             if (profile != null) {
@@ -61,7 +91,6 @@ class DashboardViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Goals())
 
-    // Съеденное за сегодня (Калории и БЖУ)
     private val todayStart = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
     val consumed: StateFlow<DailyMacros> = nutritionRepository
@@ -71,7 +100,6 @@ class DashboardViewModel @Inject constructor(
             var prot = 0.0
             var f = 0.0
             var carb = 0.0
-
             list.forEach { entry ->
                 val factor = entry.grams / 100.0
                 cal += entry.productCalories * factor
@@ -79,17 +107,10 @@ class DashboardViewModel @Inject constructor(
                 f += entry.productFat * factor
                 carb += entry.productCarbs * factor
             }
-
-            DailyMacros(
-                calories = cal,
-                protein = prot,
-                fat = f,
-                carbs = carb
-            )
+            DailyMacros(cal, prot, f, carb)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DailyMacros())
 
-    // Вода (пока локально)
     private val _waterConsumed = MutableStateFlow(1200)
     val waterConsumed = _waterConsumed.asStateFlow()
     val waterGoal = 2200
@@ -98,7 +119,6 @@ class DashboardViewModel @Inject constructor(
         _waterConsumed.value += ml
     }
 
-    // Активность (Health Connect)
     private val _healthMetrics = MutableStateFlow<HealthConnectManager.HealthMetrics?>(null)
     val healthMetrics = _healthMetrics.asStateFlow()
 
@@ -110,7 +130,6 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    // Тренировка на сегодня
     val todayWorkout: StateFlow<WorkoutEntity?> = trainingRepository
         .getWorkoutsByDay(
             startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
@@ -119,7 +138,6 @@ class DashboardViewModel @Inject constructor(
         .map { list -> list.firstOrNull() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    // Награды
     val unlockedAchievements: StateFlow<List<Achievement>> = achievementRepository.getUnlocked()
         .map { unlockedList ->
             unlockedList.take(3).mapNotNull { Achievement.fromId(it.achievementId) }

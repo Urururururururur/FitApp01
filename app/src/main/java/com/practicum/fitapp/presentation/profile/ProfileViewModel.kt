@@ -22,7 +22,6 @@ class ProfileViewModel @Inject constructor(
     private val db: FitAppDatabase
 ) : ViewModel() {
 
-    /** Профиль (null если пользователь ещё не заполнял). */
     val profile: StateFlow<UserProfileEntity?> = repository
         .getProfile()
         .stateIn(
@@ -31,7 +30,6 @@ class ProfileViewModel @Inject constructor(
             initialValue = null
         )
 
-    /** История взвешиваний. */
     val weightHistory: StateFlow<List<WeightEntryEntity>> = repository
         .getWeightHistory()
         .stateIn(
@@ -40,7 +38,6 @@ class ProfileViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    /** Последнее взвешивание (для UI). */
     val lastWeight: StateFlow<WeightEntryEntity?> = repository
         .getLastWeight()
         .stateIn(
@@ -49,7 +46,45 @@ class ProfileViewModel @Inject constructor(
             initialValue = null
         )
 
-    /** Сохранить (или создать) профиль. */
+    // ОБНОВЛЕНО: Добавлены showNutrition и showWorkoutPlan
+    fun updateDashboardSettings(
+        showWater: Boolean,
+        showActivity: Boolean,
+        quitAlcohol: Boolean,
+        quitNicotine: Boolean,
+        showNutrition: Boolean,
+        showWorkoutPlan: Boolean
+    ) {
+        val current = profile.value ?: return
+        viewModelScope.launch {
+            val newAlcoholDate = when {
+                quitAlcohol && !current.quitAlcohol -> System.currentTimeMillis()
+                !quitAlcohol -> null
+                else -> current.alcoholQuitDate
+            }
+
+            val newNicotineDate = when {
+                quitNicotine && !current.quitNicotine -> System.currentTimeMillis()
+                !quitNicotine -> null
+                else -> current.nicotineQuitDate
+            }
+
+            repository.saveProfile(
+                current.copy(
+                    showWaterBalance = showWater,
+                    showActivity = showActivity,
+                    quitAlcohol = quitAlcohol,
+                    alcoholQuitDate = newAlcoholDate,
+                    quitNicotine = quitNicotine,
+                    nicotineQuitDate = newNicotineDate,
+                    showNutrition = showNutrition,
+                    showWorkoutPlan = showWorkoutPlan
+                )
+            )
+        }
+    }
+
+    // ОБНОВЛЕНО: Добавлены showNutrition и showWorkoutPlan
     fun saveProfile(
         name: String,
         gender: String,
@@ -59,14 +94,17 @@ class ProfileViewModel @Inject constructor(
         activityLevel: String,
         goal: String,
         quitAlcohol: Boolean,
-        quitNicotine: Boolean
+        quitNicotine: Boolean,
+        showWaterBalance: Boolean,
+        showActivity: Boolean,
+        showNutrition: Boolean,
+        showWorkoutPlan: Boolean
     ) {
         viewModelScope.launch {
             val current = profile.value
             val isFirstTime = current == null
             val weightChanged = current?.weightKg != weightKg
 
-            // 1. Сохраняем профиль
             repository.saveProfile(
                 UserProfileEntity(
                     id = 1,
@@ -82,56 +120,41 @@ class ProfileViewModel @Inject constructor(
                     alcoholRelapses = current?.alcoholRelapses ?: 0,
                     quitNicotine = quitNicotine,
                     nicotineQuitDate = if (quitNicotine && current?.nicotineQuitDate == null) System.currentTimeMillis() else current?.nicotineQuitDate,
-                    nicotineRelapses = current?.nicotineRelapses ?: 0
+                    nicotineRelapses = current?.nicotineRelapses ?: 0,
+                    showWaterBalance = showWaterBalance,
+                    showActivity = showActivity,
+                    showNutrition = showNutrition,
+                    showWorkoutPlan = showWorkoutPlan
                 )
             )
 
-            // 2. Если это первый запуск или вес изменился,
-            // автоматически создаем запись о взвешивании, чтобы норма стала актуальной
             if (isFirstTime || weightChanged) {
                 repository.addWeight(System.currentTimeMillis(), weightKg)
             }
         }
     }
 
-    /** Зафиксировать новое взвешивание на сегодня и обновить вес в профиле. */
     fun addWeight(weightKg: Double) {
         viewModelScope.launch {
             val current = profile.value
-
-            // 1. Обновляем вес в самом профиле, чтобы форма и норма пересчитались
             if (current != null) {
                 repository.saveProfile(current.copy(weightKg = weightKg))
             }
-
-            // 2. Добавляем запись в историю взвешиваний
             repository.addWeight(System.currentTimeMillis(), weightKg)
         }
     }
 
-    /** Обновить дату отказа от алкоголя (сбрасывает срывы). */
     fun updateAlcoholDate(date: Long) {
         val current = profile.value ?: return
         viewModelScope.launch {
-            repository.saveProfile(
-                current.copy(
-                    alcoholQuitDate = date,
-                    alcoholRelapses = 0
-                )
-            )
+            repository.saveProfile(current.copy(alcoholQuitDate = date, alcoholRelapses = 0))
         }
     }
 
-    /** Обновить дату отказа от никотина (сбрасывает срывы). */
     fun updateNicotineDate(date: Long) {
         val current = profile.value ?: return
         viewModelScope.launch {
-            repository.saveProfile(
-                current.copy(
-                    nicotineQuitDate = date,
-                    nicotineRelapses = 0
-                )
-            )
+            repository.saveProfile(current.copy(nicotineQuitDate = date, nicotineRelapses = 0))
         }
     }
 
@@ -149,14 +172,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    /** Очистка всех данных приложения. */
     fun clearAllData(context: Context, onComplete: () -> Unit) {
         viewModelScope.launch {
-            // Очищаем все таблицы в фоновом потоке
             withContext(Dispatchers.IO) {
                 db.clearAllTables()
             }
-            // Вызываем колбэк, чтобы перезапустить Activity (сбросит стейты)
             onComplete()
         }
     }

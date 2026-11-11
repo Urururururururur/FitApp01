@@ -3,20 +3,10 @@ package com.practicum.fitapp.presentation.dashboard
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,13 +16,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,20 +29,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.practicum.fitapp.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// Цвета
 val BgColorStart = Color(0xFFE8F5E9)
 val BgColorEnd = Color(0xFFF5F7F5)
 val CardColor = Color.White
@@ -83,7 +64,8 @@ fun DashboardScreen(
     val todayWorkout by viewModel.todayWorkout.collectAsState()
     val achievements by viewModel.unlockedAchievements.collectAsState()
 
-    // === ЗАПРОС РАЗРЕШЕНИЙ И ЗАГРУЗКА ДАННЫХ (КАК В ЖУРНАЛЕ) ===
+    val settings by viewModel.settings.collectAsState()
+
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = PermissionController.createRequestPermissionResultContract()
     ) { granted ->
@@ -98,18 +80,15 @@ fun DashboardScreen(
         if (healthMetrics == null) {
             permissionsLauncher.launch(viewModel.hcPermissions)
         } else {
-            viewModel.loadHealthData() // Обновляем при возврате на экран
+            viewModel.loadHealthData()
         }
     }
-    // =============================================================
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(BgColorStart, BgColorEnd)
-                )
+                brush = Brush.verticalGradient(colors = listOf(BgColorStart, BgColorEnd))
             )
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
@@ -118,39 +97,76 @@ fun DashboardScreen(
         DashboardHeader(userName = userName, onProfileClick = onNavigateToProfile)
         Spacer(modifier = Modifier.height(20.dp))
 
-        NutritionCard(
-            consumedCal = consumed.calories,
-            goalCal = goals.calories,
-            protein = consumed.protein,
-            goalProtein = goals.protein,
-            fat = consumed.fat,
-            goalFat = goals.fat,
-            carbs = consumed.carbs,
-            goalCarbs = goals.carbs,
-            onDiaryClick = onNavigateToNutrition
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // === ПИТАНИЕ ===
+        if (settings.showNutrition) {
+            NutritionCard(
+                consumedCal = consumed.calories,
+                goalCal = goals.calories,
+                protein = consumed.protein,
+                goalProtein = goals.protein,
+                fat = consumed.fat,
+                goalFat = goals.fat,
+                carbs = consumed.carbs,
+                goalCarbs = goals.carbs,
+                onDiaryClick = onNavigateToNutrition
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-        WaterCard(
-            consumedMl = waterConsumed,
-            goalMl = viewModel.waterGoal,
-            onAddWater = { viewModel.addWater(250) }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // === ВОДА ===
+        if (settings.showWater) {
+            WaterCard(
+                consumedMl = waterConsumed,
+                goalMl = viewModel.waterGoal,
+                onAddWater = { viewModel.addWater(250) }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-        ActivityCard(
-            healthMetrics = healthMetrics,
-            onClick = onNavigateToJournal,
-            onRequestPermissions = { permissionsLauncher.launch(viewModel.hcPermissions) } // <-- Передаем лончер
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // === АКТИВНОСТЬ ===
+        if (settings.showActivity) {
+            ActivityCard(
+                healthMetrics = healthMetrics,
+                onClick = onNavigateToJournal,
+                onRequestPermissions = { permissionsLauncher.launch(viewModel.hcPermissions) }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-        WorkoutPlanCard(workout = todayWorkout, onWorkoutClick = onNavigateToWorkout)
-        Spacer(modifier = Modifier.height(24.dp))
+        // === КАРТОЧКИ ПРИВЫЧЕК ===
+        if (settings.quitAlcohol) {
+            HabitTrackerCard(
+                title = "Не пью алкоголь",
+                quitDate = settings.alcoholQuitDate,
+                relapses = settings.alcoholRelapses,
+                icon = "🍃",
+                color = GreenAccent
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (settings.quitNicotine) {
+            HabitTrackerCard(
+                title = "Не курю",
+                quitDate = settings.nicotineQuitDate,
+                relapses = settings.nicotineRelapses,
+                icon = "🫁",
+                color = BlueAccent
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // === МОЙ ПЛАН (ТРЕНИРОВКИ) ===
+        if (settings.showWorkoutPlan) {
+            WorkoutPlanCard(workout = todayWorkout, onWorkoutClick = onNavigateToWorkout)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         AchievementsRow(achievements = achievements, onCommunityClick = onNavigateToCommunity)
     }
 }
+
+// ... (Остальные компоненты остаются без изменений: DashboardHeader, NutritionCard, MacroColumn, WaterCard, ActivityCard, ActivityMetric, WorkoutPlanCard, AchievementsRow, HabitTrackerCard) ...
 
 @Composable
 fun DashboardHeader(userName: String, onProfileClick: () -> Unit) {
@@ -168,28 +184,24 @@ fun DashboardHeader(userName: String, onProfileClick: () -> Unit) {
             Text(text = "Привет, $userName!", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         }
 
-        // КЛИКАБЕЛЬНАЯ КАРТИНКА В КРУГЕ
         Box(
             modifier = Modifier
-                .size(48.dp) // Размер аватарки
-                .clip(CircleShape) // Обрезаем по кругу
-                .background(Color(0xFFC8E6C9)) // Зеленая подложка (на случай, если картинка с прозрачным фоном)
-                .clickable { onProfileClick() }, // Переход в профиль
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(1.dp, Color(0xFFC8E6C9), CircleShape)
+                .clickable { onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.img_user_avatar), // <-- ЗАМЕНИ на название своей картинки
-                contentDescription = "Профиль",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape), // Обрезаем саму картинку
-                contentScale = ContentScale.Crop // Заполняет весь круг без искажений
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = "Профиль и настройки",
+                tint = GreenAccent,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
 }
-
-// ... (Компоненты NutritionCard, MacroColumn, WaterCard остаются БЕЗ ИЗМЕНЕНИЙ) ...
 
 @Composable
 fun NutritionCard(
@@ -339,7 +351,6 @@ fun WaterCard(consumedMl: Int, goalMl: Int, onAddWater: () -> Unit) {
     }
 }
 
-// ОБНОВЛЕННАЯ КАРТОЧКА АКТИВНОСТИ
 @Composable
 fun ActivityCard(
     healthMetrics: com.practicum.fitapp.data.HealthConnectManager.HealthMetrics?,
@@ -350,9 +361,7 @@ fun ActivityCard(
         colors = CardDefaults.cardColors(containerColor = CardColor),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -366,7 +375,6 @@ fun ActivityCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (healthMetrics == null) {
-                // Делаем текст кликабельным для запроса разрешений
                 Text(
                     text = "Нет доступа к Health Connect. Нажмите, чтобы разрешить.",
                     color = BlueAccent,
@@ -406,17 +414,10 @@ fun ActivityMetric(title: String, value: String, color: Color, modifier: Modifie
 fun WorkoutPlanCard(workout: com.practicum.fitapp.data.local.WorkoutEntity?, onWorkoutClick: () -> Unit) {
     val workoutName = workout?.name ?: "Новичок: фулбоди"
 
-    // ЛОГ ДЛЯ ОТЛАДКИ: Смотрим, какое имя пришло из БД
-    android.util.Log.d("IMG_DEBUG", "Ищем картинку для тренировки: '$workoutName'")
-
-    // МЯГКИЙ ПОИСК: ищем, если название программы совпадает с именем тренировки или содержится в нём
     val programImage = com.practicum.fitapp.presentation.training.builtInPrograms.find { program ->
         workoutName.contains(program.title, ignoreCase = true) ||
                 program.title.contains(workoutName, ignoreCase = true)
     }?.imageResId
-
-    // ЛОГ ДЛЯ ОТЛАДКИ: Смотрим, нашли ли картинку
-    android.util.Log.d("IMG_DEBUG", "Найдена картинка (ID ресурса): $programImage")
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -431,8 +432,6 @@ fun WorkoutPlanCard(workout: com.practicum.fitapp.data.local.WorkoutEntity?, onW
             modifier = Modifier.fillMaxWidth().clickable { onWorkoutClick() }
         ) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-
-                // БЛОК С КАРТИНКОЙ
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -448,18 +447,12 @@ fun WorkoutPlanCard(workout: com.practicum.fitapp.data.local.WorkoutEntity?, onW
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop
                         )
                     } else {
-                        // Если картинки нет, показываем иконку
                         Icon(Icons.Default.FitnessCenter, contentDescription = null, tint = GrayText)
                     }
                 }
-
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(
-                        text = workoutName,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = workoutName, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     Text("СЕГОДНЯ · 18:30", fontSize = 12.sp, color = OrangeAccent, fontWeight = FontWeight.Medium)
                     Text("40 мин · 6 упражнений", fontSize = 12.sp, color = GrayText)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -479,9 +472,7 @@ fun AchievementsRow(
     onCommunityClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCommunityClick() } // Вся секция кликабельна
+        modifier = Modifier.fillMaxWidth().clickable { onCommunityClick() }
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Твои награды", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -493,8 +484,6 @@ fun AchievementsRow(
                 Text("Пока нет наград", color = GrayText, fontSize = 14.sp)
             } else {
                 achievements.take(3).forEach { achievement ->
-
-                    // Ищем картинку по ID ачивки
                     val imageResId = when (achievement.id) {
                         "first_workout" -> com.practicum.fitapp.R.drawable.ic_ach_first_workout
                         "ten_workouts" -> com.practicum.fitapp.R.drawable.ic_ach_ten_workouts
@@ -518,12 +507,8 @@ fun AchievementsRow(
                             modifier = Modifier.padding(12.dp).fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Блок с картинкой
                             Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFFE8F5E9)), // Светло-зеленая подложка
+                                modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFFE8F5E9)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (imageResId != 0) {
@@ -534,13 +519,10 @@ fun AchievementsRow(
                                         contentScale = androidx.compose.ui.layout.ContentScale.Crop
                                     )
                                 } else {
-                                    // Заглушка, если картинки нет
                                     Text("🏅", fontSize = 24.sp)
                                 }
                             }
-
                             Spacer(modifier = Modifier.height(8.dp))
-
                             Text(
                                 text = achievement.title,
                                 fontSize = 12.sp,
@@ -551,6 +533,49 @@ fun AchievementsRow(
                             Text("Сегодня", fontSize = 10.sp, color = GrayText)
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HabitTrackerCard(
+    title: String,
+    quitDate: Long?,
+    relapses: Int,
+    icon: String,
+    color: Color
+) {
+    val days = if (quitDate != null) {
+        (System.currentTimeMillis() - quitDate) / (1000 * 60 * 60 * 24)
+    } else 0L
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = CardColor),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = icon, fontSize = 28.sp)
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(text = "$days дней", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = color)
+                if (relapses > 0) {
+                    Text(text = "Срывов: $relapses", fontSize = 12.sp, color = GrayText)
                 }
             }
         }
