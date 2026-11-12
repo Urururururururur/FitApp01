@@ -1,6 +1,7 @@
 package com.practicum.fitapp
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,15 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.outlined.Chair
-import androidx.compose.material.icons.outlined.DirectionsWalk
-import androidx.compose.material.icons.outlined.Eco
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.FitnessCenter
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.Spa
-import androidx.compose.material.icons.outlined.TrendingDown
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,8 +37,8 @@ import com.practicum.fitapp.presentation.onboarding.OnboardingViewModel
 
 // Основные цвета
 val OnboardingGreen = Color(0xFF2E7D32)
-val OnboardingBgStart = Color(0xFFE8F5E9) // Для градиента сверху
-val OnboardingBgEnd = Color(0xFFF5F7F5)   // Для градиента снизу
+val OnboardingBgStart = Color(0xFFE8F5E9)
+val OnboardingBgEnd = Color(0xFFF5F7F5)
 val OnboardingTextGray = Color(0xFF757575)
 val OnboardingBorderGray = Color(0xFFE0E0E0)
 val OnboardingLightGreen = Color(0xFFE8F5E9)
@@ -72,7 +67,7 @@ fun OnboardingScreen(
         else -> true
     }
 
-    // ЗАМЕНИЛИ SURFACE НА BOX С ГРАДИЕНТОМ
+    // Возвращаем обычный Box с градиентом
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -323,7 +318,7 @@ fun OnboardingScreen(
                 }
             }
 
-            // --- ШАГ 6: ГОТОВО (ИНФОРМАТИВНЫЙ) ---
+            // --- ШАГ 6: ГОТОВО ---
             if (currentStep == 6) {
                 val tempProfile = UserProfileEntity(
                     id = 1,
@@ -354,7 +349,6 @@ fun OnboardingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Теги
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Tag(text = goalText, icon = Icons.Outlined.FavoriteBorder, isActive = true)
                     Tag(text = activityText, icon = null, isActive = false)
@@ -362,7 +356,6 @@ fun OnboardingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Главная карточка калорий (без обводки, с легкой тенью)
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
@@ -385,9 +378,7 @@ fun OnboardingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // БЖУ (без кнопки "Изменить вручную")
                 Text("Баланс БЖУ", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -407,7 +398,6 @@ fun OnboardingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Дисклеймер (без обводки, серый фон)
                 Surface(shape = RoundedCornerShape(16.dp), color = Color.White.copy(alpha = 0.5f), modifier = Modifier.fillMaxWidth()) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Info, contentDescription = null, tint = OnboardingTextGray, modifier = Modifier.size(20.dp))
@@ -422,10 +412,27 @@ fun OnboardingScreen(
                 }
             }
 
-            // Отступ перед кнопками
-            Spacer(modifier = Modifier.height(32.dp))
+            // ==========================================
+            // ВСТАВЛЯЕМ КАРТИНКУ ПЕРЕД КНОПКАМИ
+            // ==========================================
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // --- КНОПКИ В КОНЦЕ КОНТЕНТА ---
+            val imageResId = getOnboardingImageResId(currentStep, activityLevel)
+            if (imageResId != null) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp), // Высота картинки
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            // Отступ перед кнопками
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- КНОПКИ ---
             Button(
                 onClick = {
                     if (currentStep < 6) {
@@ -455,22 +462,31 @@ fun OnboardingScreen(
     }
 }
 
-// Тег (например, "Поддержание")
+// ФУНКЦИЯ ДЛЯ ОПРЕДЕЛЕНИЯ КАРТИНКИ
+fun getOnboardingImageResId(step: Int, activityLevel: String): Int? {
+    return when (step) {
+        1 -> R.drawable.img_onboarding_name
+        2 -> R.drawable.img_onboarding_age
+        3 -> R.drawable.img_onboarding_height_weight
+        4 -> when (activityLevel) {
+            "SEDENTARY" -> R.drawable.img_onboarding_sedentary
+            "MODERATE" -> R.drawable.img_onboarding_moderate
+            "ACTIVE" -> R.drawable.img_onboarding_active
+            else -> null
+        }
+        5 -> R.drawable.img_onboarding_goal
+        else -> null
+    }
+}
+
 @Composable
 fun Tag(text: String, icon: ImageVector? = null, isActive: Boolean) {
     val bgColor = if (isActive) OnboardingLightGreen else Color.White
     val textColor = if (isActive) OnboardingGreen else OnboardingTextGray
     val border = if (isActive) null else BorderStroke(1.dp, OnboardingBorderGray)
 
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = bgColor,
-        border = border
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Surface(shape = RoundedCornerShape(50), color = bgColor, border = border) {
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             if (icon != null) {
                 Icon(icon, contentDescription = null, tint = textColor, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(6.dp))
@@ -480,15 +496,9 @@ fun Tag(text: String, icon: ImageVector? = null, isActive: Boolean) {
     }
 }
 
-// Карточка БЖУ (без обводки, с легкой тенью)
 @Composable
 fun MacroCard(title: String, grams: Int, percent: Int, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        shadowElevation = 2.dp
-    ) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(16.dp), color = Color.White, shadowElevation = 2.dp) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(title, fontSize = 11.sp, color = OnboardingTextGray)
             Spacer(modifier = Modifier.height(4.dp))
@@ -504,13 +514,7 @@ fun MacroCard(title: String, grams: Int, percent: Int, modifier: Modifier = Modi
 }
 
 @Composable
-fun SelectionOptionCard(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
+fun SelectionOptionCard(title: String, description: String, icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
     val bgColor = if (isSelected) OnboardingLightGreen else Color.White
     val borderColor = if (isSelected) OnboardingGreen else Color.Transparent
     val borderWidth = if (isSelected) 2.dp else 0.dp
@@ -543,15 +547,7 @@ fun SelectionOptionCard(
 }
 
 @Composable
-fun MetricSliderCard(
-    title: String,
-    valueStr: String,
-    unit: String,
-    icon: ImageVector,
-    valueRange: ClosedFloatingPointRange<Float>,
-    onValueChange: (Float) -> Unit,
-    isValid: Boolean
-) {
+fun MetricSliderCard(title: String, valueStr: String, unit: String, icon: ImageVector, valueRange: ClosedFloatingPointRange<Float>, onValueChange: (Float) -> Unit, isValid: Boolean) {
     var isManual by remember { mutableStateOf(false) }
     val currentValueFloat = valueStr.toFloatOrNull() ?: valueRange.start
 
@@ -619,12 +615,7 @@ fun MetricSliderCard(
 }
 
 @Composable
-fun CustomGenderButton(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun CustomGenderButton(text: String, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val borderColor = if (isSelected) OnboardingGreen else OnboardingBorderGray
     val textColor = if (isSelected) OnboardingGreen else Color.Black
     val borderWidth = if (isSelected) 2.dp else 1.dp

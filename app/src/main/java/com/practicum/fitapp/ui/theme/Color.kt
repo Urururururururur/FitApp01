@@ -15,7 +15,4 @@ val AccentOrange = Color(0xFFF59E0B) // Оранжевый (жиры/энерг�
 val AccentBlue = Color(0xFF3B82F6) // Синий (вода/пульс)
 val LightGreen = Color(0xFFA7F3D0) // Салатовый для градиентов
 
-// Цвета для фоновых пятен (оставим на случай, если захочешь вернуть градиент)
-val BlobOrange = Color(0xFFFFCC80)
-val BlobPeach = Color(0xFFFFAB91)
-val BlobYellow = Color(0xFFFFE082)
+val AccentLightRed = Color(0xFFFF8A80) // Мягкий розово-красный (коралловый)

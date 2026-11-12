@@ -277,7 +277,7 @@ private fun HealthMetricsCard(metrics: com.practicum.fitapp.data.HealthConnectMa
             // Калории
             HealthMetricRow(
                 icon = Icons.Outlined.LocalFireDepartment,
-                iconTint = AccentOrange,
+                iconTint = AccentLightRed,
                 title = "Активные калории",
                 value = "${metrics.calories.toInt()} ккал"
             )

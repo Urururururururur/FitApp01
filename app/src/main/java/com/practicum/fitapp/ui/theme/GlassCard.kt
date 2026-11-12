@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
@@ -20,10 +19,10 @@ fun GlassCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(20.dp),
     solidColor: Color? = null,
-    glassColor: Color = Color.White.copy(alpha = 0.85f), // 85% плотности
+    glassColor: Color = Color.White.copy(alpha = 1f),
     hasShadow: Boolean = false,
     hasBorder: Boolean = false,
-    hazeState: HazeState? = null, // Параметр остался для совместимости, но не используется
+    hazeState: HazeState? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     if (solidColor != null) {
@@ -38,21 +37,23 @@ fun GlassCard(
         return
     }
 
-    // Просто рисуем фон, без всякого Haze
     var boxModifier = modifier
         .then(if (hasShadow) {
-            Modifier.shadow(12.dp, shape, ambientColor = Color.Black.copy(alpha = 0.08f))
+            // Убрали ambientColor и spotColor, оставили стандартную черную тень.
+            // Это решит проблему с белыми квадратами позади карточек.
+            Modifier.shadow(
+                elevation = 6.dp,
+                shape = shape
+            )
         } else Modifier)
         .clip(shape)
-        .background(glassColor) // Используем только цвет
+        .background(glassColor)
 
-    // Градиентная обводка (если включена)
+    // Если включена обводка, используем обычный белый цвет вместо градиента
     if (hasBorder) {
         boxModifier = boxModifier.border(
-            width = 1.5.dp,
-            brush = Brush.linearGradient(
-                colors = listOf(Color.White.copy(alpha = 0.9f), Color.White.copy(alpha = 0.05f))
-            ),
+            width = 1.dp,
+            color = Color.White.copy(alpha = 0.6f),
             shape = shape
         )
     }

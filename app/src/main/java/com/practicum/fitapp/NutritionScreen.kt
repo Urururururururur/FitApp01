@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -138,77 +139,114 @@ fun NutritionScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // СВОДКА ЗА ДЕНЬ
+            // СВОДКА ЗА ДЕНЬ (С КАРТИНКОЙ)
             item {
                 GlassCard(modifier = Modifier.fillMaxWidth(), hazeState = hazeState) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, fontFamily = Manrope)
-                        Spacer(modifier = Modifier.height(12.dp))
+                    // ОБОРАЧИВАЕМ В BOX, ЧТОБЫ НАЛОЖИТЬ КАРТИНКУ
+                    Box(modifier = Modifier.fillMaxWidth()) {
 
-                        if (dailyGoal != null) {
-                            val remaining = dailyGoal!! - summary.calories
-                            val isOver = remaining < 0
-                            val absRemaining = kotlin.math.abs(remaining)
+                        // 1. КАРТИНКА НА ЗАДНЕМ ПЛАНЕ (В правом верхнем углу)
+                        Image(
+                            painter = painterResource(id = com.practicum.fitapp.R.drawable.img_fruits_bowl),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .size(180.dp)
+                                .padding(top = 12.dp, end = 12.dp)
+                                .clip(RoundedCornerShape(topEnd = 20.dp, bottomStart = 16.dp)),
+                            contentScale = ContentScale.Crop
+                        )
 
-                            // Главный акцент
-                            Text(
-                                text = "%,.0f".format(absRemaining),
-                                fontSize = 48.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = if (isOver) Color(0xFFEF4444) else PrimaryGreen,
-                                fontFamily = Manrope,
-                                lineHeight = 48.sp
-                            )
-                            Text(
-                                text = if (isOver) "ккал перебор" else "ккал осталось",
-                                fontSize = 14.sp,
-                                color = if (isOver) Color(0xFFEF4444) else PrimaryGreen,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = Manrope
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Съедено: ${"%.0f".format(summary.calories)} из ${"%.0f".format(dailyGoal!!)}",
-                                fontSize = 12.sp,
-                                color = TextSecondary,
-                                fontFamily = Manrope
-                            )
-
+                        // 2. ТЕКСТ ПОВЕРХ КАРТИНКИ
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, fontFamily = Manrope)
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // Прогресс-бар
-                            val calProgress = (summary.calories / dailyGoal!!).toFloat().coerceIn(0f, 1f)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Black.copy(alpha = 0.1f))
-                            ) {
+                            if (dailyGoal != null) {
+                                val remaining = dailyGoal!! - summary.calories
+                                val isOver = remaining < 0
+                                val absRemaining = kotlin.math.abs(remaining)
+
+                                // Главный акцент
+                                Text(
+                                    text = "%,.0f".format(absRemaining).replace(",", " "),
+                                    fontSize = 48.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (isOver) Color(0xFFEF4444) else PrimaryGreen,
+                                    fontFamily = Manrope,
+                                    lineHeight = 48.sp
+                                )
+
+                                // Плашка с восклицательным знаком (если перебор)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .padding(top = 4.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(if (isOver) Color(0xFFEF4444).copy(alpha = 0.1f) else Color.Transparent)
+                                        .padding(horizontal = if (isOver) 8.dp else 0.dp, vertical = if (isOver) 4.dp else 0.dp)
+                                ) {
+                                    if (isOver) {
+                                        Icon(
+                                            imageVector = Icons.Default.Warning,
+                                            contentDescription = null,
+                                            tint = Color(0xFFEF4444),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                    }
+                                    Text(
+                                        text = if (isOver) "ккал перебор" else "ккал осталось",
+                                        fontSize = 14.sp,
+                                        color = if (isOver) Color(0xFFEF4444) else PrimaryGreen,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = Manrope
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Съедено: ${"%.0f".format(summary.calories)} из ${"%.0f".format(dailyGoal!!)}",
+                                    fontSize = 12.sp,
+                                    color = TextSecondary,
+                                    fontFamily = Manrope
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Прогресс-бар
+                                val calProgress = (summary.calories / dailyGoal!!).toFloat().coerceIn(0f, 1f)
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth(calProgress)
-                                        .fillMaxHeight()
-                                        .background(if (isOver) Color(0xFFEF4444) else PrimaryGreen)
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Black.copy(alpha = 0.1f))
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(calProgress)
+                                            .fillMaxHeight()
+                                            .background(if (isOver) Color(0xFFEF4444) else PrimaryGreen)
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = "Заполните профиль, чтобы видеть норму",
+                                    fontSize = 12.sp,
+                                    color = TextSecondary,
+                                    fontFamily = Manrope
                                 )
                             }
-                        } else {
-                            Text(
-                                text = "Заполните профиль, чтобы видеть норму",
-                                fontSize = 12.sp,
-                                color = TextSecondary,
-                                fontFamily = Manrope
-                            )
-                        }
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
 
-                        // Макросы (капсулы)
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            MacroCapsule("Белки", summary.protein, PrimaryGreen, Modifier.weight(1f))
-                            MacroCapsule("Жиры", summary.fat, AccentOrange, Modifier.weight(1f))
-                            MacroCapsule("Углеводы", summary.carbs, AccentBlue, Modifier.weight(1f))
+                            // Макросы (капсулы)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                MacroCapsule("Белки", summary.protein, AccentLightRed, Modifier.weight(1f))
+                                MacroCapsule("Жиры", summary.fat, AccentOrange, Modifier.weight(1f))
+                                MacroCapsule("Углеводы", summary.carbs, AccentBlue, Modifier.weight(1f))
+                            }
                         }
                     }
                 }
@@ -415,7 +453,7 @@ fun NutritionScreen(
                 GlassCard(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
                     shape = RoundedCornerShape(24.dp),
-                    hazeState = hazeState // <-- ДОБАВИЛИ HAZE СЮДА
+                    hazeState = hazeState
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Text(
@@ -478,7 +516,7 @@ fun NutritionScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = { viewModel.saveAiResultToDiary(result, grams) },
-                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen) // <-- ЦВЕТ ИЗ ТЕМЫ
+                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
                             ) {
                                 Text("Сохранить", color = Color.White)
                             }
@@ -526,7 +564,6 @@ private fun NutritionDayCell(
 ) {
     val isWeekend = DateUtils.isWeekend(date)
 
-    // Выбор цветов: если выбран — белый, если выходной — красный, иначе — стандартный
     val dayNameColor = if (isSelected) Color.White.copy(alpha = 0.8f) else if (isWeekend) Color(0xFFEF4444) else TextSecondary
     val dayNumberColor = if (isSelected) Color.White else if (isWeekend) Color(0xFFEF4444) else TextPrimary
 
@@ -534,7 +571,7 @@ private fun NutritionDayCell(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         hazeState = hazeState,
-        solidColor = if (isSelected) PrimaryGreen else null // Если выбран, заливаем сплошным цветом
+        solidColor = if (isSelected) PrimaryGreen else null
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
@@ -567,7 +604,6 @@ fun MacroCapsule(name: String, current: Double, color: Color, modifier: Modifier
     Column(modifier = modifier) {
         Text("$name", fontSize = 10.sp, color = TextSecondary, fontFamily = Manrope)
         Spacer(modifier = Modifier.height(4.dp))
-        // Так как у нас нет цели по макросам в этом экране, просто закрашиваем полоску полностью
         Box(
             modifier = Modifier
                 .fillMaxWidth()

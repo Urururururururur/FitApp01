@@ -196,7 +196,7 @@ fun TrainingScreen(
                                         fontSize = 12.sp,
                                         color = when (statusEnum) {
                                             WorkoutStatus.COMPLETED -> PrimaryGreen
-                                            WorkoutStatus.IN_PROGRESS -> AccentOrange
+                                            WorkoutStatus.IN_PROGRESS -> PrimaryGreen
                                             WorkoutStatus.WAITING -> TextSecondary
                                         },
                                         fontFamily = Manrope

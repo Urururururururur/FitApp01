@@ -206,7 +206,7 @@ fun WorkoutDetailsScreen(
                             Button(
                                 onClick = { viewModel.finishWorkout() },
                                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)), // Мягкий красный
+                                colors = ButtonDefaults.buttonColors(containerColor = AccentLightRed), // Мягкий красный
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text("ЗАКОНЧИТЬ ТРЕНИРОВКУ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = Manrope)
@@ -350,7 +350,7 @@ fun WorkoutDetailsScreen(
                                                             text = part,
                                                             fontSize = 12.sp,
                                                             fontWeight = if (isMaxWeight) FontWeight.Bold else FontWeight.Normal,
-                                                            color = if (isMaxWeight) AccentOrange else TextSecondary,
+                                                            color = if (isMaxWeight) PrimaryGreen else TextSecondary,
                                                             fontFamily = Manrope
                                                         )
                                                     }
