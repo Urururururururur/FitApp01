@@ -6,6 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.practicum.fitapp.data.local.CategoryDao
+import com.practicum.fitapp.data.local.CollectionDao
+import com.practicum.fitapp.data.local.RecipeDao
 
 /**
  * Главный класс базы данных.
@@ -22,10 +25,16 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SetEntity::class,
         UserProfileEntity::class,
         WeightEntryEntity::class,
-        UnlockedAchievementEntity::class
+        UnlockedAchievementEntity::class,
+        CategoryEntity::class,
+        RecipeEntity::class,
+        RecipeIngredientEntity::class,
+        CollectionEntity::class,
+        RecipeCategoryCrossRef::class,
+        CollectionRecipeCrossRef::class
 
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 
@@ -47,6 +56,9 @@ abstract class FitAppDatabase : RoomDatabase() {
     abstract fun userProfileDao(): UserProfileDao
 
     abstract fun achievementDao(): AchievementDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun recipeDao(): RecipeDao
+    abstract fun collectionDao(): CollectionDao
 
     companion object {
         @Volatile
@@ -303,6 +315,74 @@ abstract class FitAppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE meal_entries ADD COLUMN mealType TEXT NOT NULL DEFAULT 'OTHER'")
             }
         }
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS recipe_categories (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        icon TEXT NOT NULL
+                    )
+                """.trimIndent())
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS recipes (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        title TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        instructions TEXT NOT NULL,
+                        cookTimeMinutes INTEGER NOT NULL,
+                        servings INTEGER NOT NULL,
+                        calories INTEGER NOT NULL,
+                        protein REAL NOT NULL,
+                        fat REAL NOT NULL,
+                        carbs REAL NOT NULL,
+                        imageUrl TEXT,
+                        isFavorite INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS recipe_ingredients (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        recipeId INTEGER NOT NULL,
+                        productName TEXT NOT NULL,
+                        grams REAL NOT NULL,
+                        FOREIGN KEY(recipeId) REFERENCES recipes(id) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_recipe_ingredients_recipeId ON recipe_ingredients(recipeId)")
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS collections (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        title TEXT NOT NULL,
+                        subtitle TEXT NOT NULL,
+                        imageUrl TEXT
+                    )
+                """.trimIndent())
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS recipe_category_cross_ref (
+                        recipeId INTEGER NOT NULL,
+                        categoryId INTEGER NOT NULL,
+                        PRIMARY KEY(recipeId, categoryId),
+                        FOREIGN KEY(recipeId) REFERENCES recipes(id) ON DELETE CASCADE,
+                        FOREIGN KEY(categoryId) REFERENCES recipe_categories(id) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_recipe_category_cross_ref_recipeId ON recipe_category_cross_ref(recipeId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_recipe_category_cross_ref_categoryId ON recipe_category_cross_ref(categoryId)")
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS collection_recipe_cross_ref (
+                        collectionId INTEGER NOT NULL,
+                        recipeId INTEGER NOT NULL,
+                        PRIMARY KEY(collectionId, recipeId),
+                        FOREIGN KEY(collectionId) REFERENCES collections(id) ON DELETE CASCADE,
+                        FOREIGN KEY(recipeId) REFERENCES recipes(id) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_collection_recipe_cross_ref_collectionId ON collection_recipe_cross_ref(collectionId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_collection_recipe_cross_ref_recipeId ON collection_recipe_cross_ref(recipeId)")
+            }
+        }
 
         fun getInstance(context: Context): FitAppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -314,8 +394,9 @@ abstract class FitAppDatabase : RoomDatabase() {
                     .addMigrations(
                         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
                         MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
-                        MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
-                        MIGRATION_16_17)
+                        MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
+                        MIGRATION_17_18
+                    )
                     .build()
                     .also { INSTANCE = it }
             }

@@ -19,24 +19,52 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        // ИЗМЕНЕНО: getByName вместо create
+        getByName("debug") {
+            storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            // Включаем современные схемы подписи
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+        }
+    }
+
+    // Блок signingConfigs мы убрали, так как Gradle сам создает дефолтный debug.
 
     buildTypes {
-        release {
+        getByName("debug") {
+            // Берем стандартную debug-подпись
+            val debugConfig = signingConfigs.getByName("debug")
+            signingConfig = debugConfig
+
+            // Включаем схемы подписи V1 и V2 для совместимости с Huawei
+            debugConfig.enableV1Signing = true
+            debugConfig.enableV2Signing = true
+        }
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
@@ -76,6 +104,7 @@ dependencies {
     implementation(libs.gson)
     implementation("dev.chrisbanes.haze:haze:1.6.10")
 }
+
 hilt {
     enableAggregatingTask = false
 }

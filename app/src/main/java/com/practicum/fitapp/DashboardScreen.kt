@@ -1,6 +1,7 @@
 package com.practicum.fitapp.presentation.dashboard
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -27,11 +28,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,11 +40,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.practicum.fitapp.presentation.common.GlassCard
@@ -73,6 +72,9 @@ fun DashboardScreen(
     val achievements by viewModel.unlockedAchievements.collectAsState()
     val settings by viewModel.settings.collectAsState()
 
+    val context = LocalContext.current
+    var isHealthConnectAvailable by remember { mutableStateOf(false) }
+
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = PermissionController.createRequestPermissionResultContract()
     ) { granted ->
@@ -83,11 +85,24 @@ fun DashboardScreen(
         }
     }
 
+    // БЕЗОПАСНАЯ ПРОВЕРКА И ЗАПУСК
     LaunchedEffect(Unit) {
-        if (healthMetrics == null) {
-            permissionsLauncher.launch(viewModel.hcPermissions)
+        val status = HealthConnectClient.getSdkStatus(context, "com.google.android.apps.healthdata")
+        isHealthConnectAvailable = (status == HealthConnectClient.SDK_AVAILABLE)
+
+        if (isHealthConnectAvailable) {
+            if (healthMetrics == null) {
+                try {
+                    permissionsLauncher.launch(viewModel.hcPermissions)
+                } catch (e: Exception) {
+                    Log.e("HealthConnect", "Failed to launch permissions intent", e)
+                }
+            } else {
+                viewModel.loadHealthData()
+            }
         } else {
-            viewModel.loadHealthData()
+            Log.w("HealthConnect", "Health Connect is not available. Status: $status")
+            Toast.makeText(context, "Синхронизация со здоровьем недоступна на этом устройстве", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -147,8 +162,17 @@ fun DashboardScreen(
             if (settings.showActivity) {
                 ActivityCarousel(
                     healthMetrics = healthMetrics,
+                    isHealthConnectAvailable = isHealthConnectAvailable,
                     onClick = onNavigateToJournal,
-                    onRequestPermissions = { permissionsLauncher.launch(viewModel.hcPermissions) },
+                    onRequestPermissions = {
+                        if (isHealthConnectAvailable) {
+                            try {
+                                permissionsLauncher.launch(viewModel.hcPermissions)
+                            } catch (e: Exception) {
+                                Log.e("HealthConnect", "Failed to launch permissions intent", e)
+                            }
+                        }
+                    },
                     hazeState = hazeState
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -493,6 +517,7 @@ fun WaveBackground(modifier: Modifier = Modifier) {
 @Composable
 fun ActivityCarousel(
     healthMetrics: com.practicum.fitapp.data.HealthConnectManager.HealthMetrics?,
+    isHealthConnectAvailable: Boolean, // <-- НОВЫЙ ПАРАМЕТР
     onClick: () -> Unit,
     onRequestPermissions: () -> Unit,
     hazeState: HazeState? = null
@@ -512,10 +537,15 @@ fun ActivityCarousel(
         }
 
         if (healthMetrics == null) {
-            GlassCard(modifier = Modifier.fillMaxWidth().clickable { onRequestPermissions() }, hazeState = hazeState) {
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (isHealthConnectAvailable) Modifier.clickable { onRequestPermissions() } else Modifier), // Блокируем клик, если нет HC
+                hazeState = hazeState
+            ) {
                 Text(
-                    text = "Нажмите, чтобы разрешить доступ к Health Connect",
-                    color = AccentBlue,
+                    text = if (isHealthConnectAvailable) "Нажмите, чтобы разрешить доступ к Health Connect" else "Health Connect недоступен на этом устройстве",
+                    color = if (isHealthConnectAvailable) AccentBlue else TextSecondary, // Меняем цвет на серый
                     fontSize = 14.sp,
                     modifier = Modifier.padding(20.dp),
                     fontFamily = Manrope
@@ -716,7 +746,6 @@ fun AchievementsRow(
                 items(achievements.take(4)) { achievement ->
                     val imageResId = getAchievementImageResId(achievement.id)
 
-                    // ФИКСИРУЕМ ВЫСОТУ И ШИРИНУ
                     GlassCard(
                         modifier = Modifier
                             .width(110.dp)
@@ -729,7 +758,7 @@ fun AchievementsRow(
                                 .fillMaxSize()
                                 .padding(12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center // Выравниваем контент по центру
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Box(
                                 modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.8f)),
@@ -748,7 +777,6 @@ fun AchievementsRow(
                             }
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // ТОЛЬКО НАЗВАНИЕ, БЕЗ ОПИСАНИЯ
                             Text(
                                 text = achievement.title,
                                 fontSize = 12.sp,
@@ -793,6 +821,6 @@ fun HabitTrackerCard(title: String, quitDate: Long?, relapses: Int, icon: String
 
 @Composable
 fun getAchievementImageResId(id: String): Int {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     return context.resources.getIdentifier("ic_ach_$id", "drawable", context.packageName)
 }

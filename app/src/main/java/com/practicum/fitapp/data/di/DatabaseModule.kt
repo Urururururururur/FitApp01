@@ -3,6 +3,8 @@ package com.practicum.fitapp.data.di
 import android.content.Context
 import androidx.room.Room
 import com.practicum.fitapp.data.local.*
+import com.practicum.fitapp.data.local.CollectionDao
+import com.practicum.fitapp.data.local.RecipeDao
 import com.practicum.fitapp.data.repository.*
 import dagger.Module
 import dagger.Provides
@@ -39,7 +41,8 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_13_14,
                 FitAppDatabase.MIGRATION_14_15,
                 FitAppDatabase.MIGRATION_15_16,
-                FitAppDatabase.MIGRATION_16_17
+                FitAppDatabase.MIGRATION_16_17,
+                FitAppDatabase.MIGRATION_17_18
             )
             .build()
     }
@@ -98,4 +101,22 @@ object DatabaseModule {
         dao: UserProfileDao,
         weightEntryDao: WeightEntryDao
     ): UserRepository = UserRepository(dao, weightEntryDao)
+    // ==================== DAO ДЛЯ РЕЦЕПТОВ ====================
+    @Provides
+    fun provideCategoryDao(db: FitAppDatabase): CategoryDao = db.categoryDao()
+
+    @Provides
+    fun provideRecipeDao(db: FitAppDatabase): RecipeDao = db.recipeDao()
+
+    @Provides
+    fun provideCollectionDao(db: FitAppDatabase): CollectionDao = db.collectionDao()
+
+    // ==================== РЕПОЗИТОРИЙ РЕЦЕПТОВ ====================
+    @Provides
+    @Singleton
+    fun provideRecipeRepository(
+        categoryDao: CategoryDao,
+        recipeDao: RecipeDao,
+        collectionDao: CollectionDao
+    ): RecipeRepository = RecipeRepository(categoryDao, recipeDao, collectionDao)
 }

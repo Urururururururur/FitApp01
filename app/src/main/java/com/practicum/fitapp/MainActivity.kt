@@ -1,6 +1,5 @@
 package com.practicum.fitapp
 
-// ДОБАВЛЕНЫ ВСЕ НЕОБХОДИМЫЕ ИМПОРТЫ ЭКРАНОВ
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,15 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -27,17 +18,8 @@ import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Restaurant
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +33,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.practicum.fitapp.data.local.RecipeSeeder
+import com.practicum.fitapp.data.repository.RecipeRepository
 import com.practicum.fitapp.data.repository.UserRepository
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.common.GradientBackground
@@ -69,6 +53,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var userRepository: UserRepository
+
+    @Inject
+    lateinit var recipeRepository: RecipeRepository // <-- ДОБАВИЛИ ДЛЯ СИДЕРА
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -97,6 +84,11 @@ class MainActivity : ComponentActivity() {
                 var startDestination by remember { mutableStateOf<String?>(null) }
 
                 LaunchedEffect(Unit) {
+                    // 1. Заполняем базу рецептов при первом запуске
+                    val seeder = RecipeSeeder(recipeRepository)
+                    seeder.seedDatabaseIfEmpty()
+
+                    // 2. Проверяем профиль пользователя
                     val profile = userRepository.getProfile().first()
                     startDestination = if (profile != null) "dashboard" else "welcome"
                 }
@@ -117,7 +109,6 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxSize(),
                             containerColor = Color.Transparent,
                             bottomBar = {
-                                // Показываем меню только на 4 главных экранах
                                 if (currentRoute in listOf("dashboard", "nutrition", "training", "journal")) {
                                     Box(
                                         modifier = Modifier
@@ -151,10 +142,8 @@ class MainActivity : ComponentActivity() {
                                                                 indication = null
                                                             ) {
                                                                 if (route == "dashboard") {
-                                                                    // Если нажали на Домик — просто возвращаемся к нему, удаляя всё лишнее
                                                                     navController.popBackStack("dashboard", inclusive = false)
                                                                 } else {
-                                                                    // Для остальных вкладок используем стандартную навигацию
                                                                     navController.navigate(route) {
                                                                         popUpTo("dashboard") { saveState = true }
                                                                         launchSingleTop = true
@@ -248,20 +237,11 @@ class MainActivity : ComponentActivity() {
 
                                 // --- Каталог рецептов ---
                                 composable("recipe_catalog") {
-                                    val nutritionViewModel: com.practicum.fitapp.presentation.nutrition.NutritionViewModel = hiltViewModel()
-
-                                    RecipeCatalogScreen(
+                                    RecipeOverviewScreen(
                                         onBack = { navController.popBackStack() },
-                                        onAddRecipeToDiary = { recipe, grams ->
-                                            // Сохраняем рецепт в сегодняшний день (пока без привязки к конкретному приему пищи)
-                                            val todayTimestamp = java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-                                            // Используем метод из твоей ViewModel
-                                            nutritionViewModel.addRecipeToDiary(
-                                                recipe = recipe,
-                                                dateTimestamp = todayTimestamp,
-                                                grams = grams
-                                            )
+                                        onNavigateToCategory = { categoryName ->
+                                            // Здесь пока просто выводим в лог, позже сделаем переход на экран фильтров
+                                            println("Переход к категории: $categoryName")
                                         }
                                     )
                                 }
