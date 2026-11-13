@@ -235,14 +235,21 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
 
-                                // --- Каталог рецептов ---
+                                // --- Каталог рецептов (Обзор) ---
                                 composable("recipe_catalog") {
                                     RecipeOverviewScreen(
                                         onBack = { navController.popBackStack() },
-                                        onNavigateToCategory = { categoryName ->
-                                            // Здесь пока просто выводим в лог, позже сделаем переход на экран фильтров
-                                            println("Переход к категории: $categoryName")
+                                        onNavigateToCategory = {
+                                            // При клике на категорию на главном экране переходим в фильтры
+                                            navController.navigate("recipe_filters")
                                         }
+                                    )
+                                }
+
+                                // --- Экран Фильтров ---
+                                composable("recipe_filters") {
+                                    RecipeFilterScreen(
+                                        onBack = { navController.popBackStack() }
                                     )
                                 }
 

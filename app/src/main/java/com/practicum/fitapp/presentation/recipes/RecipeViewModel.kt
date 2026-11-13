@@ -65,6 +65,9 @@ class RecipeViewModel @Inject constructor(
     val collections = repository.getCollections()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val allCategories = repository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     // === ДЕЙСТВИЯ ===
     fun setSearchQuery(query: String) {
         _searchQuery.value = query

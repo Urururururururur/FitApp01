@@ -20,6 +20,8 @@ class RecipeRepository(
     fun getCategoriesByType(type: CategoryType): Flow<List<CategoryEntity>> =
         categoryDao.getCategoriesByType(type)
 
+    fun getAllCategories(): Flow<List<CategoryEntity>> = categoryDao.getAllCategories()
+
     // --- Чтение (Рецепты) ---
     fun getFilteredRecipes(
         categoryIds: List<Long>?,
