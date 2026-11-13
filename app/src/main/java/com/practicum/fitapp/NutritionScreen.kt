@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
@@ -16,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -29,20 +29,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.practicum.fitapp.data.local.MealEntryEntity
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.DateUtils
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.nutrition.NutritionViewModel
 import com.practicum.fitapp.ui.theme.*
 import java.time.LocalDate
-
-// Импорты для Haze
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 
 @Composable
 fun NutritionScreen(
-    onAddFood: () -> Unit,
+    onAddFood: (String) -> Unit,
+    onNavigateToRecipes: () -> Unit,
     savedStateHandle: SavedStateHandle,
     viewModel: NutritionViewModel = hiltViewModel()
 ) {
@@ -54,6 +54,9 @@ fun NutritionScreen(
     val isAiLoading by viewModel.isAiLoading.collectAsStateWithLifecycle()
     val aiResult by viewModel.aiResult.collectAsStateWithLifecycle()
 
+    // Проверяем, выбран ли сегодняшний день
+    val isToday = selectedDate == LocalDate.now()
+
     // Стейты для диалогов
     var showGramsDialog by remember { mutableStateOf<ProductEntity?>(null) }
     var gramsInput by remember { mutableStateOf("100") }
@@ -61,46 +64,47 @@ fun NutritionScreen(
     var textQueryInput by remember { mutableStateOf("") }
     var editedGrams by remember { mutableStateOf("100") }
 
-    // Стейт для Haze
+    var currentMealType by remember { mutableStateOf("OTHER") }
     val hazeState = remember { HazeState() }
 
     // Обработка возврата из справочника продуктов
     val selectedProductId = savedStateHandle.getStateFlow<Long?>("selectedProductId", null).collectAsStateWithLifecycle()
-    LaunchedEffect(selectedProductId.value) {
-        if (selectedProductId.value != null) {
+    val selectedMealType = savedStateHandle.getStateFlow<String?>("selectedMealType", null).collectAsStateWithLifecycle()
+
+    LaunchedEffect(selectedProductId.value, selectedMealType.value) {
+        if (selectedProductId.value != null && selectedMealType.value != null) {
             val product = products.find { it.id == selectedProductId.value }
             if (product != null) {
                 showGramsDialog = product
+                currentMealType = selectedMealType.value!!
                 gramsInput = "100"
                 savedStateHandle["selectedProductId"] = null
+                savedStateHandle["selectedMealType"] = null
             }
         }
     }
 
-    // Инициализация граммовки при получении результата от ИИ
     LaunchedEffect(aiResult) {
-        if (aiResult != null) {
-            editedGrams = "100"
-        }
+        if (aiResult != null) editedGrams = "100"
     }
 
-    // ОСНОВНОЙ КОНТЕЙНЕР
+    // ГРУППИРУЕМ ПРОДУКТЫ ПО ПРИЕМАМ ПИЩИ
+    val breakfast = entries.filter { it.mealType == "BREAKFAST" }
+    val lunch = entries.filter { it.mealType == "LUNCH" }
+    val snack = entries.filter { it.mealType == "SNACK" }
+    val dinner = entries.filter { it.mealType == "DINNER" }
+    val other = entries.filter { it.mealType == "OTHER" || it.mealType.isBlank() }
+
     Box(modifier = Modifier.fillMaxSize().background(BgColor)) {
-        // Фон
         Image(
             painter = painterResource(id = com.practicum.fitapp.R.drawable.app_background),
             contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeSource(hazeState),
+            modifier = Modifier.fillMaxSize().hazeSource(hazeState),
             contentScale = ContentScale.Crop
         )
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp)
         ) {
             item {
                 Text(
@@ -122,12 +126,9 @@ fun NutritionScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            // СКРЫВАЕМ ДАТУ, ЕСЛИ СЕГОДНЯ
+            if (!isToday) {
+                item {
                     Text(
                         text = DateUtils.formatShort(selectedDate),
                         fontSize = 18.sp,
@@ -135,17 +136,14 @@ fun NutritionScreen(
                         color = TextPrimary,
                         fontFamily = Manrope
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // СВОДКА ЗА ДЕНЬ (С КАРТИНКОЙ)
+            // СВОДКА ЗА ДЕНЬ
             item {
                 GlassCard(modifier = Modifier.fillMaxWidth(), hazeState = hazeState) {
-                    // ОБОРАЧИВАЕМ В BOX, ЧТОБЫ НАЛОЖИТЬ КАРТИНКУ
                     Box(modifier = Modifier.fillMaxWidth()) {
-
-                        // 1. КАРТИНКА НА ЗАДНЕМ ПЛАНЕ (В правом верхнем углу)
                         Image(
                             painter = painterResource(id = com.practicum.fitapp.R.drawable.img_fruits_bowl),
                             contentDescription = null,
@@ -157,9 +155,15 @@ fun NutritionScreen(
                             contentScale = ContentScale.Crop
                         )
 
-                        // 2. ТЕКСТ ПОВЕРХ КАРТИНКИ
                         Column(modifier = Modifier.padding(20.dp)) {
-                            Text(text = "За день", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, fontFamily = Manrope)
+                            // МЕНЯЕМ ЗАГОЛОВОК В ЗАВИСИМОСТИ ОТ ДНЯ
+                            Text(
+                                text = if (isToday) "На сегодня" else "За день",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = TextPrimary,
+                                fontFamily = Manrope
+                            )
                             Spacer(modifier = Modifier.height(12.dp))
 
                             if (dailyGoal != null) {
@@ -167,7 +171,6 @@ fun NutritionScreen(
                                 val isOver = remaining < 0
                                 val absRemaining = kotlin.math.abs(remaining)
 
-                                // Главный акцент
                                 Text(
                                     text = "%,.0f".format(absRemaining).replace(",", " "),
                                     fontSize = 48.sp,
@@ -177,7 +180,6 @@ fun NutritionScreen(
                                     lineHeight = 48.sp
                                 )
 
-                                // Плашка с восклицательным знаком (если перебор)
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
@@ -187,12 +189,7 @@ fun NutritionScreen(
                                         .padding(horizontal = if (isOver) 8.dp else 0.dp, vertical = if (isOver) 4.dp else 0.dp)
                                 ) {
                                     if (isOver) {
-                                        Icon(
-                                            imageVector = Icons.Default.Warning,
-                                            contentDescription = null,
-                                            tint = Color(0xFFEF4444),
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
                                     }
                                     Text(
@@ -214,34 +211,17 @@ fun NutritionScreen(
 
                                 Spacer(modifier = Modifier.height(12.dp))
 
-                                // Прогресс-бар
                                 val calProgress = (summary.calories / dailyGoal!!).toFloat().coerceIn(0f, 1f)
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(8.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.Black.copy(alpha = 0.1f))
+                                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.1f))
                                 ) {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth(calProgress)
-                                            .fillMaxHeight()
-                                            .background(if (isOver) Color(0xFFEF4444) else PrimaryGreen)
+                                        modifier = Modifier.fillMaxWidth(calProgress).fillMaxHeight().background(if (isOver) Color(0xFFEF4444) else PrimaryGreen)
                                     )
                                 }
-                            } else {
-                                Text(
-                                    text = "Заполните профиль, чтобы видеть норму",
-                                    fontSize = 12.sp,
-                                    color = TextSecondary,
-                                    fontFamily = Manrope
-                                )
                             }
-
                             Spacer(modifier = Modifier.height(20.dp))
 
-                            // Макросы (капсулы)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 MacroCapsule("Белки", summary.protein, AccentLightRed, Modifier.weight(1f))
                                 MacroCapsule("Жиры", summary.fat, AccentOrange, Modifier.weight(1f))
@@ -253,95 +233,36 @@ fun NutritionScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // КНОПКА ДОБАВИТЬ
+            // КНОПКА РЕЦЕПТОВ
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = PrimaryGreen.copy(alpha = 0.3f))
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(PrimaryGreen)
-                        .clickable { onAddFood() },
-                    contentAlignment = Alignment.Center
+                OutlinedButton(
+                    onClick = onNavigateToRecipes,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, PrimaryGreen),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryGreen)
                 ) {
-                    Text(
-                        text = "Добавить продукт",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        fontFamily = Manrope
-                    )
+                    Text("Каталог рецептов", fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = Manrope)
                 }
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // СПИСОК ПРОДУКТОВ
+            // КАРТОЧКИ ПРИЕМОВ ПИЩИ
             item {
-                Text(
-                    text = "Съедено за день",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    fontFamily = Manrope
-                )
+                MealCard("Завтрак", "BREAKFAST", breakfast, isToday, onAddFood, { viewModel.deleteEntry(it) }, hazeState)
                 Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            if (entries.isEmpty()) {
-                item {
-                    Text(
-                        "Пока ничего не записано",
-                        fontSize = 14.sp,
-                        color = TextSecondary,
-                        fontFamily = Manrope
-                    )
-                }
-            } else {
-                items(entries.size) { index ->
-                    val entry = entries[index]
-                    GlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        hazeState = hazeState
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = entry.productName,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary,
-                                    fontFamily = Manrope
-                                )
-                                Text(
-                                    text = "${entry.grams} г — ${"%.0f".format(entry.grams * entry.productCalories / 100)} ккал",
-                                    fontSize = 12.sp,
-                                    color = TextSecondary,
-                                    fontFamily = Manrope
-                                )
-                            }
-                            IconButton(onClick = { viewModel.deleteEntry(entry.id) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Delete,
-                                    contentDescription = "Удалить",
-                                    tint = TextSecondary
-                                )
-                            }
-                        }
-                    }
+                MealCard("Обед", "LUNCH", lunch, isToday, onAddFood, { viewModel.deleteEntry(it) }, hazeState)
+                Spacer(modifier = Modifier.height(12.dp))
+                MealCard("Перекус", "SNACK", snack, isToday, onAddFood, { viewModel.deleteEntry(it) }, hazeState)
+                Spacer(modifier = Modifier.height(12.dp))
+                MealCard("Ужин", "DINNER", dinner, isToday, onAddFood, { viewModel.deleteEntry(it) }, hazeState)
+                if (other.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    MealCard("Другое", "OTHER", other, isToday, onAddFood, { viewModel.deleteEntry(it) }, hazeState)
                 }
             }
 
-            // ОТСТУП В КОНЦЕ
-            item {
-                Spacer(modifier = Modifier.height(100.dp))
-            }
+            item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
 
@@ -375,7 +296,7 @@ fun NutritionScreen(
                     onClick = {
                         val grams = gramsInput.toDoubleOrNull()
                         if (grams != null && grams > 0) {
-                            viewModel.addEntry(showGramsDialog!!, grams)
+                            viewModel.addEntry(showGramsDialog!!, grams, currentMealType)
                             showGramsDialog = null
                         }
                     },
@@ -392,6 +313,7 @@ fun NutritionScreen(
         )
     }
 
+    // Диалог текстового запроса к ИИ
     if (showTextQueryDialog) {
         AlertDialog(
             onDismissRequest = { showTextQueryDialog = false },
@@ -515,7 +437,7 @@ fun NutritionScreen(
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
-                                onClick = { viewModel.saveAiResultToDiary(result, grams) },
+                                onClick = { viewModel.saveAiResultToDiary(result, grams, "OTHER") }, // TODO: Будем передавать currentMealType, когда доработаем UI ИИ
                                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
                             ) {
                                 Text("Сохранить", color = Color.White)
@@ -528,7 +450,94 @@ fun NutritionScreen(
     }
 }
 
-// ============ КОМПОНЕНТЫ ============
+// ============ КОМПОНЕНТ КАРТОЧКИ ПРИЕМА ПИЩИ ============
+
+@Composable
+fun MealCard(
+    title: String,
+    mealType: String,
+    entries: List<MealEntryEntity>,
+    isToday: Boolean,
+    onAddClick: (String) -> Unit,
+    onDeleteEntry: (Long) -> Unit,
+    hazeState: HazeState
+) {
+    val totalCalories = entries.sumOf { (it.grams * it.productCalories / 100).toInt() }
+
+    GlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isToday) Modifier.clickable { onAddClick(mealType) } else Modifier),
+        hazeState = hazeState
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
+                if (totalCalories > 0) {
+                    Text(text = "$totalCalories ккал", fontSize = 14.sp, color = PrimaryGreen, fontWeight = FontWeight.Medium, fontFamily = Manrope)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (entries.isEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Пока ничего не записано", fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
+
+                    if (isToday) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Добавить",
+                            tint = TextSecondary.copy(alpha = 0.5f),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            } else {
+                entries.forEach { entry ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(entry.productName, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary, fontFamily = Manrope)
+                            Text("${entry.grams} г — ${(entry.grams * entry.productCalories / 100).toInt()} ккал", fontSize = 12.sp, color = TextSecondary, fontFamily = Manrope)
+                        }
+
+                        if (isToday) {
+                            IconButton(onClick = { onDeleteEntry(entry.id) }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Удалить", tint = TextSecondary.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+
+                if (isToday) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Добавить",
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ============ ОСТАЛЬНЫЕ КОМПОНЕНТЫ ============
 
 @Composable
 private fun NutritionWeekStrip(
@@ -605,17 +614,10 @@ fun MacroCapsule(name: String, current: Double, color: Color, modifier: Modifier
         Text("$name", fontSize = 10.sp, color = TextSecondary, fontFamily = Manrope)
         Spacer(modifier = Modifier.height(4.dp))
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.1f))
+            modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.1f))
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .fillMaxHeight()
-                    .background(color)
+                modifier = Modifier.fillMaxWidth(1f).fillMaxHeight().background(color)
             )
         }
         Spacer(modifier = Modifier.height(4.dp))

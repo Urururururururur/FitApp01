@@ -14,5 +14,6 @@ data class MealEntryEntity(
     val productProtein: Double = 0.0,
     val productFat: Double = 0.0,
     val productCarbs: Double = 0.0,
-    val grams: Double
+    val grams: Double,
+    val mealType: String = "OTHER"
 )

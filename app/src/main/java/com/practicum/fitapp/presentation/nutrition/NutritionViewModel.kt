@@ -117,7 +117,32 @@ class NutritionViewModel @Inject constructor(
         _aiResult.value = null
     }
 
-    fun saveAiResultToDiary(result: AiFoodResult, grams: Double) {
+
+
+    // ==================== Действия ====================
+    fun setSelectedDate(date: LocalDate) {
+        _selectedDate.value = date
+    }
+    fun addEntry(product: ProductEntity, grams: Double, mealType: String) {
+        viewModelScope.launch {
+            val timestamp = _selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            repository.addMealEntry(
+                MealEntryEntity(
+                    date = timestamp,
+                    productId = product.id,
+                    productName = product.name,
+                    productCalories = product.caloriesPer100g,
+                    productProtein = product.proteinPer100g,
+                    productFat = product.fatPer100g,
+                    productCarbs = product.carbsPer100g,
+                    grams = grams,
+                    mealType = mealType // <-- ДОБАВИЛИ СЮДА
+                )
+            )
+        }
+    }
+
+    fun saveAiResultToDiary(result: AiFoodResult, grams: Double, mealType: String = "OTHER") {
         if (result.name == null || result.caloriesPer100g == null) return
         viewModelScope.launch {
             val timestamp = _selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -130,39 +155,21 @@ class NutritionViewModel @Inject constructor(
                     productProtein = result.proteinPer100g ?: 0.0,
                     productFat = result.fatPer100g ?: 0.0,
                     productCarbs = result.carbsPer100g ?: 0.0,
-                    grams = grams
+                    grams = grams,
+                    mealType = mealType // <-- ДОБАВИЛИ СЮДА
                 )
             )
             _aiResult.value = null
         }
     }
 
-    // ==================== Действия ====================
-    fun setSelectedDate(date: LocalDate) {
-        _selectedDate.value = date
-    }
 
-    fun addEntry(product: ProductEntity, grams: Double) {
-        viewModelScope.launch {
-            val timestamp = _selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            repository.addMealEntry(
-                MealEntryEntity(
-                    date = timestamp,
-                    productId = product.id,
-                    productName = product.name,
-                    productCalories = product.caloriesPer100g,
-                    productProtein = product.proteinPer100g,
-                    productFat = product.fatPer100g,
-                    productCarbs = product.carbsPer100g,
-                    grams = grams
-                )
-            )
-        }
-    }
 
     fun deleteEntry(id: Long) {
         viewModelScope.launch {
             repository.deleteMealEntryById(id)
         }
     }
+
+    fun addRecipeToDiary(recipe: Recipe, dateTimestamp: Long, grams: Double) {}
 }

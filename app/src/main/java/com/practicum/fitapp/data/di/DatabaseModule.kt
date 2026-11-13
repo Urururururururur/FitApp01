@@ -38,7 +38,8 @@ object DatabaseModule {
                 FitAppDatabase.MIGRATION_12_13,
                 FitAppDatabase.MIGRATION_13_14,
                 FitAppDatabase.MIGRATION_14_15,
-                FitAppDatabase.MIGRATION_15_16 // <-- ДОБАВИЛИ СЮДА
+                FitAppDatabase.MIGRATION_15_16,
+                FitAppDatabase.MIGRATION_16_17
             )
             .build()
     }
