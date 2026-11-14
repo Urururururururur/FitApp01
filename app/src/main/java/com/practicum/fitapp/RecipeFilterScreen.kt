@@ -141,7 +141,7 @@ fun RecipeFilterScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 allCategories.forEach { category ->
-                                    val isSelected = selectedCategoryIds?.contains(category.id) == true
+                                    val isSelected = selectedCategoryIds.contains(category.id)
                                     FilterChip(
                                         selected = isSelected,
                                         onClick = { viewModel.toggleCategory(category.id) },

@@ -7,7 +7,7 @@ class RecipeSeeder(private val repository: RecipeRepository) {
 
     suspend fun seedDatabaseIfEmpty() {
         // Если рецепты уже есть, ничего не делаем
-        if (repository.getFilteredRecipes(null, 0, 9999, "").first().isNotEmpty()) return
+        if (repository.getFilteredRecipes(emptyList(), 0, 9999, "").first().isNotEmpty()) return
 
         // 1. Создаем категории
         val catBreakfast = repository.insertCategory(CategoryEntity(name = "Завтрак", type = CategoryType.MEAL, icon = "🍳"))

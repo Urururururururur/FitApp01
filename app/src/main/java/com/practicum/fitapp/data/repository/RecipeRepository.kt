@@ -24,12 +24,18 @@ class RecipeRepository(
 
     // --- Чтение (Рецепты) ---
     fun getFilteredRecipes(
-        categoryIds: List<Long>?,
+        categoryIds: List<Long>,
         minCalories: Int,
         maxCalories: Int,
         searchQuery: String
     ): Flow<List<RecipeEntity>> =
-        recipeDao.getFilteredRecipes(categoryIds, minCalories, maxCalories, searchQuery)
+        recipeDao.getFilteredRecipes(
+            categoryIds = categoryIds,
+            categoryIdsSize = categoryIds.size, // <-- Передаем размер
+            minCalories = minCalories,
+            maxCalories = maxCalories,
+            searchQuery = searchQuery
+        )
 
     fun getRecipeDetails(recipeId: Long): Flow<RecipeWithIngredients?> =
         recipeDao.getRecipeById(recipeId)

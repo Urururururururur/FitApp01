@@ -27,6 +27,21 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes WHERE id = :recipeId")
     fun getRecipeById(recipeId: Long): Flow<RecipeWithIngredients?>
 
+    @Query("""
+        SELECT DISTINCT r.* FROM recipes r
+        INNER JOIN recipe_category_cross_ref rcc ON r.id = rcc.recipeId
+        WHERE (:categoryIdsSize = 0 OR rcc.categoryId IN (:categoryIds))
+        AND r.calories BETWEEN :minCalories AND :maxCalories
+        AND r.title LIKE '%' || :searchQuery || '%'
+    """)
+    fun getFilteredRecipes(
+        categoryIds: List<Long>, // Теперь не Nullable
+        categoryIdsSize: Int,    // Передаем размер списка
+        minCalories: Int,
+        maxCalories: Int,
+        searchQuery: String
+    ): Flow<List<RecipeEntity>>
+
     @Query("SELECT * FROM recipes WHERE isFavorite = 1")
     fun getFavoriteRecipes(): Flow<List<RecipeEntity>>
 

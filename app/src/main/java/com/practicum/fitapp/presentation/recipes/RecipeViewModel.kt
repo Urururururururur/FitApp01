@@ -21,8 +21,9 @@ class RecipeViewModel @Inject constructor(
 ) : ViewModel() {
 
     // === ФИЛЬТРЫ ===
-    private val _selectedCategoryIds = MutableStateFlow<List<Long>?>(null) // null = все категории
-    val selectedCategoryIds: StateFlow<List<Long>?> = _selectedCategoryIds
+    // Теперь это не Nullable List, а просто List (пустой по умолчанию)
+    private val _selectedCategoryIds = MutableStateFlow<List<Long>>(emptyList())
+    val selectedCategoryIds: StateFlow<List<Long>> = _selectedCategoryIds
 
     private val _minCalories = MutableStateFlow(0)
     val minCalories: StateFlow<Int> = _minCalories
@@ -54,7 +55,11 @@ class RecipeViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
-    // === КАТЕГОРИИ ДЛЯ ЭКРАНА ФИЛЬТРОВ ===
+    // === ВСЕ КАТЕГОРИИ (ДЛЯ ЭКРАНА ФИЛЬТРОВ) ===
+    val allCategories = repository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // === КАТЕГОРИИ ПО ТИПУ (ДЛЯ ГЛАВНОГО ЭКРАНА) ===
     val dietCategories = repository.getCategoriesByType(CategoryType.DIET)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -65,9 +70,6 @@ class RecipeViewModel @Inject constructor(
     val collections = repository.getCollections()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allCategories = repository.getAllCategories()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     // === ДЕЙСТВИЯ ===
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
@@ -75,15 +77,10 @@ class RecipeViewModel @Inject constructor(
 
     fun toggleCategory(categoryId: Long) {
         val current = _selectedCategoryIds.value
-        if (current == null) {
-            _selectedCategoryIds.value = listOf(categoryId)
+        _selectedCategoryIds.value = if (current.contains(categoryId)) {
+            current - categoryId
         } else {
-            if (current.contains(categoryId)) {
-                val newList = current - categoryId
-                _selectedCategoryIds.value = if (newList.isEmpty()) null else newList
-            } else {
-                _selectedCategoryIds.value = current + categoryId
-            }
+            current + categoryId
         }
     }
 
@@ -98,9 +95,9 @@ class RecipeViewModel @Inject constructor(
         }
     }
 
-    // Вспомогательный класс для combine
+    // ИСПРАВЛЕНО: Теперь тип List<Long> без знака вопроса
     private data class FilterParams(
-        val categoryIds: List<Long>?,
+        val categoryIds: List<Long>,
         val minCalories: Int,
         val maxCalories: Int,
         val searchQuery: String
