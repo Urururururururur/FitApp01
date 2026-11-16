@@ -33,12 +33,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.practicum.fitapp.data.local.FitAppDatabase
 import com.practicum.fitapp.data.local.RecipeSeeder
 import com.practicum.fitapp.data.repository.RecipeRepository
 import com.practicum.fitapp.data.repository.UserRepository
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.common.GradientBackground
 import com.practicum.fitapp.presentation.dashboard.DashboardScreen
+import com.practicum.fitapp.presentation.recipes.RecipeCategoriesScreen
+import com.practicum.fitapp.presentation.recipes.RecipeDetailsScreen // <-- ДОБАВЛЕН ИМПОРТ
 import com.practicum.fitapp.presentation.training.TrainingViewModel
 import com.practicum.fitapp.presentation.training.builtInPrograms
 import com.practicum.fitapp.ui.theme.BgColor
@@ -47,6 +50,7 @@ import com.practicum.fitapp.ui.theme.PrimaryGreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
+import com.practicum.fitapp.presentation.recipes.RecipeCategoryAllScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -55,7 +59,7 @@ class MainActivity : ComponentActivity() {
     lateinit var userRepository: UserRepository
 
     @Inject
-    lateinit var recipeRepository: RecipeRepository // <-- ДОБАВИЛИ ДЛЯ СИДЕРА
+    lateinit var recipeRepository: RecipeRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -85,7 +89,10 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     // 1. Заполняем базу рецептов при первом запуске
-                    val seeder = RecipeSeeder(recipeRepository)
+                    val seeder = RecipeSeeder(
+                        context = applicationContext,
+                        database = FitAppDatabase.getInstance(applicationContext)
+                    )
                     seeder.seedDatabaseIfEmpty()
 
                     // 2. Проверяем профиль пользователя
@@ -239,17 +246,62 @@ class MainActivity : ComponentActivity() {
                                 composable("recipe_catalog") {
                                     RecipeOverviewScreen(
                                         onBack = { navController.popBackStack() },
-                                        onNavigateToCategory = {
-                                            // При клике на категорию на главном экране переходим в фильтры
-                                            navController.navigate("recipe_filters")
+                                        onNavigateToCategory = { type, id ->
+                                            if (type == "FILTERS") {
+                                                navController.navigate("recipe_filters") // <-- Переход на экран фильтров!
+                                            } else {
+                                                navController.navigate("recipe_categories/$type/$id") // <-- Переход на экран категорий
+                                            }
+                                        },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") }
+                                    )
+                                }
+                                composable(
+                                    route = "recipe_categories/{type}/{categoryId}",
+                                    arguments = listOf(
+                                        navArgument("type") { type = NavType.StringType },
+                                        navArgument("categoryId") { type = NavType.LongType }
+                                    )
+                                ) {
+                                    RecipeCategoriesScreen(
+                                        onBack = { navController.popBackStack() },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") },
+                                        onSeeAllClick = { type, categoryId ->
+                                            navController.navigate("recipe_category_all/$type/$categoryId")
                                         }
+                                    )
+                                }
+                                // --- Экран ВСЕХ рецептов конкретной категории ---
+                                composable(
+                                    route = "recipe_category_all/{type}/{categoryId}",
+                                    arguments = listOf(
+                                        navArgument("type") { type = NavType.StringType },
+                                        navArgument("categoryId") { type = NavType.LongType }
+                                    )
+                                ) {
+                                    RecipeCategoryAllScreen(
+                                        onBack = { navController.popBackStack() },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") }
                                     )
                                 }
 
                                 // --- Экран Фильтров ---
                                 composable("recipe_filters") {
                                     RecipeFilterScreen(
-                                        onBack = { navController.popBackStack() }
+                                        onBack = { navController.popBackStack() },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") }
+                                    )
+                                }
+
+                                // --- Экран Деталей Рецепта ---
+                                composable(
+                                    route = "recipe_details/{recipeId}",
+                                    arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
+                                ) { backStackEntry ->
+                                    val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
+                                    RecipeDetailsScreen(
+                                        onBack = { navController.popBackStack() },
+                                        onAddToDiary = { /* TODO: Сделаем на следующем шаге */ }
                                     )
                                 }
 

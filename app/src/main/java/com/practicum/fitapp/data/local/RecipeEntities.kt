@@ -23,6 +23,7 @@ data class RecipeEntity(
     val instructions: String,     // Храним инструкцию как одну строку с переносами \n
     val cookTimeMinutes: Int,
     val servings: Int,
+    val totalWeightGrams: Int,
     val calories: Int,
     val protein: Double,
     val fat: Double,

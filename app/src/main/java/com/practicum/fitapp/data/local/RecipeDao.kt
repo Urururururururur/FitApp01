@@ -7,8 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Relation
 import androidx.room.Transaction
-import com.practicum.fitapp.data.local.RecipeEntity
-import com.practicum.fitapp.data.local.RecipeIngredientEntity
 import kotlinx.coroutines.flow.Flow
 
 data class RecipeWithIngredients(
@@ -28,15 +26,17 @@ interface RecipeDao {
     fun getRecipeById(recipeId: Long): Flow<RecipeWithIngredients?>
 
     @Query("""
-        SELECT DISTINCT r.* FROM recipes r
+        SELECT r.* FROM recipes r
         INNER JOIN recipe_category_cross_ref rcc ON r.id = rcc.recipeId
         WHERE (:categoryIdsSize = 0 OR rcc.categoryId IN (:categoryIds))
         AND r.calories BETWEEN :minCalories AND :maxCalories
         AND r.title LIKE '%' || :searchQuery || '%'
+        GROUP BY r.id
+        HAVING COUNT(DISTINCT rcc.categoryId) = :categoryIdsSize
     """)
     fun getFilteredRecipes(
-        categoryIds: List<Long>, // Теперь не Nullable
-        categoryIdsSize: Int,    // Передаем размер списка
+        categoryIds: List<Long>,
+        categoryIdsSize: Int,
         minCalories: Int,
         maxCalories: Int,
         searchQuery: String
@@ -48,24 +48,9 @@ interface RecipeDao {
     @Query("UPDATE recipes SET isFavorite = :isFavorite WHERE id = :recipeId")
     suspend fun toggleFavorite(recipeId: Long, isFavorite: Boolean)
 
-    @Query("""
-        SELECT DISTINCT r.* FROM recipes r
-        INNER JOIN recipe_category_cross_ref rcc ON r.id = rcc.recipeId
-        WHERE (:categoryIds IS NULL OR rcc.categoryId IN (:categoryIds))
-        AND r.calories BETWEEN :minCalories AND :maxCalories
-        AND r.title LIKE '%' || :searchQuery || '%'
-    """)
-    fun getFilteredRecipes(
-        categoryIds: List<Long>?,
-        minCalories: Int,
-        maxCalories: Int,
-        searchQuery: String
-    ): Flow<List<RecipeEntity>>
-
     @Query("SELECT * FROM recipes ORDER BY id DESC")
     fun getAllRecipes(): Flow<List<RecipeEntity>>
 
-    // ИСПРАВЛЕНО: Используем @Insert вместо @Query
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecipe(recipe: RecipeEntity): Long
 
@@ -74,4 +59,14 @@ interface RecipeDao {
 
     @Query("INSERT INTO recipe_category_cross_ref (recipeId, categoryId) VALUES (:recipeId, :categoryId)")
     suspend fun insertRecipeCategory(recipeId: Long, categoryId: Long)
+
+    // --- Новые методы для сидера ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllIngredients(ingredients: List<RecipeIngredientEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllRecipeCategories(refs: List<RecipeCategoryCrossRef>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllCollectionRecipes(refs: List<CollectionRecipeCrossRef>)
 }

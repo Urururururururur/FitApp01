@@ -14,13 +14,16 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.lifecycle.SavedStateHandle
 
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
-    private val repository: RecipeRepository
+    private val repository: RecipeRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     // === ФИЛЬТРЫ ===
+    private val initialCategoryId: Long = savedStateHandle["initialCategoryId"] ?: 0L
     // Теперь это не Nullable List, а просто List (пустой по умолчанию)
     private val _selectedCategoryIds = MutableStateFlow<List<Long>>(emptyList())
     val selectedCategoryIds: StateFlow<List<Long>> = _selectedCategoryIds

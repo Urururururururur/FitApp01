@@ -1,27 +1,38 @@
 package com.practicum.fitapp
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.practicum.fitapp.data.local.RecipeEntity
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.recipes.RecipeViewModel
 import com.practicum.fitapp.ui.theme.*
@@ -32,6 +43,7 @@ import dev.chrisbanes.haze.hazeSource
 @Composable
 fun RecipeFilterScreen(
     onBack: () -> Unit,
+    onRecipeClick: (Long) -> Unit,
     viewModel: RecipeViewModel = hiltViewModel()
 ) {
     val allCategories by viewModel.allCategories.collectAsStateWithLifecycle()
@@ -42,11 +54,16 @@ fun RecipeFilterScreen(
     val filteredRecipes by viewModel.filteredRecipes.collectAsStateWithLifecycle()
 
     val hazeState = remember { HazeState() }
-
-    // Локальный стейт для слайдера (использует Float для плавности)
     var sliderRange by remember { mutableStateOf(minCalories.toFloat()..maxCalories.toFloat()) }
 
-    // Синхронизация слайдера при изменении фильтров
+    // Стейт для спойлера категорий (по умолчанию свернут)
+    var isCategoriesExpanded by remember { mutableStateOf(false) }
+    // Анимация стрелочки
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isCategoriesExpanded) 180f else 0f,
+        label = "arrow_rotation"
+    )
+
     LaunchedEffect(minCalories, maxCalories) {
         sliderRange = minCalories.toFloat()..maxCalories.toFloat()
     }
@@ -128,30 +145,55 @@ fun RecipeFilterScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // 3. КАТЕГОРИИ (Теги)
+                // 3. КАТЕГОРИИ (СПОЙЛЕР)
                 item {
                     GlassCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), hazeState = hazeState) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Категории", fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
-                            Spacer(modifier = Modifier.height(12.dp))
 
-                            // FlowRow позволяет тегам переноситься на новую строку
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            // Заголовок-кнопка для спойлера
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isCategoriesExpanded = !isCategoriesExpanded },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                allCategories.forEach { category ->
-                                    val isSelected = selectedCategoryIds.contains(category.id)
-                                    FilterChip(
-                                        selected = isSelected,
-                                        onClick = { viewModel.toggleCategory(category.id) },
-                                        label = { Text(category.name, fontFamily = Manrope) },
-                                        leadingIcon = { Text(category.icon) },
-                                        colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = PrimaryGreen.copy(alpha = 0.2f),
-                                            selectedLabelColor = PrimaryGreen
-                                        )
-                                    )
+                                Text(
+                                    text = if (selectedCategoryIds.isNotEmpty()) "Категории (выбрано: ${selectedCategoryIds.size})" else "Категории",
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary,
+                                    fontFamily = Manrope
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Развернуть",
+                                    tint = TextPrimary,
+                                    modifier = Modifier.rotate(rotationAngle)
+                                )
+                            }
+
+                            // Выпадающий контент
+                            AnimatedVisibility(visible = isCategoriesExpanded) {
+                                Column {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        allCategories.forEach { category ->
+                                            val isSelected = selectedCategoryIds.contains(category.id)
+                                            FilterChip(
+                                                selected = isSelected,
+                                                onClick = { viewModel.toggleCategory(category.id) },
+                                                label = { Text(category.name, fontFamily = Manrope) },
+                                                leadingIcon = { Text(category.icon) },
+                                                colors = FilterChipDefaults.filterChipColors(
+                                                    selectedContainerColor = PrimaryGreen.copy(alpha = 0.2f),
+                                                    selectedLabelColor = PrimaryGreen
+                                                )
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -170,35 +212,68 @@ fun RecipeFilterScreen(
                         Text("Ничего не найдено. Попробуйте изменить фильтры.", color = TextSecondary, fontFamily = Manrope)
                     }
                 } else {
-                    // Сетка результатов (по 2 в ряд)
-                    val chunked = filteredRecipes.chunked(2)
-                    items(chunked.size) { index ->
-                        val rowRecipes = chunked[index]
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            rowRecipes.forEach { recipe ->
-                                GlassCard(
-                                    modifier = Modifier.weight(1f).padding(vertical = 6.dp),
-                                    shape = RoundedCornerShape(16.dp),
-                                    hazeState = hazeState
-                                ) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
-                                        Box(
-                                            modifier = Modifier.fillMaxWidth().height(100.dp).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.5f)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(Icons.Outlined.Restaurant, contentDescription = null, tint = PrimaryGreen, modifier = Modifier.size(32.dp))
-                                        }
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(recipe.title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope, maxLines = 2)
-                                        Text("${recipe.calories} ккал", fontSize = 12.sp, color = PrimaryGreen, fontFamily = Manrope)
-                                    }
-                                }
-                            }
-                            if (rowRecipes.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
+                    items(filteredRecipes) { recipe ->
+                        FullWidthRecipeCard(recipe, onClick = { onRecipeClick(recipe.id) }, hazeState = hazeState)
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
+                }
+            }
+        }
+    }
+}
+
+// --- КАРТОЧКА НА ВСЮ ШИРИНУ ---
+@Composable
+fun FullWidthRecipeCard(recipe: RecipeEntity, onClick: () -> Unit, hazeState: HazeState) {
+    GlassCard(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        hazeState = hazeState
+    ) {
+        Column {
+            // Картинка с кнопкой "Избранное"
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                AsyncImage(
+                    model = recipe.imageUrl,
+                    contentDescription = recipe.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                // Кнопка избранного поверх картинки
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable { /* TODO: Сюда добавим логику избранного */ },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (recipe.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                        contentDescription = "Избранное",
+                        tint = Color.White
+                    )
+                }
+            }
+
+            // Текстовая часть
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = recipe.title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    fontFamily = Manrope,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("${recipe.calories} ккал", fontSize = 14.sp, color = PrimaryGreen, fontFamily = Manrope)
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("${recipe.cookTimeMinutes} мин.", fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
                 }
             }
         }
