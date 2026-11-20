@@ -46,6 +46,9 @@ class RecipeRepository(
     fun getFavoriteRecipes(): Flow<List<RecipeEntity>> =
         recipeDao.getFavoriteRecipes()
 
+    fun getRecipesByCategoryAndCollection(categoryId: Long, collectionId: Long): Flow<List<RecipeEntity>> =
+        recipeDao.getRecipesByCategoryAndCollection(categoryId, collectionId)
+
     // --- Чтение (Подборки) ---
     fun getCollections(): Flow<List<CollectionWithRecipes>> =
         collectionDao.getCollectionsWithRecipes()

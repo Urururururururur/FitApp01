@@ -2,6 +2,7 @@ package com.practicum.fitapp
 
 import android.graphics.Paint
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -33,12 +34,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +65,7 @@ fun JournalScreen(
     viewModel: JournalViewModel = hiltViewModel(),
     statsViewModel: ExerciseStatsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val nutritionDays by viewModel.nutritionDays.collectAsStateWithLifecycle()
     val workoutDays by viewModel.workoutDays.collectAsStateWithLifecycle()
     val weightHistory by viewModel.weightHistory.collectAsStateWithLifecycle()
@@ -71,6 +75,9 @@ fun JournalScreen(
     val exercisesWithProgress by statsViewModel.exercisesWithProgress.collectAsStateWithLifecycle()
     val progressData by statsViewModel.progressData.collectAsStateWithLifecycle()
     val selectedExerciseId by statsViewModel.selectedExerciseId.collectAsStateWithLifecycle()
+
+    // Стейт для проверки доступности Health Connect
+    var isHealthConnectAvailable by remember { mutableStateOf(false) }
 
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = PermissionController.createRequestPermissionResultContract()
@@ -82,11 +89,24 @@ fun JournalScreen(
         }
     }
 
+    // БЕЗОПАСНАЯ ПРОВЕРКА И ЗАПУСК (КАК В ДАШБОРДЕ)
     LaunchedEffect(Unit) {
-        if (metrics == null) {
-            permissionsLauncher.launch(viewModel.hcPermissions)
+        val status = HealthConnectClient.getSdkStatus(context, "com.google.android.apps.healthdata")
+        isHealthConnectAvailable = (status == HealthConnectClient.SDK_AVAILABLE)
+
+        if (isHealthConnectAvailable) {
+            if (metrics == null) {
+                try {
+                    permissionsLauncher.launch(viewModel.hcPermissions)
+                } catch (e: Exception) {
+                    Log.e("HealthConnect", "Failed to launch permissions intent", e)
+                }
+            } else {
+                viewModel.loadHealthData()
+            }
         } else {
-            viewModel.loadHealthData()
+            Log.w("HealthConnect", "Health Connect is not available in Journal. Status: $status")
+            // Можно показать Toast, но лучше просто молча показать заглушку
         }
     }
 
@@ -113,7 +133,27 @@ fun JournalScreen(
                 .padding(bottom = 100.dp) // Отступ под нижнее меню
         ) {
             // ДАШБОРД ЗДОРОВЬЯ
-            if (metrics != null) {
+            if (!isHealthConnectAvailable) {
+                // Заглушка для Huawei
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    hazeState = hazeState,
+                    hasBorder = true
+                ) {
+                    Box(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Синхронизация со здоровьем недоступна на этом устройстве",
+                            color = TextSecondary,
+                            fontFamily = Manrope,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            } else if (metrics != null) {
                 HealthMetricsCard(metrics = metrics!!, hazeState = hazeState)
                 Spacer(modifier = Modifier.height(16.dp))
             } else {
@@ -245,7 +285,7 @@ fun JournalScreen(
     }
 }
 
-// ============ КОМПОНЕНТЫ ============
+// ============ КОМПОНЕНТЫ (ниже без изменений) ============
 
 @Composable
 private fun HealthMetricsCard(metrics: com.practicum.fitapp.data.HealthConnectManager.HealthMetrics, hazeState: HazeState) {
@@ -296,7 +336,7 @@ private fun HealthMetricsCard(metrics: com.practicum.fitapp.data.HealthConnectMa
                 Spacer(modifier = Modifier.height(12.dp))
                 HealthMetricRow(
                     icon = Icons.Outlined.Bedtime,
-                    iconTint = Color(0xFF9C27B0), // Оставил фиолетовый для сна, чтобы отличать
+                    iconTint = Color(0xFF9C27B0),
                     title = "Сон",
                     value = "${metrics.sleepMinutes / 60}ч ${metrics.sleepMinutes % 60}м"
                 )
@@ -335,7 +375,6 @@ private fun NutritionHeatmap(days: List<NutritionDay>) {
     val firstDay = days.first().date
     val offset = firstDay.dayOfWeek.value - 1
 
-    // Дни недели
     Row(modifier = Modifier.fillMaxWidth()) {
         listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { name ->
             Text(
@@ -467,7 +506,7 @@ private fun nutritionColor(ratio: Double, calories: Double): Color {
     }
 }
 
-// ============ ГРАФИКИ ============
+// ============ ГРАФИКИ (без изменений) ============
 
 @Composable
 private fun WeightChart(history: List<WeightEntryEntity>) {
@@ -493,7 +532,6 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
             val chartWidth = width - paddingLeft
             val chartHeight = height - paddingBottom
 
-            // Сетка и подписи по Y
             val labelPaint = Paint().apply {
                 color = textColor
                 textSize = 24f
@@ -507,7 +545,6 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
                 drawContext.canvas.nativeCanvas.drawText("%.0f".format(weight), 0f, y + 8f, labelPaint)
             }
 
-            // Точки
             val points = mutableListOf<Offset>()
             sorted.forEachIndexed { index, entry ->
                 val x = paddingLeft + (chartWidth * index / (sorted.size - 1))
@@ -516,7 +553,6 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
                 points.add(Offset(x, y))
             }
 
-            // Плавная линия (Cubic Bezier)
             val path = Path()
             path.moveTo(points.first().x, points.first().y)
             for (i in 1 until points.size) {
@@ -525,7 +561,6 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
                 val p2 = points[i]
                 val p3 = if (i == points.size - 1) p2 else points[i + 1]
 
-                // Control points for smoothing
                 val cp1x = p1.x + (p2.x - p0.x) / 6f
                 val cp1y = p1.y + (p2.y - p0.y) / 6f
                 val cp2x = p2.x - (p3.x - p1.x) / 6f
@@ -534,7 +569,6 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
                 path.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
             }
 
-            // Градиентная заливка под линией
             val fillPath = Path().apply {
                 addPath(path)
                 lineTo(points.last().x, chartHeight)
@@ -551,10 +585,7 @@ private fun WeightChart(history: List<WeightEntryEntity>) {
                 )
             )
 
-            // Сама линия
             drawPath(path = path, color = PrimaryGreen, style = Stroke(width = 4f))
-
-            // Точки (маленькие)
             points.forEach { drawCircle(color = PrimaryGreen, radius = 3f, center = it) }
         }
 
@@ -623,7 +654,6 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
                 points.add(Offset(x, y))
             }
 
-            // Плавная линия
             val path = Path()
             path.moveTo(points.first().x, points.first().y)
             for (i in 1 until points.size) {
@@ -640,7 +670,6 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
                 path.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
             }
 
-            // Градиент
             val fillPath = Path().apply {
                 addPath(path)
                 lineTo(points.last().x, chartHeight)
@@ -657,10 +686,7 @@ private fun ExerciseProgressChart(data: List<ExerciseProgress>, category: String
                 )
             )
 
-            // Линия
             drawPath(path = path, color = PrimaryGreen, style = Stroke(width = 4f))
-
-            // Точки
             points.forEach { drawCircle(color = PrimaryGreen, radius = 3f, center = it) }
         }
 

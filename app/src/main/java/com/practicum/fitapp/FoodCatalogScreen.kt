@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,11 +39,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.practicum.fitapp.data.local.ProductCategory
 import com.practicum.fitapp.data.local.ProductEntity
 import com.practicum.fitapp.presentation.common.GlassCard
+import com.practicum.fitapp.presentation.nutrition.BarcodeScannerScreen
 import com.practicum.fitapp.presentation.nutrition.FoodCatalogViewModel
-import com.practicum.fitapp.presentation.nutrition.Recipe
 import com.practicum.fitapp.ui.theme.*
-
-// Импорты для Haze
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 
@@ -54,16 +53,13 @@ fun FoodCatalogScreen(
     viewModel: FoodCatalogViewModel = hiltViewModel()
 ) {
     val userProducts by viewModel.userProducts.collectAsStateWithLifecycle()
-    val usedProducts by viewModel.usedProducts.collectAsStateWithLifecycle()
     val builtInProducts by viewModel.builtInProducts.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isAiLoading by viewModel.isAiLoading.collectAsStateWithLifecycle()
 
+    // 0 - Справочник (по умолчанию), 1 - Мои, 2 - Штрихкод (заглушка)
     var selectedTab by remember { mutableStateOf(0) }
-    var showAddDialog by remember { mutableStateOf(false) }
-    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-    var recipeGrams by remember { mutableStateOf("") }
-
+    var showAddDialog by remember { mutableStateOf(false) } // У тебя уже есть
     var expandedCategories by remember { mutableStateOf(setOf<String>()) }
 
     // Стейты для формы добавления
@@ -74,18 +70,15 @@ fun FoodCatalogScreen(
     var newFat by remember { mutableStateOf("") }
     var newCarbs by remember { mutableStateOf("") }
     var useAi by remember { mutableStateOf(false) }
+    var showScanner by remember { mutableStateOf(false) }
 
-    // Стейт для размытия
     val hazeState = remember { HazeState() }
 
     Box(modifier = Modifier.fillMaxSize().background(BgColor)) {
-        // Фон
         Image(
             painter = painterResource(id = com.practicum.fitapp.R.drawable.app_background),
             contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeSource(hazeState),
+            modifier = Modifier.fillMaxSize().hazeSource(hazeState),
             contentScale = ContentScale.Crop
         )
 
@@ -94,15 +87,7 @@ fun FoodCatalogScreen(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = {
-                        Text(
-                            "Справочник продуктов",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary,
-                            fontFamily = Manrope
-                        )
-                    },
+                    title = { Text("Справочник продуктов", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Назад", tint = TextPrimary)
@@ -112,33 +97,27 @@ fun FoodCatalogScreen(
                 )
             }
         ) { innerPadding ->
-            // Изменили структуру: теперь Column вместо Box с отступами
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
+            Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                 // 1. Вкладки
                 GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                     shape = RoundedCornerShape(30.dp),
                     hazeState = hazeState,
                     hasBorder = true
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(4.dp),
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(4.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val tabs = listOf("Мои", "Часто", "Справочник", "Рецепты")
+                        // Новый порядок вкладок
+                        val tabs = listOf("Справочник", "Мои", "Штрихкод")
 
                         tabs.forEachIndexed { index, title ->
                             val isSelected = selectedTab == index
+
+                            // Для штрихкода делаем иконку
+                            val icon = if (index == 2) Icons.Outlined.QrCodeScanner else null
 
                             val bgColor by animateColorAsState(
                                 targetValue = if (isSelected) PrimaryGreen else Color.Transparent,
@@ -157,45 +136,54 @@ fun FoodCatalogScreen(
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = title,
-                                    fontSize = 13.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = textColor,
-                                    fontFamily = Manrope,
-                                    maxLines = 1
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (icon != null) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = textColor,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                    }
+                                    Text(
+                                        text = title,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = textColor,
+                                        fontFamily = Manrope,
+                                        maxLines = 1
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                // 2. Поиск
-                GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 0.dp),
-                    shape = RoundedCornerShape(30.dp),
-                    hazeState = hazeState,
-                    hasBorder = true
-                ) {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { viewModel.setSearchQuery(it) },
-                        placeholder = {
-                            Text(if (selectedTab == 3) "Поиск рецепта..." else "Поиск продукта...", color = TextSecondary, fontFamily = Manrope)
-                        },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        textStyle = LocalTextStyle.current.copy(fontFamily = Manrope, color = TextPrimary),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Transparent,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
+                // 2. Поиск (Скрываем на вкладке штрихкода)
+                if (selectedTab != 2) {
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 0.dp),
+                        shape = RoundedCornerShape(30.dp),
+                        hazeState = hazeState,
+                        hasBorder = true
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { viewModel.setSearchQuery(it) },
+                            placeholder = { Text("Поиск продукта...", color = TextSecondary, fontFamily = Manrope) },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            textStyle = LocalTextStyle.current.copy(fontFamily = Manrope, color = TextPrimary),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent
+                            )
                         )
-                    )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -206,9 +194,26 @@ fun FoodCatalogScreen(
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 100.dp)
                 ) {
                     when (selectedTab) {
-                        0 -> {
+                        0 -> { // СПРАВОЧНИК (По умолчанию)
+                            val filtered = builtInProducts.filter { it.name.contains(searchQuery, ignoreCase = true) }
+                            if (filtered.isEmpty()) {
+                                item { Text("Справочник пуст", color = TextSecondary, fontFamily = Manrope) }
+                            } else {
+                                groupedProductsList(
+                                    products = filtered,
+                                    expandedCategories = expandedCategories,
+                                    onToggleCategory = { cat ->
+                                        expandedCategories = if (expandedCategories.contains(cat)) expandedCategories - cat else expandedCategories + cat
+                                    },
+                                    onProductClick = onProductSelected,
+                                    onDelete = null,
+                                    hazeState = hazeState
+                                )
+                            }
+                        }
+
+                        1 -> { // МОИ ПРОДУКТЫ
                             item {
-                                // Кнопка "Добавить продукт" (Primary)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -245,75 +250,22 @@ fun FoodCatalogScreen(
                                 )
                             }
                         }
-                        1 -> {
-                            val filtered = usedProducts.filter { it.name.contains(searchQuery, ignoreCase = true) }
-                            if (filtered.isEmpty()) {
-                                item { Text("Вы пока не ели ни одного продукта", color = TextSecondary, fontFamily = Manrope) }
-                            } else {
-                                groupedProductsList(
-                                    products = filtered,
-                                    expandedCategories = expandedCategories,
-                                    onToggleCategory = { cat ->
-                                        expandedCategories = if (expandedCategories.contains(cat)) expandedCategories - cat else expandedCategories + cat
-                                    },
-                                    onProductClick = onProductSelected,
-                                    onDelete = null,
-                                    hazeState = hazeState
-                                )
-                            }
-                        }
-                        2 -> {
-                            val filtered = builtInProducts.filter { it.name.contains(searchQuery, ignoreCase = true) }
-                            if (filtered.isEmpty()) {
-                                item { Text("Справочник пуст", color = TextSecondary, fontFamily = Manrope) }
-                            } else {
-                                groupedProductsList(
-                                    products = filtered,
-                                    expandedCategories = expandedCategories,
-                                    onToggleCategory = { cat ->
-                                        expandedCategories = if (expandedCategories.contains(cat)) expandedCategories - cat else expandedCategories + cat
-                                    },
-                                    onProductClick = onProductSelected,
-                                    onDelete = null,
-                                    hazeState = hazeState
-                                )
-                            }
-                        }
-                        3 -> {
-                            val filteredRecipes = com.practicum.fitapp.presentation.nutrition.builtInRecipes.filter {
-                                it.title.contains(searchQuery, ignoreCase = true)
-                            }
 
-                            if (filteredRecipes.isEmpty()) {
-                                item { Text("Рецепты не найдены", color = TextSecondary, fontFamily = Manrope) }
-                            } else {
-                                items(filteredRecipes) { recipe ->
-                                    GlassCard(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp)
-                                            .clickable {
-                                                selectedRecipe = recipe
-                                                recipeGrams = recipe.totalWeightGrams.toString()
-                                            },
-                                        shape = RoundedCornerShape(16.dp),
-                                        hazeState = hazeState,
-                                        hasShadow = true,
-                                        hasBorder = true
+                        2 -> {
+                            item {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 40.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(Icons.Outlined.QrCodeScanner, contentDescription = null, modifier = Modifier.size(80.dp), tint = PrimaryGreen)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text("Сканер штрихкодов", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(
+                                        onClick = { showScanner = true },
+                                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
                                     ) {
-                                        Column(modifier = Modifier.padding(16.dp)) {
-                                            Text(recipe.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(recipe.description, fontSize = 12.sp, color = TextSecondary, fontFamily = Manrope)
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Text(
-                                                "${"%.0f".format(recipe.totalsKcal)} ккал · Б${"%.0f".format(recipe.totalsProtein)} Ж${"%.0f".format(recipe.totalsFat)} У${"%.0f".format(recipe.totalsCarbs)}",
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = PrimaryGreen,
-                                                fontFamily = Manrope
-                                            )
-                                        }
+                                        Text("Открыть камеру")
                                     }
                                 }
                             }
@@ -323,30 +275,40 @@ fun FoodCatalogScreen(
             }
         }
     }
+    // ЭКРАН СКАНЕРА
+    if (showScanner) {
+        BarcodeScannerScreen(
+            onBack = { showScanner = false },
+            onProductFound = { scannedProduct ->
+                showScanner = false
+                selectedTab = 1 // Переключаем на вкладку "Мои"
 
+                // Заполняем форму
+                newName = scannedProduct.name
+                newCalories = scannedProduct.calories.toString()
+                newProtein = scannedProduct.protein.toString()
+                newFat = scannedProduct.fat.toString()
+                newCarbs = scannedProduct.carbs.toString()
+                newCategory = "Сканер" // Или оставь пустым
+
+                showAddDialog = true // Открываем диалог
+            }
+        )
+    }
     // ============ ДИАЛОГ ДОБАВЛЕНИЯ ПРОДУКТА ============
     if (showAddDialog) {
         Dialog(onDismissRequest = { if (!isAiLoading) showAddDialog = false }) {
             GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
                 shape = RoundedCornerShape(24.dp),
                 hazeState = hazeState,
                 hasShadow = true,
                 hasBorder = true
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        text = "Новый продукт",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                        fontFamily = Manrope
-                    )
+                    Text("Новый продукт", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Поля ввода со стеклянным стилем
                     val textFieldColors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PrimaryGreen,
                         unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
@@ -431,15 +393,12 @@ fun FoodCatalogScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // ТУМБЛЕР ИИ (Зеленый)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("✨ ИИ БЖУ", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = PrimaryGreen, fontFamily = Manrope)
-                        }
+                        Text("✨ ИИ БЖУ", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = PrimaryGreen, fontFamily = Manrope)
                         Switch(
                             checked = useAi,
                             onCheckedChange = {
@@ -463,10 +422,7 @@ fun FoodCatalogScreen(
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(
-                            onClick = { showAddDialog = false },
-                            enabled = !isAiLoading
-                        ) {
+                        TextButton(onClick = { showAddDialog = false }, enabled = !isAiLoading) {
                             Text("Отмена", color = TextSecondary, fontFamily = Manrope)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -495,11 +451,7 @@ fun FoodCatalogScreen(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             if (isAiLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
                             } else {
                                 Text("Добавить", color = Color.White, fontWeight = FontWeight.Bold, fontFamily = Manrope)
                             }
@@ -509,92 +461,16 @@ fun FoodCatalogScreen(
             }
         }
     }
-
-    // ============ ДИАЛОГ РЕЦЕПТА ============
-    if (selectedRecipe != null) {
-        val recipe = selectedRecipe!!
-        Dialog(onDismissRequest = { selectedRecipe = null }) {
-            GlassCard(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                shape = RoundedCornerShape(24.dp),
-                hazeState = hazeState,
-                hasBorder = true
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(recipe.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
-                        item {
-                            Text(recipe.description, fontSize = 14.sp, color = TextSecondary, fontFamily = Manrope)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Время: ${recipe.cookingTimeMinutes} мин", fontSize = 12.sp, color = TextSecondary, fontFamily = Manrope)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Ингредиенты:", fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
-                        }
-                        items(recipe.ingredients) { ing ->
-                            Text("${ing.productName} — ${ing.grams} г", fontSize = 13.sp, color = TextPrimary, fontFamily = Manrope, modifier = Modifier.padding(vertical = 2.dp))
-                        }
-                        item {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Приготовление:", fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
-                        }
-                        items(recipe.steps) { step ->
-                            Text(step, fontSize = 13.sp, color = TextPrimary, fontFamily = Manrope, modifier = Modifier.padding(vertical = 2.dp))
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = recipeGrams,
-                        onValueChange = { v -> if (v.all { it.isDigit() || it == '.' }) recipeGrams = v },
-                        label = { Text("Граммы порции", color = TextSecondary, fontFamily = Manrope) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PrimaryGreen,
-                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { selectedRecipe = null }) {
-                            Text("Закрыть", color = TextSecondary, fontFamily = Manrope)
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                val grams = recipeGrams.toDoubleOrNull() ?: recipe.totalWeightGrams
-                                val todayTimestamp = java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                                viewModel.addRecipeToDiary(recipe, todayTimestamp, grams)
-                                selectedRecipe = null
-                                onBack()
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text("Добавить", color = Color.White, fontFamily = Manrope)
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
-// Вспомогательная функция
+// Вспомогательная функция (осталась без изменений)
 private fun LazyListScope.groupedProductsList(
     products: List<ProductEntity>,
     expandedCategories: Set<String>,
     onToggleCategory: (String) -> Unit,
     onProductClick: (ProductEntity) -> Unit,
     onDelete: ((ProductEntity) -> Unit)?,
-    hazeState: HazeState // <-- Передаем Haze
+    hazeState: HazeState
 ) {
     val grouped = products.groupBy { product ->
         val matchedEnum = ProductCategory.entries.find {
@@ -609,10 +485,7 @@ private fun LazyListScope.groupedProductsList(
 
         item {
             GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clickable { onToggleCategory(categoryName) },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onToggleCategory(categoryName) },
                 shape = RoundedCornerShape(16.dp),
                 hazeState = hazeState,
                 hasShadow = true,
@@ -624,11 +497,7 @@ private fun LazyListScope.groupedProductsList(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("$categoryName (${categoryProducts.size})", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = Manrope)
-                    Icon(
-                        if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = TextSecondary
-                    )
+                    Icon(if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, contentDescription = null, tint = TextSecondary)
                 }
             }
         }
@@ -636,10 +505,7 @@ private fun LazyListScope.groupedProductsList(
         if (isExpanded) {
             items(categoryProducts) { product ->
                 GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable { onProductClick(product) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onProductClick(product) },
                     shape = RoundedCornerShape(16.dp),
                     hazeState = hazeState,
                     hasShadow = true,
@@ -651,9 +517,7 @@ private fun LazyListScope.groupedProductsList(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 "${product.caloriesPer100g} ккал/100г · Б${"%.0f".format(product.proteinPer100g)} Ж${"%.0f".format(product.fatPer100g)} У${"%.0f".format(product.carbsPer100g)}",
-                                fontSize = 12.sp,
-                                color = TextSecondary,
-                                fontFamily = Manrope
+                                fontSize = 12.sp, color = TextSecondary, fontFamily = Manrope
                             )
                         }
                         if (onDelete != null) {

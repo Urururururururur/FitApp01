@@ -102,9 +102,18 @@ class RecipeSeeder(
                                 recipeCategoriesToInsert.add(RecipeCategoryCrossRef(recipeId = newRecipeId, categoryId = catId))
                             }
                         }
-
                         // Подборки (новые)
                         jsonRecipe.collectionTitles.forEach { colTitle ->
+                            // ПРОВЕРКА: если подборки нет в мапе, создаем её прямо сейчас
+                            if (!collectionIdMap.containsKey(colTitle)) {
+                                val newColId = collectionDao.insertCollection(
+                                    CollectionEntity(title = colTitle, subtitle = "", imageUrl = null)
+                                )
+                                collectionIdMap[colTitle] = newColId
+                                Log.d("RecipeSeeder", "Автоматически создана подборка: $colTitle")
+                            }
+
+                            // Привязываем рецепт к подборке
                             collectionIdMap[colTitle]?.let { colId ->
                                 collectionRecipesToInsert.add(CollectionRecipeCrossRef(collectionId = colId, recipeId = newRecipeId))
                             }

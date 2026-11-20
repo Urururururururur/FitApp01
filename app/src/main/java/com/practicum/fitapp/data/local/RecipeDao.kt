@@ -42,6 +42,14 @@ interface RecipeDao {
         searchQuery: String
     ): Flow<List<RecipeEntity>>
 
+    @Query("""
+        SELECT r.* FROM recipes r
+        INNER JOIN recipe_category_cross_ref rcc ON r.id = rcc.recipeId
+        INNER JOIN collection_recipe_cross_ref crc ON r.id = crc.recipeId
+        WHERE rcc.categoryId = :categoryId AND crc.collectionId = :collectionId
+    """)
+    fun getRecipesByCategoryAndCollection(categoryId: Long, collectionId: Long): Flow<List<RecipeEntity>>
+
     @Query("SELECT * FROM recipes WHERE isFavorite = 1")
     fun getFavoriteRecipes(): Flow<List<RecipeEntity>>
 

@@ -1,11 +1,13 @@
 package com.practicum.fitapp.presentation.recipes
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -24,16 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.practicum.fitapp.FullWidthRecipeCard
+import com.practicum.fitapp.data.local.CategoryEntity
 import com.practicum.fitapp.data.local.RecipeEntity
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.ui.theme.*
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import coil.compose.AsyncImage
-import com.practicum.fitapp.presentation.common.rememberDrawablePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,15 +41,18 @@ fun RecipeCategoriesScreen(
     onBack: () -> Unit,
     onRecipeClick: (Long) -> Unit,
     onSeeAllClick: (String, Long) -> Unit,
+    // Добавляем коллбэк для перехода на экран пересечений (например, Завтрак + Веганский)
+    onCrossCategoryClick: (Long, Long) -> Unit,
+    onCollectionCrossClick: (Long, Long) -> Unit,
     viewModel: RecipeCategoriesViewModel = hiltViewModel()
 ) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val selectedCategoryId by viewModel.selectedCategoryId.collectAsStateWithLifecycle()
     val recipes by viewModel.recipes.collectAsStateWithLifecycle()
+    val crossCategories by viewModel.crossCategories.collectAsStateWithLifecycle()
+    val crossCollections by viewModel.crossCollections.collectAsStateWithLifecycle()
 
     val hazeState = remember { HazeState() }
-
-    // Красивое название заголовка в зависимости от типа
     val title = when (viewModel.categoryType.name) {
         "MEAL" -> "Приемы пищи"
         "DIET" -> "Диеты"
@@ -58,7 +61,7 @@ fun RecipeCategoriesScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(BgColor)) {
-        androidx.compose.foundation.Image(
+        Image(
             painter = androidx.compose.ui.res.painterResource(id = com.practicum.fitapp.R.drawable.app_background),
             contentDescription = null,
             modifier = Modifier.fillMaxSize().hazeSource(hazeState),
@@ -84,7 +87,7 @@ fun RecipeCategoriesScreen(
                 modifier = Modifier.padding(padding).fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 100.dp)
             ) {
-                // 1. КАРУСЕЛЬ С ПИЛЮЛЯМИ (Выбор категории)
+                // 1. КАРУСЕЛЬ С ПИЛЮЛЯМИ
                 item {
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -95,7 +98,7 @@ fun RecipeCategoriesScreen(
                             Surface(
                                 onClick = { viewModel.selectCategory(category.id) },
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (isSelected) Color(0xFF5B7A81) else Color.White, // Цвет как на скрине
+                                color = if (isSelected) Color(0xFF5B7A81) else Color.White,
                                 border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.1f))
                             ) {
                                 Column(
@@ -117,7 +120,7 @@ fun RecipeCategoriesScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // 2. РЕЦЕПТ ДНЯ (Берем первый попавшийся из списка)
+                // 2. РЕЦЕПТ ДНЯ
                 if (recipes.isNotEmpty()) {
                     val recipeOfTheDay = recipes.first()
                     item {
@@ -127,7 +130,6 @@ fun RecipeCategoriesScreen(
                             Text("Рецепт дня", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        // Используем карточку из RecipeFilterScreen
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                             FullWidthRecipeCard(recipe = recipeOfTheDay, onClick = { onRecipeClick(recipeOfTheDay.id) }, hazeState = hazeState)
                         }
@@ -135,7 +137,7 @@ fun RecipeCategoriesScreen(
                     }
                 }
 
-                // 3. КАРУСЕЛЬ РЕЦЕПТОВ (Все рецепты этой категории)
+                // 3. КАРУСЕЛЬ "ВСЕ РЕЦЕПТЫ" (основная)
                 if (recipes.isNotEmpty()) {
                     item {
                         Row(
@@ -144,16 +146,12 @@ fun RecipeCategoriesScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text("Все рецепты", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-
-                            // ВОТ ЗДЕСЬ ДОБАВИЛИ CLICKABLE
                             Text(
                                 text = "БОЛЬШЕ",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF2196F3),
-                                modifier = Modifier.clickable {
-                                    onSeeAllClick(viewModel.categoryType.name, selectedCategoryId)
-                                }
+                                modifier = Modifier.clickable { onSeeAllClick(viewModel.categoryType.name, selectedCategoryId) }
                             )
                         }
                         Spacer(modifier = Modifier.height(12.dp))
@@ -162,23 +160,94 @@ fun RecipeCategoriesScreen(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Пропускаем первый (он уже "Рецепт дня")
                             items(recipes.drop(1).take(8)) { recipe ->
                                 RecipeCarouselCard(recipe, onClick = { onRecipeClick(recipe.id) }, hazeState = hazeState)
                             }
                         }
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
-                } else if (selectedCategoryId != 0L) {
-                    item {
-                        Text("В этой категории пока нет рецептов", modifier = Modifier.padding(16.dp), color = TextSecondary)
+                }
+                // 5. ПОДБОРКИ (КУХНИ МИРА, СЕЗОНЫ)
+                items(crossCollections) { cross ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = cross.collection.title,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        // Кнопка "БОЛЬШЕ" для подборок. Нам понадобится экран для них,
+                        // но пока можешь сделать просто переход в общий фильтр.
+                        Text(
+                            text = "БОЛЬШЕ",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2196F3),
+                            modifier = Modifier.clickable {
+                                // categoryId, collectionId
+                                onCollectionCrossClick(selectedCategoryId, cross.collection.id)
+                            }
+                        )
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(cross.recipes.take(8)) { recipe ->
+                            RecipeCarouselCard(recipe, onClick = { onRecipeClick(recipe.id) }, hazeState = hazeState)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // 4. ДОПОЛНИТЕЛЬНЫЕ КАРУСЕЛИ (ПЕРЕСЕЧЕНИЯ)
+                items(crossCategories) { cross ->
+                    // Убрали лишнее слово item
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = cross.category.name,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = "БОЛЬШЕ",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2196F3),
+                            modifier = Modifier.clickable {
+                                onCrossCategoryClick(selectedCategoryId, cross.category.id)
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(cross.recipes.take(8)) { recipe ->
+                            RecipeCarouselCard(recipe, onClick = { onRecipeClick(recipe.id) }, hazeState = hazeState)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
     }
 }
 
-// --- КАРТОЧКА ДЛЯ КАРУСЕЛИ (узкая) ---
+// --- КАРТОЧКА ДЛЯ КАРУСЕЛИ ---
 @Composable
 fun RecipeCarouselCard(recipe: RecipeEntity, onClick: () -> Unit, hazeState: HazeState) {
     GlassCard(
@@ -188,23 +257,19 @@ fun RecipeCarouselCard(recipe: RecipeEntity, onClick: () -> Unit, hazeState: Haz
     ) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(130.dp)) {
-                // Внутри Box, где выводится картинка:
+                // Возвращаем AsyncImage, так как он лучше работает с URI из сидера
                 AsyncImage(
                     model = recipe.imageUrl,
                     contentDescription = recipe.title,
-                    modifier = Modifier.fillMaxSize(), // или как было
-                    contentScale = ContentScale.Crop,
-                    // Добавляем заглушку, если картинка не загрузилась:
-                    error = painterResource(id = android.R.drawable.ic_menu_gallery),
-                    placeholder = painterResource(id = android.R.drawable.ic_menu_gallery)
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
-                // Иконка звезды
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(28.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.3f)),
                     contentAlignment = Alignment.Center
                 ) {

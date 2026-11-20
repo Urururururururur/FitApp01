@@ -40,6 +40,7 @@ import com.practicum.fitapp.data.repository.UserRepository
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.presentation.common.GradientBackground
 import com.practicum.fitapp.presentation.dashboard.DashboardScreen
+import com.practicum.fitapp.presentation.recipes.CollectionDetailsScreen
 import com.practicum.fitapp.presentation.recipes.RecipeCategoriesScreen
 import com.practicum.fitapp.presentation.recipes.RecipeDetailsScreen // <-- ДОБАВЛЕН ИМПОРТ
 import com.practicum.fitapp.presentation.training.TrainingViewModel
@@ -51,6 +52,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import com.practicum.fitapp.presentation.recipes.RecipeCategoryAllScreen
+import com.practicum.fitapp.presentation.recipes.RecipeCollectionCrossScreen
+import com.practicum.fitapp.presentation.recipes.RecipeCrossScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -246,13 +249,19 @@ class MainActivity : ComponentActivity() {
                                 composable("recipe_catalog") {
                                     RecipeOverviewScreen(
                                         onBack = { navController.popBackStack() },
-                                        onNavigateToCategory = { type, id ->
-                                            if (type == "FILTERS") {
-                                                navController.navigate("recipe_filters") // <-- Переход на экран фильтров!
-                                            } else {
-                                                navController.navigate("recipe_categories/$type/$id") // <-- Переход на экран категорий
-                                            }
-                                        },
+                                        onNavigateToCategory = { type, id -> navController.navigate("recipe_categories/$type/$id") },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") },
+                                        onCollectionClick = { collectionId ->
+                                            navController.navigate("collection_details/$collectionId") // <-- ДОБАВИЛИ
+                                        }
+                                    )
+                                }
+                                composable(
+                                    route = "collection_details/{collectionId}",
+                                    arguments = listOf(navArgument("collectionId") { type = NavType.LongType })
+                                ) {
+                                    CollectionDetailsScreen(
+                                        onBack = { navController.popBackStack() },
                                         onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") }
                                     )
                                 }
@@ -266,11 +275,36 @@ class MainActivity : ComponentActivity() {
                                     RecipeCategoriesScreen(
                                         onBack = { navController.popBackStack() },
                                         onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") },
-                                        onSeeAllClick = { type, categoryId ->
-                                            navController.navigate("recipe_category_all/$type/$categoryId")
-                                        }
+                                        onSeeAllClick = { type, categoryId -> navController.navigate("recipe_category_all/$type/$categoryId") },
+                                        onCrossCategoryClick = { catId1, catId2 -> navController.navigate("recipe_cross/$catId1/$catId2") },
+                                        onCollectionCrossClick = { catId, colId -> navController.navigate("recipe_collection_cross/$catId/$colId") } // <-- НОВЫЙ
                                     )
                                 }
+                                composable(
+                                    route = "recipe_cross/{catId1}/{catId2}",
+                                    arguments = listOf(
+                                        navArgument("catId1") { type = NavType.LongType },
+                                        navArgument("catId2") { type = NavType.LongType }
+                                    )
+                                ) {
+                                    RecipeCrossScreen(
+                                        onBack = { navController.popBackStack() },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") }
+                                    )
+                                }
+                                composable(
+                                    route = "recipe_collection_cross/{categoryId}/{collectionId}",
+                                    arguments = listOf(
+                                        navArgument("categoryId") { type = NavType.LongType },
+                                        navArgument("collectionId") { type = NavType.LongType }
+                                    )
+                                ) {
+                                    RecipeCollectionCrossScreen(
+                                        onBack = { navController.popBackStack() },
+                                        onRecipeClick = { recipeId -> navController.navigate("recipe_details/$recipeId") }
+                                    )
+                                }
+
                                 // --- Экран ВСЕХ рецептов конкретной категории ---
                                 composable(
                                     route = "recipe_category_all/{type}/{categoryId}",
@@ -297,11 +331,16 @@ class MainActivity : ComponentActivity() {
                                 composable(
                                     route = "recipe_details/{recipeId}",
                                     arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
-                                ) { backStackEntry ->
-                                    val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
+                                ) {
                                     RecipeDetailsScreen(
                                         onBack = { navController.popBackStack() },
-                                        onAddToDiary = { /* TODO: Сделаем на следующем шаге */ }
+                                        onNavigateToNutrition = {
+                                            // Переходим в раздел Питание и очищаем стек до него
+                                            navController.navigate("nutrition") {
+                                                popUpTo("dashboard") { saveState = true } // Или popUpTo("recipe_catalog")
+                                                launchSingleTop = true
+                                            }
+                                        }
                                     )
                                 }
 
