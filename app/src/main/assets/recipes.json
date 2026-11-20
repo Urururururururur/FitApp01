@@ -183,18 +183,18 @@
   ],
   "collections": [
     {
-      "title": "Вдохновение",
+      "title": "Зимнее",
       "subtitle": "10 лучших рецептов",
       "imageUrl": null
     },
     {
-      "title": "Быстрый завтрак",
-      "subtitle": "Готовим за 15 минут",
+      "title": "Праздничное",
+      "subtitle": "10 лучших рецептов",
       "imageUrl": null
     },
     {
-      "title": "Высокий белок",
-      "subtitle": "Для набора массы",
+      "title": "Детское",
+      "subtitle": "10 лучших рецептов",
       "imageUrl": null
     }
   ],
@@ -216,7 +216,7 @@
       "protein": 6.3,
       "fat": 7.3,
       "carbs": 2.3,
-      "imageUrl": "https://www.photorecept.ru/wp-content/uploads/2022/02/omlet-so-shpinatom-i-svezhimi-pomidorami-2-e1644958943973.jpg",
+      "imageUrl": "recipes_0001",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -226,7 +226,9 @@
         "Мало ингредиентов",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -272,7 +274,7 @@
       "protein": 6.4,
       "fat": 4.0,
       "carbs": 30.1,
-      "imageUrl": "https://cdn.7days.ru/pic/fdb/957607/1299083/86.jpg",
+      "imageUrl": "recipes_0002",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -281,7 +283,9 @@
         "Выпечка",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -335,7 +339,7 @@
       "protein": 9.1,
       "fat": 6.7,
       "carbs": 16.4,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2014nov/03/21/918250_52053-640x480.jpg",
+      "imageUrl": "recipes_0003",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -344,7 +348,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -394,7 +400,7 @@
       "protein": 4.2,
       "fat": 1.2,
       "carbs": 27.6,
-      "imageUrl": "https://static.1000.menu/img/content-v2/d0/98/109015/bulgur-s-kabachkami_1776846798_0_za2varc_max.jpg",
+      "imageUrl": "recipes_0004",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -403,7 +409,10 @@
         "Быстрое приготовление",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Булгур",
@@ -445,7 +454,7 @@
       "protein": 3.6,
       "fat": 3.2,
       "carbs": 13.0,
-      "imageUrl": "https://wellnessy.ru/wp-content/uploads/2021/06/porridge5.jpg",
+      "imageUrl": "recipes_0005",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -455,7 +464,10 @@
         "Базовый",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -493,7 +505,7 @@
       "protein": 11.5,
       "fat": 9.2,
       "carbs": 3.8,
-      "imageUrl": "https://images.gastronom.ru/IWJ69lwBZpaLYGswO8P-MjdvQrxJzs_H542_31PBIm4/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzUzZjllMmJmLTY4MzQtNDZkNC1hOGRmLTc0NDdmZjlkNmZhMC5qcGc.webp",
+      "imageUrl": "recipes_0006",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -504,7 +516,9 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -546,7 +560,7 @@
       "protein": 10.3,
       "fat": 9.7,
       "carbs": 3.1,
-      "imageUrl": "https://img.iamcook.ru/2024/upl/recipes/byusers/misc/26750/efd77dace3db3b5ede9b8098e18948fa-2024.jpg",
+      "imageUrl": "recipes_0007",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -556,7 +570,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -602,7 +618,7 @@
       "protein": 8.9,
       "fat": 8.2,
       "carbs": 3.4,
-      "imageUrl": "https://fb.ru/misc/i/gallery/62230/3184494.jpg",
+      "imageUrl": "recipes_0008",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -612,7 +628,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Болгарский перец",
@@ -654,7 +672,7 @@
       "protein": 7.0,
       "fat": 5.3,
       "carbs": 19.5,
-      "imageUrl": "https://i.pinimg.com/736x/a0/c6/f5/a0c6f5c980f063b9dcccf0cfafd8095e.jpg",
+      "imageUrl": "recipes_0009",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -665,7 +683,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -699,7 +719,7 @@
       "protein": 7.9,
       "fat": 8.6,
       "carbs": 2.8,
-      "imageUrl": "https://www.chefmarket.ru/blog/wp-content/uploads/2021/08/omelette-with-mushrooms-2000x1200.jpg",
+      "imageUrl": "recipes_0010",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -708,7 +728,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Шампиньоны",
@@ -758,7 +780,7 @@
       "protein": 5.8,
       "fat": 7.4,
       "carbs": 12.9,
-      "imageUrl": "https://img.povar.ru/main-micro/b5/8e/96/e7/oladi_iz_kabachkov_na_skovorode-408019.JPG",
+      "imageUrl": "recipes_0011",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -769,7 +791,10 @@
         "Лёгкий",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Кабачки",
@@ -819,7 +844,7 @@
       "protein": 9.4,
       "fat": 3.9,
       "carbs": 15.6,
-      "imageUrl": "https://images.news.ru/2026/04/23/d12LIQwWhsOGaorAn9W5N2MalMr8g5d39yJ3ijrJ_780.png",
+      "imageUrl": "recipes_0012",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -829,7 +854,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Творог",
@@ -875,7 +903,7 @@
       "protein": 2.8,
       "fat": 1.9,
       "carbs": 16.4,
-      "imageUrl": "https://www.chefmarket.ru/blog/wp-content/uploads/2023/06/klubnichno-bananovyj-smuzi-s-ovsjanymi-hlopjami-1-2000x1200.jpg",
+      "imageUrl": "recipes_0013",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -887,7 +915,10 @@
         "Перекус",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Клубника",
@@ -925,7 +956,7 @@
       "protein": 8.5,
       "fat": 8.8,
       "carbs": 1.9,
-      "imageUrl": "https://volshebnaya-eda.ru/wp-content/uploads/2018/04/omelette-810x536.jpg",
+      "imageUrl": "recipes_0014",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -935,7 +966,9 @@
         "Базовый",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -977,7 +1010,7 @@
       "protein": 4.3,
       "fat": 4.6,
       "carbs": 14.8,
-      "imageUrl": "https://media.ovkuse.ru/images/recipes/1d0a1a5c-8bf0-48b7-afc5-283b23ccc910/1d0a1a5c-8bf0-48b7-afc5-283b23ccc910_1200_630.webp",
+      "imageUrl": "recipes_0015",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -985,7 +1018,10 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "весеннее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -1031,7 +1067,7 @@
       "protein": 10.6,
       "fat": 9.2,
       "carbs": 11.4,
-      "imageUrl": "https://www.chefmarket.ru/blog/wp-content/uploads/2021/01/open-sandwich-or-toast-1-2000x1200.jpg",
+      "imageUrl": "recipes_0016",
       "isFavorite": false,
       "categoryNames": [
         "Пескетарианский",
@@ -1040,7 +1076,10 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -1090,7 +1129,7 @@
       "protein": 8.8,
       "fat": 9.1,
       "carbs": 2.9,
-      "imageUrl": "https://mam2mam.ru/upload/blog/182/125487-41_141b4.512.jpg",
+      "imageUrl": "recipes_0017",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1099,7 +1138,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -1149,7 +1190,7 @@
       "protein": 3.7,
       "fat": 3.4,
       "carbs": 15.2,
-      "imageUrl": "https://vkuster.ru/static/content/products/4799/photos/main_full.jpg?1667475708",
+      "imageUrl": "recipes_0018",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1158,7 +1199,10 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -1201,7 +1245,7 @@
       "protein": 6.1,
       "fat": 18.2,
       "carbs": 46.3,
-      "imageUrl": "https://i.ytimg.com/vi/axMCT6ZMdcg/maxresdefault.jpg",
+      "imageUrl": "recipes_0019",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1210,7 +1254,10 @@
         "Десерт",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -1268,7 +1315,7 @@
       "protein": 6.8,
       "fat": 8.3,
       "carbs": 24.1,
-      "imageUrl": "https://prostokvashino.ru/upload/resize_cache/iblock/fbf/800_800_0/hm44c8ty2fwli8ilud763q3ct7shp49v.jpeg",
+      "imageUrl": "recipes_0020",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1276,7 +1323,10 @@
         "Завтрак",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -1326,7 +1376,7 @@
       "protein": 11.2,
       "fat": 9.8,
       "carbs": 2.6,
-      "imageUrl": "https://prostokvashino.ru/upload/resize_cache/iblock/754/800_800_0/75483b8a82d00c0ad3cdf83f834cead1.jpg",
+      "imageUrl": "recipes_0021",
       "isFavorite": false,
       "categoryNames": [
         "Пескетарианский",
@@ -1382,7 +1432,7 @@
       "protein": 3.9,
       "fat": 2.7,
       "carbs": 17.5,
-      "imageUrl": "https://i.pinimg.com/originals/07/72/7e/07727e1b7fb14a316336be3d1a658abf.png",
+      "imageUrl": "recipes_0022",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1392,7 +1442,10 @@
         "На ходу",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -1438,7 +1491,7 @@
       "protein": 2.6,
       "fat": 1.7,
       "carbs": 12.1,
-      "imageUrl": "https://lafoy.ru/photo_l/foto-3027-8.jpg",
+      "imageUrl": "recipes_0023",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1449,7 +1502,10 @@
         "Завтрак",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Кефир",
@@ -1487,7 +1543,7 @@
       "protein": 4.4,
       "fat": 4.1,
       "carbs": 16.8,
-      "imageUrl": "https://s3.coolclever.tech/img/0000000090023156/960/32867.webp",
+      "imageUrl": "recipes_0024",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1546,7 +1602,7 @@
       "protein": 10.4,
       "fat": 8.9,
       "carbs": 2.3,
-      "imageUrl": "https://www.gotovim.ru/pics/sbs/omletsuspinatom/rec.jpg",
+      "imageUrl": "recipes_0025",
       "isFavorite": false,
       "categoryNames": [
         "Низкоуглеводный",
@@ -1609,7 +1665,7 @@
       "protein": 3.4,
       "fat": 2.9,
       "carbs": 16.2,
-      "imageUrl": "https://topfood.club/uploads/cropped/2024-01-22-ikv89o-2022-03-19-aebi62-smoothie-banan-shokolad-756x0-9bd_1705940989.jpg",
+      "imageUrl": "recipes_0026",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1621,7 +1677,10 @@
         "Быстрое приготовление",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -1659,7 +1718,7 @@
       "protein": 8.6,
       "fat": 8.7,
       "carbs": 15.4,
-      "imageUrl": "https://www.nyamburg.ru/wp-content/uploads/yaichnitsa-s-vetchinoy-i-kartofelem-05.jpg",
+      "imageUrl": "recipes_0027",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -1717,7 +1776,7 @@
       "protein": 8.7,
       "fat": 7.9,
       "carbs": 2.6,
-      "imageUrl": "https://i.pinimg.com/736x/6d/7c/81/6d7c818a2f6b173b1698abab3261b835.jpg",
+      "imageUrl": "recipes_0028",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1727,7 +1786,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -1777,7 +1838,7 @@
       "protein": 7.9,
       "fat": 8.6,
       "carbs": 10.7,
-      "imageUrl": "https://irecommend.ru/sites/default/files/imagecache/copyright1/user-images/1586826/8fEzGQllDKuDO0XkkaZQ.jpg",
+      "imageUrl": "recipes_0029",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1787,7 +1848,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "греческая кухня",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -1825,7 +1889,7 @@
       "protein": 7.2,
       "fat": 2.9,
       "carbs": 10.8,
-      "imageUrl": "https://img.povar.ru/uploads/02/1f/42/87/smuzi_s_tvorogom_i_malinoi-822545.jpg",
+      "imageUrl": "recipes_0030",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1836,7 +1900,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Творог",
@@ -1874,7 +1941,7 @@
       "protein": 6.2,
       "fat": 5.4,
       "carbs": 5.3,
-      "imageUrl": "https://s-dt2.cloud.edgecore.ru/FSimageresizecache/app/uploads/public/632/33e/515/63233e515b1e7319392023__99999x99999.webp",
+      "imageUrl": "recipes_0031",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1883,7 +1950,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -1938,7 +2007,7 @@
       "protein": 5.4,
       "fat": 11.2,
       "carbs": 36.5,
-      "imageUrl": "https://cdn.7days.ru/pic/785/886337/386749/86.jpg",
+      "imageUrl": "recipes_0032",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -1947,7 +2016,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -2001,7 +2072,7 @@
       "protein": 1.9,
       "fat": 1.2,
       "carbs": 12.4,
-      "imageUrl": "https://medaboutme.ru/upload/medialibrary/257/shutterstock_194910596.jpeg",
+      "imageUrl": "recipes_0033",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2012,7 +2083,10 @@
         "Завтрак",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Апельсин",
@@ -2050,7 +2124,7 @@
       "protein": 5.1,
       "fat": 11.2,
       "carbs": 4.3,
-      "imageUrl": "https://nyamkin.ru/images/recepts/medium/5f4e7267a73af.jpg",
+      "imageUrl": "recipes_0034",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2107,7 +2181,7 @@
       "protein": 1.5,
       "fat": 0.5,
       "carbs": 10.3,
-      "imageUrl": "https://static.1000.menu/img/content-v2/76/ba/49925/smuzi-so-shpinatom_1616862724_9_max.jpg",
+      "imageUrl": "recipes_0035",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2120,7 +2194,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Шпинат",
@@ -2162,7 +2238,7 @@
       "protein": 11.7,
       "fat": 5.8,
       "carbs": 14.9,
-      "imageUrl": "https://img.iamcook.ru/2020/upl/recipes/byusers/misc/23770/0f36d9f503b90ce46a55cc25760ec9d3-2020.jpg",
+      "imageUrl": "recipes_0036",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2222,7 +2298,7 @@
       "protein": 10.2,
       "fat": 10.1,
       "carbs": 16.3,
-      "imageUrl": "https://vkusnoff.com/img/recepty/6071/big.webp",
+      "imageUrl": "recipes_0037",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -2230,7 +2306,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "итальянская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -2284,7 +2362,7 @@
       "protein": 12.4,
       "fat": 5.6,
       "carbs": 20.3,
-      "imageUrl": "https://img.povar.ru/main-micro/95/b9/77/e9/proteinovie_maffini-901839.jpg",
+      "imageUrl": "recipes_0038",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2344,7 +2422,7 @@
       "protein": 7.1,
       "fat": 5.9,
       "carbs": 16.4,
-      "imageUrl": "https://i.ytimg.com/vi/TFeKU2g2Cfg/maxresdefault.jpg",
+      "imageUrl": "recipes_0039",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2404,7 +2482,7 @@
       "protein": 3.4,
       "fat": 2.9,
       "carbs": 17.8,
-      "imageUrl": "https://cdn.food.ru/unsigned/fit/640/480/ce/0/czM6Ly9tZWRpYS9waWN0dXJlcy8yMDI0MDMxMy80UVdzbVUuanBlZw.jpg",
+      "imageUrl": "recipes_0040",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2413,7 +2491,9 @@
         "Быстрое приготовление",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Молоко",
@@ -2460,7 +2540,7 @@
       "protein": 11.4,
       "fat": 18.6,
       "carbs": 54.3,
-      "imageUrl": "https://i.pinimg.com/736x/fa/6f/ad/fa6fad60f1ba90cd6e8193e5f7611b42.jpg",
+      "imageUrl": "recipes_0041",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2468,7 +2548,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлопья спельты",
@@ -2518,7 +2600,7 @@
       "protein": 3.9,
       "fat": 6.2,
       "carbs": 15.1,
-      "imageUrl": "https://st.bork.ru/recipes/napitki/bananovo-orekhovyj-koktejl/1.jpg",
+      "imageUrl": "recipes_0042",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2528,7 +2610,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -2566,7 +2651,7 @@
       "protein": 7.2,
       "fat": 9.4,
       "carbs": 12.3,
-      "imageUrl": "https://lafoy.ru/photo_l/foto-3858-7.jpg",
+      "imageUrl": "recipes_0043",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2619,7 +2704,7 @@
       "protein": 9.4,
       "fat": 8.6,
       "carbs": 2.7,
-      "imageUrl": "https://home-restaurant.ru/wp-content/uploads/2020/02/foto-111.jpg",
+      "imageUrl": "recipes_0044",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2674,7 +2759,7 @@
       "protein": 3.2,
       "fat": 5.4,
       "carbs": 17.1,
-      "imageUrl": "https://img.iamcook.ru/2020/upl/recipes/zen/u-ae24af19578fe6953c8eeaf2c07bf726.JPG",
+      "imageUrl": "recipes_0045",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2684,7 +2769,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -2730,7 +2817,7 @@
       "protein": 6.9,
       "fat": 7.4,
       "carbs": 21.3,
-      "imageUrl": "https://i.pinimg.com/originals/23/eb/da/23ebdae995a009a11ba22a373705d8ac.jpg",
+      "imageUrl": "recipes_0046",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2787,7 +2874,7 @@
       "protein": 11.6,
       "fat": 9.5,
       "carbs": 1.9,
-      "imageUrl": "https://img.iamcook.ru/2025/upl/recipes/byusers/misc/3129/c5a7ba811572e0c3e83cc05033923875-2025.jpg",
+      "imageUrl": "recipes_0047",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2840,7 +2927,7 @@
       "protein": 5.6,
       "fat": 12.3,
       "carbs": 41.7,
-      "imageUrl": "https://grandgames.net/puzzle/f1200/chernichniy_keks.jpg",
+      "imageUrl": "recipes_0048",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2849,7 +2936,10 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -2903,7 +2993,7 @@
       "protein": 1.2,
       "fat": 3.1,
       "carbs": 10.2,
-      "imageUrl": "https://i.pinimg.com/736x/a7/f8/e9/a7f8e939e984e3e7111793ac5f2d4b90.jpg",
+      "imageUrl": "recipes_0049",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -2915,7 +3005,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Черника",
@@ -2950,7 +3043,7 @@
       "protein": 10.8,
       "fat": 9.9,
       "carbs": 13.7,
-      "imageUrl": "https://img.freepik.com/premium-vector/sandwich-with-white-toast-bread-fried-egg-salmon-and-avocado-pieces-vector-illustration-of-a-healthy-breakfast-for-poster-advertisement-menu-web-healthy-lifestyle_217290-1546.jpg?w=2000",
+      "imageUrl": "recipes_0050",
       "isFavorite": false,
       "categoryNames": [
         "Пескетарианский",
@@ -2960,7 +3053,9 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -3015,7 +3110,7 @@
       "protein": 10.9,
       "fat": 5.2,
       "carbs": 18.6,
-      "imageUrl": "https://namenu.ru/upload/recipes/foto/7584.jpg",
+      "imageUrl": "recipes_0051",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3025,7 +3120,10 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Творог",
@@ -3079,7 +3177,7 @@
       "protein": 10.8,
       "fat": 24.6,
       "carbs": 54.2,
-      "imageUrl": "https://i.pinimg.com/736x/a4/6f/78/a46f7873307292b5f047942f21b4c09d.jpg",
+      "imageUrl": "recipes_0052",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3089,7 +3187,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Арахисовое масло",
@@ -3135,7 +3236,7 @@
       "protein": 11.4,
       "fat": 7.3,
       "carbs": 18.5,
-      "imageUrl": "https://zvezda4.com.ua/wp-content/uploads/2025/05/maxresdefault-2025-05-20t115408.463.jpg",
+      "imageUrl": "recipes_0053",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3143,7 +3244,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "русская кухня",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Творог",
@@ -3189,7 +3293,7 @@
       "protein": 11.8,
       "fat": 10.2,
       "carbs": 1.6,
-      "imageUrl": "http://eclair.md/cdn/shop/articles/scrob-frantuzesc-cu-somon-645592.jpg?v=1685619814",
+      "imageUrl": "recipes_0054",
       "isFavorite": false,
       "categoryNames": [
         "Пескетарианский",
@@ -3249,7 +3353,7 @@
       "protein": 10.6,
       "fat": 3.9,
       "carbs": 17.2,
-      "imageUrl": "https://img.povar.ru/main-micro/51/a8/b6/2b/sendvich_s_indeikoi-895930.JPG",
+      "imageUrl": "recipes_0055",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -3259,7 +3363,10 @@
         "На ходу",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -3317,7 +3424,7 @@
       "protein": 3.1,
       "fat": 2.8,
       "carbs": 18.6,
-      "imageUrl": "https://kizk.ru/upload/iblock/c19/52gk3px81dk9m431r76mjcpftu9k7hrl.jpg",
+      "imageUrl": "recipes_0056",
       "isFavorite": false,
       "categoryNames": [
         "Веганский",
@@ -3327,7 +3434,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -3373,7 +3482,7 @@
       "protein": 4.2,
       "fat": 8.1,
       "carbs": 13.4,
-      "imageUrl": "https://img.iamcook.ru/2023/upl/recipes/byusers/misc/126663/a36024cc3a9e51eede0437f71e1dcdc1-2023.jpg",
+      "imageUrl": "recipes_0057",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3385,7 +3494,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "итальянская кухня",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -3436,7 +3548,7 @@
       "protein": 1.8,
       "fat": 1.9,
       "carbs": 23.4,
-      "imageUrl": "https://irecommend.ru/sites/default/files/imagecache/copyright1/user-images/247671/xVNVS2MOJzNLMCElerQ.jpg",
+      "imageUrl": "recipes_0058",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3447,7 +3559,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Груша",
@@ -3485,7 +3599,7 @@
       "protein": 3.4,
       "fat": 1.6,
       "carbs": 26.8,
-      "imageUrl": "https://www.baby-boom.md/upfiles/gallery/7d8f6303373ca4a949dab86d2433fd0686996000.jpg",
+      "imageUrl": "recipes_0059",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3496,7 +3610,10 @@
         "Быстрое приготовление",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Булгур",
@@ -3542,7 +3659,7 @@
       "protein": 3.2,
       "fat": 1.4,
       "carbs": 25.1,
-      "imageUrl": "https://img.povar.ru/main-micro/9f/09/43/dc/fruktovii_salat_s_kinoa-782759.jpg",
+      "imageUrl": "recipes_0060",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3553,7 +3670,10 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Киноа",
@@ -3599,7 +3719,7 @@
       "protein": 9.2,
       "fat": 4.1,
       "carbs": 11.6,
-      "imageUrl": "https://img.iamcook.ru/2022/upl/recipes/byusers/misc/159677/898109f82bbe83ca5ecb2846eb7d5de3-2022.jpg",
+      "imageUrl": "recipes_0061",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3609,7 +3729,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Творог",
@@ -3655,7 +3778,7 @@
       "protein": 2.9,
       "fat": 1.7,
       "carbs": 14.2,
-      "imageUrl": "https://e3.edimdoma.ru/data/posts/0003/7344/37344-ed4_big_wide.jpg?1759255200",
+      "imageUrl": "recipes_0062",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3667,7 +3790,11 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "индийская кухня",
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Манго",
@@ -3709,7 +3836,7 @@
       "protein": 12.9,
       "fat": 13.4,
       "carbs": 11.2,
-      "imageUrl": "https://img.iamcook.ru/2020/upl/recipes/zen/u-073562393498222d47ae4a9b9c90f388.jpg",
+      "imageUrl": "recipes_0063",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -3718,7 +3845,9 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -3768,7 +3897,7 @@
       "protein": 4.6,
       "fat": 11.8,
       "carbs": 13.2,
-      "imageUrl": "https://hochu.ua/uploads/95/82/71/95827108-100f-4e2a-9430-a17ba1e9441d.jpg",
+      "imageUrl": "recipes_0064",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3779,7 +3908,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -3825,7 +3956,7 @@
       "protein": 5.4,
       "fat": 7.2,
       "carbs": 14.6,
-      "imageUrl": "https://zaedok.ru/wp-content/uploads/2026/04/puding-iz-semyan-chia-s-yagodami-1600x900.webp",
+      "imageUrl": "recipes_0065",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3836,7 +3967,10 @@
         "Быстрое приготовление",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Семена чиа",
@@ -3878,7 +4012,7 @@
       "protein": 6.2,
       "fat": 5.1,
       "carbs": 25.4,
-      "imageUrl": "https://every-holiday.ru/upload/recipes/files/5e5966c965d03/5e5966973da3e.jpg",
+      "imageUrl": "recipes_0066",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -3887,7 +4021,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -3941,7 +4077,7 @@
       "protein": 5.4,
       "fat": 6.2,
       "carbs": 21.7,
-      "imageUrl": "https://uzbek-culinar.ru/wp-content/uploads/c/0/7/c07bb380e786385174f4d16f814d73e8.jpeg",
+      "imageUrl": "recipes_0067",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4005,7 +4141,7 @@
       "protein": 9.4,
       "fat": 11.2,
       "carbs": 2.8,
-      "imageUrl": "https://ketodieto.com/wp-content/uploads/2020/09/j9vkarso24o51.jpg",
+      "imageUrl": "recipes_0068",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4015,7 +4151,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "итальянская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -4069,7 +4207,7 @@
       "protein": 0.3,
       "fat": 0.2,
       "carbs": 12.1,
-      "imageUrl": "https://polzavred-edi.ru/wp-content/uploads/2023/10/jablochnyj-sous.jpg",
+      "imageUrl": "recipes_0069",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4081,7 +4219,9 @@
         "Десерт",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Яблоко",
@@ -4115,7 +4255,7 @@
       "protein": 10.6,
       "fat": 4.9,
       "carbs": 12.4,
-      "imageUrl": "https://static.nv.ua/shared/system/MediaPhoto/images/000/497/564/original/ab3862cf630b7047e1a5da503ee6ec89.png?q=85&stamp=20240731133604&f=webp",
+      "imageUrl": "recipes_0070",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4125,7 +4265,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Молоко",
@@ -4167,7 +4310,7 @@
       "protein": 6.8,
       "fat": 3.4,
       "carbs": 19.2,
-      "imageUrl": "https://ir.ozone.ru/s3/multimedia-1-h/7809932393.jpg",
+      "imageUrl": "recipes_0071",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4177,7 +4320,10 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -4219,7 +4365,7 @@
       "protein": 0.8,
       "fat": 0.3,
       "carbs": 9.6,
-      "imageUrl": "https://menunedeli.ru/wp-content/uploads/2018/04/smyzi-iz-shpinata-i-mango-500х350.jpg-1000x696.jpg",
+      "imageUrl": "recipes_0072",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4233,7 +4379,10 @@
         "Шейк",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Манго",
@@ -4271,7 +4420,7 @@
       "protein": 10.2,
       "fat": 13.6,
       "carbs": 3.9,
-      "imageUrl": "https://www.photorecept.ru/wp-content/uploads/2022/02/avokado-zapechjonnyj-s-bekonom-i-perepelinym-jajcom-2.jpg",
+      "imageUrl": "recipes_0073",
       "isFavorite": false,
       "categoryNames": [
         "Низкоуглеводный",
@@ -4327,7 +4476,7 @@
       "protein": 8.1,
       "fat": 2.4,
       "carbs": 12.7,
-      "imageUrl": "https://rutxt.ru/files/20856/original/8a98dbd49e.JPG",
+      "imageUrl": "recipes_0074",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4384,7 +4533,7 @@
       "protein": 2.1,
       "fat": 1.1,
       "carbs": 13.2,
-      "imageUrl": "https://vkys.info/uploads/posts/2017-07/1500492410_10.jpg",
+      "imageUrl": "recipes_0075",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4396,7 +4545,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Киви",
@@ -4435,7 +4587,7 @@
       "protein": 8.9,
       "fat": 9.7,
       "carbs": 10.4,
-      "imageUrl": "https://i.pinimg.com/736x/09/ba/23/09ba23bfec1786fedcd0244b05c9b90c.jpg",
+      "imageUrl": "recipes_0076",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4495,7 +4647,7 @@
       "protein": 4.9,
       "fat": 4.2,
       "carbs": 20.3,
-      "imageUrl": "https://images.gastronom.ru/r_qGMQ23cNAC1yDqxUgU3HiaoPWFH7PYhx5-pl-p6s8/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzA0NmVlYjQyLWE4YWUtNGYzNi1iZmQ0LWFlMTg3MjY3MjE1NC5qcGc.webp",
+      "imageUrl": "recipes_0077",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4505,7 +4657,10 @@
         "Запеканка",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -4559,7 +4714,7 @@
       "protein": 2.4,
       "fat": 1.4,
       "carbs": 15.2,
-      "imageUrl": "https://yummykitchen.ru/wp-content/uploads/2025/02/8cde9b01-bf0a-4c84-99fa-c5c8698d6f20.webp",
+      "imageUrl": "recipes_0078",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4571,7 +4726,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Ягоды",
@@ -4609,7 +4767,7 @@
       "protein": 10.4,
       "fat": 8.9,
       "carbs": 12.6,
-      "imageUrl": "https://img.iamcook.ru/2025/upl/recipes/byusers/misc/26750/16efce1f0667a6e813cf4960d9852fbb-2025.jpeg",
+      "imageUrl": "recipes_0079",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4619,7 +4777,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -4681,7 +4841,7 @@
       "protein": 3.1,
       "fat": 2.4,
       "carbs": 19.8,
-      "imageUrl": "https://i.ytimg.com/vi/15qkFk7qiQE/hqdefault.jpg",
+      "imageUrl": "recipes_0080",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4692,7 +4852,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -4731,7 +4894,7 @@
       "protein": 4.1,
       "fat": 4.6,
       "carbs": 28.4,
-      "imageUrl": "https://media.ovkuse.ru/images/recipes/847cdd1b-7633-44f5-bf1d-3358734f675d/847cdd1b-7633-44f5-bf1d-3358734f675d.jpg",
+      "imageUrl": "recipes_0081",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4739,7 +4902,10 @@
         "Завтрак",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня",
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Кускус",
@@ -4786,7 +4952,7 @@
       "protein": 5.8,
       "fat": 12.4,
       "carbs": 43.6,
-      "imageUrl": "https://img-fotki.yandex.ru/get/6827/36902536.32/0_a68c9_2b1ff719_XL.jpg",
+      "imageUrl": "recipes_0082",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4849,7 +5015,7 @@
       "protein": 8.4,
       "fat": 8.9,
       "carbs": 20.7,
-      "imageUrl": "https://static.1000.menu/img/content-v2/0a/e4/24566/zapechennye-buterbrody-v-duxovke-s-syrom-foto_1679467944_7_max.jpg",
+      "imageUrl": "recipes_0083",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4857,7 +5023,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -4907,7 +5076,7 @@
       "protein": 5.8,
       "fat": 6.2,
       "carbs": 28.4,
-      "imageUrl": "http://www.povarenok.ru/data/cache/2019mar/07/41/2501298_47505-710x550x.jpg",
+      "imageUrl": "recipes_0084",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4916,7 +5085,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -4962,7 +5133,7 @@
       "protein": 4.7,
       "fat": 9.8,
       "carbs": 35.6,
-      "imageUrl": "https://vkusno-blog.ru/wp-content/uploads/2017/11/10.jpg",
+      "imageUrl": "recipes_0085",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -4972,7 +5143,10 @@
         "Десерт",
         "Сладости"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Тыквенное пюре",
@@ -5026,7 +5200,7 @@
       "protein": 5.2,
       "fat": 10.4,
       "carbs": 52.1,
-      "imageUrl": "https://images.unian.net/photos/2024_02/1706867477-9521.jpg?r=938681",
+      "imageUrl": "recipes_0086",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5036,7 +5210,10 @@
         "Выпечка",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -5086,7 +5263,7 @@
       "protein": 5.3,
       "fat": 3.4,
       "carbs": 18.7,
-      "imageUrl": "https://i.pinimg.com/736x/72/6d/18/726d18a8285ffe391c2a252cfe4d0756.jpg",
+      "imageUrl": "recipes_0087",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5096,7 +5273,10 @@
         "Десерт",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -5150,7 +5330,7 @@
       "protein": 7.4,
       "fat": 2.9,
       "carbs": 17.6,
-      "imageUrl": "https://img.povar.ru/main-micro/2b/ac/93/3f/yablochnoe_parfe-731139.jpg",
+      "imageUrl": "recipes_0088",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5160,7 +5340,11 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "греческая кухня",
+        "детское",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -5202,7 +5386,7 @@
       "protein": 3.4,
       "fat": 1.9,
       "carbs": 16.8,
-      "imageUrl": "http://sun9-83.userapi.com/s/v1/if2/l_8QozLif__doqFXWrpt2wP5lfJMp2LblbJS25at_UkRJ-Nbh1IQVX87MbKf3PaAYPkwh1pBPQivCcVRHIa9Hpja.jpg?quality=95&as=32x31,48x47,72x71,108x106,160x157,240x235,360x353,480x471,540x529,640x628,720x706,1080x1059&from=bu&cs=640x0",
+      "imageUrl": "recipes_0089",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5213,7 +5397,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Персик",
@@ -5256,7 +5443,7 @@
       "protein": 12.4,
       "fat": 26.1,
       "carbs": 6.8,
-      "imageUrl": "https://img.povar.ru/main-micro/c3/18/9f/6e/keto-hleb-829372.jpg",
+      "imageUrl": "recipes_0090",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5321,7 +5508,7 @@
       "protein": 3.1,
       "fat": 4.2,
       "carbs": 11.8,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/541/big_540572.jpg",
+      "imageUrl": "recipes_0091",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5330,7 +5517,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Морковь",
@@ -5376,7 +5565,7 @@
       "protein": 3.6,
       "fat": 2.8,
       "carbs": 17.9,
-      "imageUrl": "https://i.pinimg.com/originals/2f/ee/f6/2feef6a8f21cf13bafcaff652e161ffa.jpg",
+      "imageUrl": "recipes_0092",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5385,7 +5574,9 @@
         "Лёгкий",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -5428,7 +5619,7 @@
       "protein": 8.2,
       "fat": 9.1,
       "carbs": 7.4,
-      "imageUrl": "https://lefood.menu/wp-content/uploads/w_images/2022/02/recept-33990-1240x827.jpg",
+      "imageUrl": "recipes_0093",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5492,7 +5683,7 @@
       "protein": 13.2,
       "fat": 20.4,
       "carbs": 4.9,
-      "imageUrl": "https://img.povar.ru/main-micro/e0/6e/03/81/keto-blini-671455.JPG",
+      "imageUrl": "recipes_0094",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5548,7 +5739,7 @@
       "protein": 3.3,
       "fat": 3.4,
       "carbs": 15.6,
-      "imageUrl": "https://static.1000.menu/img/content-v2/e6/13/34778/jidkaya-mannaya-kasha-na-moloke_1617533964_5_max.jpg",
+      "imageUrl": "recipes_0095",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5557,7 +5748,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Молоко",
@@ -5600,7 +5793,7 @@
       "protein": 6.4,
       "fat": 5.8,
       "carbs": 5.1,
-      "imageUrl": "https://img.delo-vcusa.ru/2020/09/menemen-yaichnitsa-po-turetski-690x430.jpg",
+      "imageUrl": "recipes_0096",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5610,7 +5803,9 @@
         "Обед",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -5664,7 +5859,7 @@
       "protein": 12.1,
       "fat": 12.4,
       "carbs": 1.8,
-      "imageUrl": "https://www.ogorod.ru/images/cache/1200x750/crop_0_0_1200_750/images|cms-image-000109986.jpg",
+      "imageUrl": "recipes_0097",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5674,7 +5869,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "итальянская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -5725,7 +5922,7 @@
       "protein": 4.1,
       "fat": 5.2,
       "carbs": 33.4,
-      "imageUrl": "https://img.povar.ru/main-micro/7c/b9/d3/f5/sharlotka_s_yablokami_klassicheskaya_v_duhovke-394351.jpg",
+      "imageUrl": "recipes_0098",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5735,7 +5932,11 @@
         "Десерт",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "русская кухня",
+        "детское",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Яблоко",
@@ -5786,7 +5987,7 @@
       "protein": 5.4,
       "fat": 5.8,
       "carbs": 31.2,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/62/big_61398.jpg",
+      "imageUrl": "recipes_0099",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5795,7 +5996,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -5846,7 +6049,7 @@
       "protein": 3.2,
       "fat": 3.4,
       "carbs": 30.8,
-      "imageUrl": "https://vdiete.ru/wp-content/uploads/2019/02/YAblochnye-oladi.jpg",
+      "imageUrl": "recipes_0100",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5857,7 +6060,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -5912,7 +6117,7 @@
       "protein": 4.9,
       "fat": 11.2,
       "carbs": 36.4,
-      "imageUrl": "https://i.pinimg.com/originals/73/03/d7/7303d7ea3407fed9d994debf8ce8029e.jpg",
+      "imageUrl": "recipes_0101",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5922,7 +6127,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Морковь",
@@ -5981,7 +6188,7 @@
       "protein": 12.4,
       "fat": 12.1,
       "carbs": 20.6,
-      "imageUrl": "https://cdn.food.ru/unsigned/fit/640/480/ce/0/czM6Ly9tZWRpYS9waWN0dXJlcy8yMDI0MTExNC8zdmkyWjQuanBlZw.jpg",
+      "imageUrl": "recipes_0102",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -5990,7 +6197,9 @@
         "Перекус",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Тортилья",
@@ -6036,7 +6245,7 @@
       "protein": 4.1,
       "fat": 2.9,
       "carbs": 16.2,
-      "imageUrl": "https://lgz.ru/upload/opt/close-up-breakfast-concept.jpeg",
+      "imageUrl": "recipes_0103",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6046,7 +6255,9 @@
         "На ходу",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -6085,7 +6296,7 @@
       "protein": 6.9,
       "fat": 8.2,
       "carbs": 17.1,
-      "imageUrl": "https://i.pinimg.com/736x/83/93/6a/83936a2078a6231412a05b311343d612.jpg",
+      "imageUrl": "recipes_0104",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6094,7 +6305,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Кабачки",
@@ -6149,7 +6362,7 @@
       "protein": 5.6,
       "fat": 7.8,
       "carbs": 30.2,
-      "imageUrl": "https://dietostrana.ru/wp-content/uploads/2020/09/temp02.jpg",
+      "imageUrl": "recipes_0105",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6159,7 +6372,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -6218,7 +6433,7 @@
       "protein": 4.2,
       "fat": 11.6,
       "carbs": 24.3,
-      "imageUrl": "https://art-lunch.ru/wp-content/uploads/2015/04/bruschetta_tomato_basil_01-1.jpg",
+      "imageUrl": "recipes_0106",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6227,7 +6442,10 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня",
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -6274,7 +6492,7 @@
       "protein": 0.9,
       "fat": 0.4,
       "carbs": 9.6,
-      "imageUrl": "https://recepty.24tv.ua/resources/photos/news/900_DIR/202006/217__3b86e683-ccd5-4b5a-a6ed-ef09d884d40d.jpg?1594014292000&fit=cover&q=480&w=920",
+      "imageUrl": "recipes_0107",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6289,7 +6507,10 @@
         "Лёгкий",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Клубника",
@@ -6331,7 +6552,7 @@
       "protein": 2.4,
       "fat": 3.9,
       "carbs": 21.6,
-      "imageUrl": "https://images.news.ru/2026/01/17/5Z67n5Fo3NLBtRvZcv0VzZVau8KfQfdFHp5uWeak_780.png",
+      "imageUrl": "recipes_0108",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6342,7 +6563,9 @@
         "Обед",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Картофель",
@@ -6388,7 +6611,7 @@
       "protein": 6.4,
       "fat": 12.8,
       "carbs": 40.1,
-      "imageUrl": "https://wem.ua/wp-content/uploads/2025/11/yak-zrobyty-vafli-v-vafelnyczi.jpg",
+      "imageUrl": "recipes_0109",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6397,7 +6620,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -6448,7 +6673,7 @@
       "protein": 10.4,
       "fat": 13.6,
       "carbs": 16.8,
-      "imageUrl": "https://img.iamcook.ru/2023/upl/recipes/byusers/misc/5861/1ea81b139af074e21d102e72b98f835c-2023.jpg",
+      "imageUrl": "recipes_0110",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -6517,7 +6742,7 @@
       "protein": 4.6,
       "fat": 8.9,
       "carbs": 31.4,
-      "imageUrl": "https://www.gotovim.ru/pics/sbs/keksbananmorkv/rec.jpg",
+      "imageUrl": "recipes_0111",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6527,7 +6752,10 @@
         "Десерт",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -6589,7 +6817,7 @@
       "protein": 4.2,
       "fat": 2.6,
       "carbs": 18.4,
-      "imageUrl": "https://images.gastronom.ru/S4IVaeXIxHcwLBe8EXdvcl__xwf6iVpbMBHLgCCxPKA/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzE1NDJhYTU4LWZmOTgtNDc2OS1iOWYwLTMwZWI3NTEzMDE3NS5qcGc.webp",
+      "imageUrl": "recipes_0112",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6645,7 +6873,7 @@
       "protein": 5.1,
       "fat": 4.8,
       "carbs": 24.3,
-      "imageUrl": "https://static.1000.menu/img/content-v2/19/3f/622/oladi-iz-tjkvj_1602064384_13_max.jpg",
+      "imageUrl": "recipes_0113",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6655,7 +6883,10 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Тыква",
@@ -6709,7 +6940,7 @@
       "protein": 13.6,
       "fat": 8.4,
       "carbs": 1.9,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/733/big_732425.jpg",
+      "imageUrl": "recipes_0114",
       "isFavorite": false,
       "categoryNames": [
         "Пескетарианский",
@@ -6719,7 +6950,10 @@
         "Быстрое приготовление",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "средиземноморская кухня",
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -6769,7 +7003,7 @@
       "protein": 3.1,
       "fat": 2.6,
       "carbs": 14.8,
-      "imageUrl": "https://www.koolinar.ru/all_image/recipes/131/131091/recipe_4331888a-e9bf-41f4-b23c-124c206d9634.jpg",
+      "imageUrl": "recipes_0115",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6778,7 +7012,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Молоко",
@@ -6824,7 +7060,7 @@
       "protein": 0.9,
       "fat": 0.3,
       "carbs": 15.2,
-      "imageUrl": "https://img.freepik.com/free-photo/fresh-fruit-berry-salad-healthy-eating_114579-20466.jpg?t=st=1718668868~exp=1718672468~hmac=3f370727148290356f762a4a81f1c46e86767896dab8c503acae96e8d20604f9&w=996",
+      "imageUrl": "recipes_0116",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6838,7 +7074,10 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Яблоко",
@@ -6885,7 +7124,7 @@
       "protein": 7.4,
       "fat": 14.6,
       "carbs": 31.2,
-      "imageUrl": "https://cdn.nur.kz/images/1200x675/4e0bc6e642c14077.jpeg?version=1",
+      "imageUrl": "recipes_0117",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -6893,7 +7132,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Мука цельнозерновая",
@@ -6939,7 +7181,7 @@
       "protein": 15.4,
       "fat": 16.8,
       "carbs": 21.3,
-      "imageUrl": "https://static.1000.menu/img/content-v2/b4/c4/38523/krok-mese_1617632941_13_max.jpg",
+      "imageUrl": "recipes_0118",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -6949,7 +7191,9 @@
         "Обед",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -6987,7 +7231,7 @@
       "protein": 4.1,
       "fat": 8.2,
       "carbs": 36.4,
-      "imageUrl": "https://img.povar.ru/uploads/0f/b0/a3/b2/veganskie_vafli_v_vafelnice-705669.jpg",
+      "imageUrl": "recipes_0119",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7043,7 +7287,7 @@
       "protein": 0.8,
       "fat": 0.4,
       "carbs": 17.2,
-      "imageUrl": "https://images.gastronom.ru/PL58y9hmtZQfA6eCHnrJYmrSuzNd0AzpphSNUyM5K3Q/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzI5NjQxZmFhLTlmNDUtNDg3OS1iZGVjLTFlNDhlNWJjMWQxNi5qcGc.webp",
+      "imageUrl": "recipes_0120",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7056,7 +7300,10 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Ананас",
@@ -7103,7 +7350,7 @@
       "protein": 4.1,
       "fat": 3.2,
       "carbs": 19.6,
-      "imageUrl": "https://cdn.lifehacker.ru/wp-content/uploads/2024/11/103_1730550619.jpg",
+      "imageUrl": "recipes_0121",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7113,7 +7360,10 @@
         "Десерт",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Батат",
@@ -7164,7 +7414,7 @@
       "protein": 14.6,
       "fat": 5.4,
       "carbs": 24.1,
-      "imageUrl": "https://ir.ozone.ru/s3/multimedia-1-h/7688286773.jpg",
+      "imageUrl": "recipes_0122",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7221,7 +7471,7 @@
       "protein": 5.6,
       "fat": 6.1,
       "carbs": 31.4,
-      "imageUrl": "https://img.iamcook.ru/2018/upl/recipes/cat/u-d1da8122093a76d4b6574664cf20fa64.JPG",
+      "imageUrl": "recipes_0123",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7229,7 +7479,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -7280,7 +7532,7 @@
       "protein": 11.6,
       "fat": 9.8,
       "carbs": 9.2,
-      "imageUrl": "https://cdn.food.ru/unsigned/fit/640/480/ce/0/czM6Ly9tZWRpYS9waWN0dXJlcy8yMDI1MDYyNS8zSnBteXAuanBlZw.jpg",
+      "imageUrl": "recipes_0124",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -7289,7 +7541,10 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -7339,7 +7594,7 @@
       "protein": 3.8,
       "fat": 2.6,
       "carbs": 18.9,
-      "imageUrl": "https://i.pinimg.com/736x/fb/b7/71/fbb77161ef13b7783c6a7a2080d2662a.jpg",
+      "imageUrl": "recipes_0125",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7396,7 +7651,7 @@
       "protein": 2.9,
       "fat": 1.8,
       "carbs": 13.6,
-      "imageUrl": "https://avatars.mds.yandex.net/i?id=d8086cd0e86db3188c1e68694b7ffba916f15e4e-4697805-images-thumbs&n=13",
+      "imageUrl": "recipes_0126",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7408,7 +7663,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Ежевика",
@@ -7446,7 +7704,7 @@
       "protein": 1.9,
       "fat": 1.6,
       "carbs": 11.4,
-      "imageUrl": "https://i.pinimg.com/originals/1e/61/10/1e6110cf7d935a6c87d08205b1b76b0f.jpg",
+      "imageUrl": "recipes_0127",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7458,7 +7716,9 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Манго",
@@ -7497,7 +7757,7 @@
       "protein": 9.8,
       "fat": 7.6,
       "carbs": 8.1,
-      "imageUrl": "http://fb.ru/media/i/3/1/4/8/1/6/2/i/3148162.jpg",
+      "imageUrl": "recipes_0128",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7507,7 +7767,9 @@
         "Быстрое приготовление",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -7570,7 +7832,7 @@
       "protein": 8.4,
       "fat": 15.6,
       "carbs": 48.2,
-      "imageUrl": "https://static.tildacdn.com/tild3263-6161-4833-b336-333037303062/1.png",
+      "imageUrl": "recipes_0129",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7580,7 +7842,10 @@
         "На ходу",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -7630,7 +7895,7 @@
       "protein": 6.4,
       "fat": 4.9,
       "carbs": 4.8,
-      "imageUrl": "https://www.oum.ru/upload/iblock/8c0/8c048e4162e394b425635069522c49d3.jpg",
+      "imageUrl": "recipes_0130",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7641,7 +7906,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Тофу",
@@ -7695,7 +7962,7 @@
       "protein": 8.2,
       "fat": 4.1,
       "carbs": 12.4,
-      "imageUrl": "https://sovkusom.ru/wp-content/uploads/blog/b/boul-recepty/5.jpg",
+      "imageUrl": "recipes_0131",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7706,7 +7973,10 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -7749,7 +8019,7 @@
       "protein": 9.6,
       "fat": 4.8,
       "carbs": 35.4,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2018dec/07/59/2446276_73714-710x550x.jpg",
+      "imageUrl": "recipes_0132",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7758,7 +8028,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -7808,7 +8080,7 @@
       "protein": 7.1,
       "fat": 2.4,
       "carbs": 11.8,
-      "imageUrl": "https://i.pinimg.com/736x/0b/50/38/0b503826613639cd465bc20c9c542d14.jpg",
+      "imageUrl": "recipes_0133",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7820,7 +8092,10 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -7855,7 +8130,7 @@
       "protein": 9.4,
       "fat": 13.6,
       "carbs": 2.4,
-      "imageUrl": "https://static.1000.menu/img/content-v2/4b/45/41654/tost-s-avokado-i-yaicom-pashot_1576671291_8_max.jpg",
+      "imageUrl": "recipes_0134",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7912,7 +8187,7 @@
       "protein": 4.6,
       "fat": 10.2,
       "carbs": 34.8,
-      "imageUrl": "https://img.povar.ru/main-micro/f2/f0/ef/6f/sladkii_tikvennii_hleb_-482947.jpg",
+      "imageUrl": "recipes_0135",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7921,7 +8196,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Тыквенное пюре",
@@ -7979,7 +8256,7 @@
       "protein": 3.4,
       "fat": 3.1,
       "carbs": 20.6,
-      "imageUrl": "https://namenu.ru/upload/recipes/files/58e5500c88bb4/58e54ff98b999.jpg",
+      "imageUrl": "recipes_0136",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -7989,7 +8266,9 @@
         "Десерт",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Рис",
@@ -8032,7 +8311,7 @@
       "protein": 6.2,
       "fat": 12.8,
       "carbs": 44.6,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/552/big_551184.jpg",
+      "imageUrl": "recipes_0137",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8043,7 +8322,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -8093,7 +8375,7 @@
       "protein": 8.9,
       "fat": 0.4,
       "carbs": 8.2,
-      "imageUrl": "https://ir.ozone.ru/s3/multimedia-1-1/8493489361.jpg",
+      "imageUrl": "recipes_0138",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8104,7 +8386,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Скир",
@@ -8142,7 +8427,7 @@
       "protein": 6.8,
       "fat": 9.2,
       "carbs": 14.1,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2023sep/18/34/3068936_88519-710x550x.jpg",
+      "imageUrl": "recipes_0139",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8193,7 +8478,7 @@
       "protein": 14.2,
       "fat": 58.6,
       "carbs": 16.4,
-      "imageUrl": "https://images.silpo.ua/v2/products/500x500/origin/ad6e8b96-10ea-491e-ae7e-4b302685a46b.png",
+      "imageUrl": "recipes_0140",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8242,7 +8527,7 @@
       "protein": 14.8,
       "fat": 21.4,
       "carbs": 6.2,
-      "imageUrl": "https://avatars.dzeninfra.ru/get-zen_doc/10893775/pub_64c787a6e3f60f18893053a1_64ca4f88422e3c5d30617057/scale_1200",
+      "imageUrl": "recipes_0141",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8304,7 +8589,7 @@
       "protein": 9.6,
       "fat": 10.2,
       "carbs": 3.1,
-      "imageUrl": "https://img.iamcook.ru/2024/upl/recipes/byusers/misc/11168/9959ba61181d51e1a6c97b9f6b9c3b7e-2024.jpg",
+      "imageUrl": "recipes_0142",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8368,7 +8653,7 @@
       "protein": 2.8,
       "fat": 4.6,
       "carbs": 14.1,
-      "imageUrl": "https://golden-flamingo.com.ua/wp-content/uploads/2023/07/chocolate-avocado-smoothie-1-1024x683.jpg",
+      "imageUrl": "recipes_0143",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8381,7 +8666,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Авокадо",
@@ -8423,7 +8711,7 @@
       "protein": 11.6,
       "fat": 6.4,
       "carbs": 8.2,
-      "imageUrl": "http://062012.imgbb.ru/a/b/c/abc4b7d662447c5f9dab04371d11d929.jpg",
+      "imageUrl": "recipes_0144",
       "isFavorite": false,
       "categoryNames": [
         "Низкоуглеводный",
@@ -8434,7 +8722,10 @@
         "На ходу",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Дыня",
@@ -8464,7 +8755,7 @@
       "protein": 2.1,
       "fat": 1.4,
       "carbs": 14.6,
-      "imageUrl": "https://img.iamcook.ru/2024/upl/recipes/zen/u-9dc2c8e8c2760f291bb5da510de76bca.JPG",
+      "imageUrl": "recipes_0145",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8475,7 +8766,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Ананас",
@@ -8514,7 +8808,7 @@
       "protein": 5.4,
       "fat": 6.2,
       "carbs": 25.8,
-      "imageUrl": "https://alimero.ru/uploads/images/18/76/55/2021/10/26/c7a93c.jpg",
+      "imageUrl": "recipes_0146",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8524,7 +8818,10 @@
         "Выпечка",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -8583,7 +8880,7 @@
       "protein": 8.1,
       "fat": 3.4,
       "carbs": 49.6,
-      "imageUrl": "https://vkusnogram.ru/upload/053/food-7.webp",
+      "imageUrl": "recipes_0147",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8592,7 +8889,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -8638,7 +8937,7 @@
       "protein": 14.2,
       "fat": 8.6,
       "carbs": 1.9,
-      "imageUrl": "https://i.pinimg.com/736x/95/80/ec/9580ec8edc31107f4c646646bc5af9e2.jpg",
+      "imageUrl": "recipes_0148",
       "isFavorite": false,
       "categoryNames": [
         "Низкоуглеводный",
@@ -8647,7 +8946,9 @@
         "Быстрое приготовление",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -8697,7 +8998,7 @@
       "protein": 2.4,
       "fat": 1.6,
       "carbs": 11.2,
-      "imageUrl": "https://img.iamcook.ru/2023/upl/recipes/byusers/misc/6251/dfdaeb336a0e18b3a005784f81d4a75a-2023.jpg",
+      "imageUrl": "recipes_0149",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8709,7 +9010,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Манго",
@@ -8743,7 +9047,7 @@
       "protein": 2.2,
       "fat": 1.3,
       "carbs": 13.4,
-      "imageUrl": "https://fresh-mania.com/wp-content/uploads/2020/08/strawberry-mango-smoothie_1.jpg",
+      "imageUrl": "recipes_0150",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8755,7 +9059,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Клубника",
@@ -8794,7 +9101,7 @@
       "protein": 5.2,
       "fat": 14.6,
       "carbs": 49.8,
-      "imageUrl": "https://img.povar.ru/main/6d/9f/8b/73/tikvennoe_pechene-386173.JPG",
+      "imageUrl": "recipes_0151",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8805,7 +9112,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Тыквенное пюре",
@@ -8860,7 +9170,7 @@
       "protein": 3.6,
       "fat": 3.1,
       "carbs": 20.4,
-      "imageUrl": "https://media.ovkuse.ru/images/comment_attachments/cb8b393d-f42c-4ca4-8a82-ee37d99ed0a0/cb8b393d-f42c-4ca4-8a82-ee37d99ed0a0.jpg",
+      "imageUrl": "recipes_0152",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8870,7 +9180,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -8921,7 +9233,7 @@
       "protein": 5.1,
       "fat": 4.9,
       "carbs": 28.6,
-      "imageUrl": "https://img.povar.ru/main-micro/ab/ed/f1/90/lenivie_oladi-612815.JPG",
+      "imageUrl": "recipes_0153",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8930,7 +9242,9 @@
         "Десерт",
         "Выпечка"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -8980,7 +9294,7 @@
       "protein": 1.8,
       "fat": 1.1,
       "carbs": 11.2,
-      "imageUrl": "https://fcatering.ru/wp-content/uploads/2023/09/e6a12abfb92ae795e9e74fabc7d60784.jpg",
+      "imageUrl": "recipes_0154",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -8992,7 +9306,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "весеннее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Ревень",
@@ -9030,7 +9347,7 @@
       "protein": 8.9,
       "fat": 6.2,
       "carbs": 16.4,
-      "imageUrl": "https://img.povar.ru/main-micro/a5/ea/cf/b9/blinchiki_s_mocarelloi_i_krasnoi_riboi-267909.JPG",
+      "imageUrl": "recipes_0155",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9090,7 +9407,7 @@
       "protein": 3.4,
       "fat": 8.9,
       "carbs": 31.2,
-      "imageUrl": "https://grandkulinar.ru/uploads/posts/2015-05/1430646907_fruktovye-piccy-dlya-detskogo-stola.jpg",
+      "imageUrl": "recipes_0156",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9101,7 +9418,11 @@
         "Быстрое приготовление",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Крекеры",
@@ -9152,7 +9473,7 @@
       "protein": 4.2,
       "fat": 7.8,
       "carbs": 32.6,
-      "imageUrl": "https://i.pinimg.com/originals/31/2f/96/312f967973004727f61520e3a4a40cf1.jpg",
+      "imageUrl": "recipes_0157",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9162,7 +9483,9 @@
         "Выпечка",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Яичный белок",
@@ -9204,7 +9527,7 @@
       "protein": 3.2,
       "fat": 2.7,
       "carbs": 16.4,
-      "imageUrl": "https://totrecept.com/wp-content/uploads/2019/12/66535_79583.jpg",
+      "imageUrl": "recipes_0158",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9213,7 +9536,10 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Молоко",
@@ -9263,7 +9589,7 @@
       "protein": 3.1,
       "fat": 2.6,
       "carbs": 18.4,
-      "imageUrl": "https://i.pinimg.com/736x/d7/10/60/d71060a2f7c04edc1789d7b1988aca4b.jpg",
+      "imageUrl": "recipes_0159",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9275,7 +9601,10 @@
         "Лёгкий",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Вишня",
@@ -9310,7 +9639,7 @@
       "protein": 12.4,
       "fat": 9.6,
       "carbs": 22.8,
-      "imageUrl": "https://grandkulinar.ru/uploads/posts/2023-09/1693649510_prostaya-picca-s-bekonom-i-yaichnicej-k-zavtraku.jpg",
+      "imageUrl": "recipes_0160",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -9319,7 +9648,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "итальянская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Тесто для пиццы",
@@ -9374,7 +9705,7 @@
       "protein": 5.8,
       "fat": 8.4,
       "carbs": 26.2,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2026jan/31/12/3204422_44768-710x550x.jpg",
+      "imageUrl": "recipes_0161",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9384,7 +9715,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -9438,7 +9771,7 @@
       "protein": 2.4,
       "fat": 2.1,
       "carbs": 13.8,
-      "imageUrl": "https://i.pinimg.com/originals/4a/1a/76/4a1a762600a2f1bc78caed64dbf581c3.jpg",
+      "imageUrl": "recipes_0162",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9449,7 +9782,10 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Тыква",
@@ -9491,7 +9827,7 @@
       "protein": 1.6,
       "fat": 1.9,
       "carbs": 7.4,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/527/big_526119.jpg",
+      "imageUrl": "recipes_0163",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9502,7 +9838,9 @@
         "Лёгкий",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Кабачки",
@@ -9541,7 +9879,7 @@
       "protein": 4.2,
       "fat": 5.8,
       "carbs": 32.4,
-      "imageUrl": "https://oduk.ru/wp-content/uploads/2024/03/bananovij-xleb-bez-saxara.jpg",
+      "imageUrl": "recipes_0164",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9551,7 +9889,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Банан",
@@ -9606,7 +9946,7 @@
       "protein": 7.4,
       "fat": 6.2,
       "carbs": 4.1,
-      "imageUrl": "https://art-lunch.ru/content/uploads/2020/10/zucchini_casserole_01.jpg",
+      "imageUrl": "recipes_0165",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9669,7 +10009,7 @@
       "protein": 6.4,
       "fat": 7.8,
       "carbs": 25.6,
-      "imageUrl": "https://plan-menu.ru/media/franczuzskie-tykvennye-tosty-pumpkin-french-toast-kulinarnyj-reczept.jpg",
+      "imageUrl": "recipes_0166",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9678,7 +10018,10 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -9729,7 +10072,7 @@
       "protein": 10.8,
       "fat": 9.6,
       "carbs": 16.4,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2021aug/28/34/2896155_14233-710x550.jpg",
+      "imageUrl": "recipes_0167",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -9796,7 +10139,7 @@
       "protein": 10.2,
       "fat": 8.4,
       "carbs": 15.6,
-      "imageUrl": "https://recept-2u.com.ua/wp-content/uploads/2018/10/meksikanskaya_zapekanka_chilakiles_foto.jpg",
+      "imageUrl": "recipes_0168",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9805,7 +10148,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Тортилья",
@@ -9864,7 +10209,7 @@
       "protein": 10.4,
       "fat": 8.6,
       "carbs": 13.2,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2015may/24/33/1153641_20692-710x550x.jpg",
+      "imageUrl": "recipes_0169",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9873,7 +10218,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -9927,7 +10274,7 @@
       "protein": 7.2,
       "fat": 15.8,
       "carbs": 52.4,
-      "imageUrl": "https://1001receipt.net/wp-content/uploads/2023/01/ovsyanoe-pechene-bez-muki2-1024x576.jpg",
+      "imageUrl": "recipes_0170",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -9938,7 +10285,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -9988,7 +10338,7 @@
       "protein": 3.8,
       "fat": 3.2,
       "carbs": 18.4,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2017sep/19/28/2120086_26772-710x550x.jpg",
+      "imageUrl": "recipes_0171",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10044,7 +10394,7 @@
       "protein": 0.6,
       "fat": 0.2,
       "carbs": 8.4,
-      "imageUrl": "https://www.myllynparas.ru/sites/default/files/raparperi-mansikkatuorepuuro_rhubarb_and_strawberry_cream_porridge.jpg",
+      "imageUrl": "recipes_0172",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10057,7 +10407,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "весеннее"
+      ],
       "ingredients": [
         {
           "productName": "Ревень",
@@ -10100,7 +10452,7 @@
       "protein": 9.8,
       "fat": 6.4,
       "carbs": 4.1,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/615/big_614052.jpg",
+      "imageUrl": "recipes_0173",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10167,7 +10519,7 @@
       "protein": 3.8,
       "fat": 10.4,
       "carbs": 35.6,
-      "imageUrl": "https://images.news.ru/2025/08/24/uSz1LpNHd7pFDaSvSqX5tIoq1TXnK88se3urBQyZ_780.png",
+      "imageUrl": "recipes_0174",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10236,7 +10588,7 @@
       "protein": 4.1,
       "fat": 1.2,
       "carbs": 25.8,
-      "imageUrl": "https://cdn.food.ru/unsigned/fit/640/480/ce/0/czM6Ly9tZWRpYS9waWN0dXJlcy8yMDIzMTAxNi8zdmY5dnAuanBlZw.jpg",
+      "imageUrl": "recipes_0175",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10292,7 +10644,7 @@
       "protein": 7.4,
       "fat": 5.6,
       "carbs": 9.8,
-      "imageUrl": "http://wums.ru/wp-content/uploads/2019/04/Bliny-s-gribami.jpg",
+      "imageUrl": "recipes_0176",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10352,7 +10704,7 @@
       "protein": 10.6,
       "fat": 12.4,
       "carbs": 21.8,
-      "imageUrl": "https://cdn.lifehacker.ru/wp-content/uploads/2021/09/Depositphotos_464887278_xl-2015_1632987701-scaled.jpg",
+      "imageUrl": "recipes_0177",
       "isFavorite": false,
       "categoryNames": [
         "Мясо",
@@ -10361,7 +10713,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -10407,7 +10761,7 @@
       "protein": 2.1,
       "fat": 1.4,
       "carbs": 11.6,
-      "imageUrl": "https://buljon.ru/files/styles/recipe_large/public/images/recipes/2024-03/CBwJAqXAV4vh1ZSOOauiGCY0zDfSGCy4dNjFpAc6sQY.jpg?itok=o0aYcJGL",
+      "imageUrl": "recipes_0178",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10419,7 +10773,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Кефир",
@@ -10457,7 +10814,7 @@
       "protein": 5.4,
       "fat": 5.2,
       "carbs": 23.6,
-      "imageUrl": "https://img.iamcook.ru/2022/upl/recipes/byusers/misc/9661/6700d83a8a6b610ef618f3e32b45e2cc-2022.jpg",
+      "imageUrl": "recipes_0179",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10467,7 +10824,9 @@
         "Десерт",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Тыква",
@@ -10518,7 +10877,7 @@
       "protein": 5.6,
       "fat": 11.2,
       "carbs": 24.8,
-      "imageUrl": "https://e3.edimdoma.ru/data/recipes/0006/9410/69410-ed4_big_wide.jpg?1468309647",
+      "imageUrl": "recipes_0180",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10527,7 +10886,10 @@
         "Десерт",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -10578,7 +10940,7 @@
       "protein": 7.8,
       "fat": 6.4,
       "carbs": 15.2,
-      "imageUrl": "https://resizer.mail.ru/p/0cc25d8b-7d63-545c-9bcf-3f756f5a3d8a/dpr:200/AQAF7IL3S8YZ9n4D0fnjVbyqQbLhSEA-08b1IogWGf3uVJN1Mw9QXGyu0EaD66K7ge3gcFq2YEU2NCfAUmn4iNY3uZE.jpg",
+      "imageUrl": "recipes_0181",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10588,7 +10950,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Батат",
@@ -10643,7 +11007,7 @@
       "protein": 10.4,
       "fat": 7.2,
       "carbs": 14.6,
-      "imageUrl": "https://yourmeal.ru/wp-content/uploads/2022/01/000-2.jpg",
+      "imageUrl": "recipes_0182",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10652,7 +11016,9 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Тортилья",
@@ -10706,7 +11072,7 @@
       "protein": 6.4,
       "fat": 5.8,
       "carbs": 7.2,
-      "imageUrl": "https://img.freepik.com/free-photo/high-angle-shot-of-a-clear-frozen-lake-surrounded-by-a-mountainous-scenery_181624-16256.jpg",
+      "imageUrl": "recipes_0183",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10715,7 +11081,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "индийская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Хлопья рисовые",
@@ -10774,7 +11142,7 @@
       "protein": 9.6,
       "fat": 7.8,
       "carbs": 3.4,
-      "imageUrl": "https://img.povar.ru/uploads/49/4a/72/e6/yaica_zapechennie_s_gribami_i_shpinatom-116713.jpg",
+      "imageUrl": "recipes_0184",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10785,7 +11153,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -10835,7 +11205,7 @@
       "protein": 7.2,
       "fat": 8.4,
       "carbs": 16.8,
-      "imageUrl": "https://img.iamcook.ru/2025/upl/recipes/byusers/misc/159678/f3fcbe00c4e10c19db72325b7d652d42-2025.jpg",
+      "imageUrl": "recipes_0185",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10844,7 +11214,9 @@
         "Перекус",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб овсяный",
@@ -10895,7 +11267,7 @@
       "protein": 8.4,
       "fat": 4.2,
       "carbs": 14.6,
-      "imageUrl": "https://www.chefmarket.ru/blog/wp-content/uploads/2022/11/polenta-s-syrom-i-krevetkami--2000x1200.jpg",
+      "imageUrl": "recipes_0186",
       "isFavorite": false,
       "categoryNames": [
         "Пескетарианский",
@@ -10905,7 +11277,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "итальянская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Полента",
@@ -10960,7 +11334,7 @@
       "protein": 9.2,
       "fat": 6.8,
       "carbs": 9.4,
-      "imageUrl": "http://recepti-vkusnie.ru/wp-content/uploads/2019/02/uevos-rancheros.jpg",
+      "imageUrl": "recipes_0187",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -10969,7 +11343,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -11023,7 +11399,7 @@
       "protein": 3.6,
       "fat": 3.8,
       "carbs": 22.4,
-      "imageUrl": "https://img.povar.ru/main-micro/35/95/56/46/rojdestvenskaya_kasha-657590.JPG",
+      "imageUrl": "recipes_0188",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11032,7 +11408,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "Рождество"
+      ],
       "ingredients": [
         {
           "productName": "Рис",
@@ -11082,7 +11460,7 @@
       "protein": 1.2,
       "fat": 3.4,
       "carbs": 12.8,
-      "imageUrl": "https://napitki133.ru/wp-content/uploads/2025/10/izobrazhenie-13-5.jpg",
+      "imageUrl": "recipes_0189",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11095,7 +11473,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее",
+        "перекус"
+      ],
       "ingredients": [
         {
           "productName": "Ананас",
@@ -11134,7 +11515,7 @@
       "protein": 13.4,
       "fat": 18.6,
       "carbs": 8.2,
-      "imageUrl": "https://art-lunch.ru/wp-content/uploads/2014/02/Eggs_Benedict_01.jpg",
+      "imageUrl": "recipes_0190",
       "isFavorite": false,
       "categoryNames": [
         "Высокобелковый",
@@ -11197,7 +11578,7 @@
       "protein": 3.8,
       "fat": 8.4,
       "carbs": 37.2,
-      "imageUrl": "https://wibes-07.wbbasket.ru/41baeb94-4875-11f1-9a67-b2e22f0e25f7/supplier-36453-wibe-1080.webp",
+      "imageUrl": "recipes_0191",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11208,7 +11589,9 @@
         "Завтрак",
         "Сладости"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -11259,7 +11642,7 @@
       "protein": 8.6,
       "fat": 7.2,
       "carbs": 10.8,
-      "imageUrl": "https://www.good-cook.ru/foto/tort/828-12.jpg",
+      "imageUrl": "recipes_0192",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11327,7 +11710,7 @@
       "protein": 9.4,
       "fat": 6.2,
       "carbs": 10.4,
-      "imageUrl": "https://i.pinimg.com/originals/a5/12/ed/a512ed29f4202bb1e66501ccd172fe45.jpg",
+      "imageUrl": "recipes_0193",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11339,7 +11722,9 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Тофу",
@@ -11397,7 +11782,7 @@
       "protein": 9.2,
       "fat": 9.8,
       "carbs": 3.6,
-      "imageUrl": "https://img.iamcook.ru/2019/upl/recipes/cat/u-3b6c79f9ecab93f4f13327f0dd40ad7d.JPG",
+      "imageUrl": "recipes_0194",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11407,7 +11792,9 @@
         "Быстрое приготовление",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "тайская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -11465,7 +11852,7 @@
       "protein": 4.6,
       "fat": 21.2,
       "carbs": 27.8,
-      "imageUrl": "https://static.1000.menu/img/content-v2/1f/51/11215/limonnyi-kurd_1587711558_9_max.jpg",
+      "imageUrl": "recipes_0195",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11517,7 +11904,7 @@
       "protein": 7.8,
       "fat": 16.4,
       "carbs": 42.6,
-      "imageUrl": "https://gipfel.ru/upload/iblock/7d8/ihxqmsk9rjijuheu4qv3ionjj79d21t1.jpg",
+      "imageUrl": "recipes_0196",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11526,7 +11913,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "французская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -11581,7 +11970,7 @@
       "protein": 4.8,
       "fat": 10.2,
       "carbs": 40.6,
-      "imageUrl": "https://gastrokot.by/wp-content/uploads/2018/10/IMG_8925_wm2-1024x1024.png",
+      "imageUrl": "recipes_0197",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11590,7 +11979,10 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее",
+        "детское"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -11649,7 +12041,7 @@
       "protein": 8.6,
       "fat": 8.4,
       "carbs": 2.8,
-      "imageUrl": "https://novorab.ru/wp-content/uploads/2026/06/foto-kuku-sabzi-iranskij-omlet-s-zelenyu.jpeg",
+      "imageUrl": "recipes_0198",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11659,7 +12051,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Яйца",
@@ -11713,7 +12107,7 @@
       "protein": 3.4,
       "fat": 2.1,
       "carbs": 21.4,
-      "imageUrl": "https://pastry-school.online/wp-content/uploads/2023/07/3_mango-cream.jpg",
+      "imageUrl": "recipes_0199",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11759,7 +12153,7 @@
       "protein": 3.4,
       "fat": 2.1,
       "carbs": 16.8,
-      "imageUrl": "https://www.russianfood.com/dycontent/images_upl/697/big_696508.jpg",
+      "imageUrl": "recipes_0200",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11769,7 +12163,9 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Пшено",
@@ -11812,7 +12208,7 @@
       "protein": 11.4,
       "fat": 16.8,
       "carbs": 25.6,
-      "imageUrl": "https://yummybook.ru/cloud/images/recipe/item/9352/image_large_84275e8070a1e9424_85475833.jpg",
+      "imageUrl": "recipes_0201",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11876,7 +12272,7 @@
       "protein": 4.4,
       "fat": 10.8,
       "carbs": 32.4,
-      "imageUrl": "https://images.news.ru/2025/08/24/uSz1LpNHd7pFDaSvSqX5tIoq1TXnK88se3urBQyZ_1200.png",
+      "imageUrl": "recipes_0202",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -11943,7 +12339,7 @@
       "protein": 6.4,
       "fat": 9.8,
       "carbs": 8.2,
-      "imageUrl": "https://i.ytimg.com/vi/mbc4jeyO57k/maxresdefault.jpg",
+      "imageUrl": "recipes_0203",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12000,7 +12396,7 @@
       "protein": 8.6,
       "fat": 5.4,
       "carbs": 25.8,
-      "imageUrl": "https://www.povarenok.ru/data/cache/2015mar/31/18/1088264_22823-710x550x.jpg",
+      "imageUrl": "recipes_0204",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12011,7 +12407,9 @@
         "Завтрак",
         "На ходу"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -12066,7 +12464,7 @@
       "protein": 7.8,
       "fat": 8.4,
       "carbs": 17.6,
-      "imageUrl": "https://img.iamcook.ru/2023/upl/recipes/zen/u-2801f38622a07a33244658b2c7bf166b.jpg",
+      "imageUrl": "recipes_0205",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12077,7 +12475,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "ближневосточная кухня"
+      ],
       "ingredients": [
         {
           "productName": "Пита",
@@ -12139,7 +12539,7 @@
       "protein": 7.2,
       "fat": 4.1,
       "carbs": 14.6,
-      "imageUrl": "https://media.ovkuse.ru/images/recipes/496ed05e-4157-4d8b-97fb-76349ab9781c/496ed05e-4157-4d8b-97fb-76349ab9781c_1200_630.webp",
+      "imageUrl": "recipes_0206",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12151,7 +12551,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Фасоль отварная",
@@ -12205,7 +12607,7 @@
       "protein": 0.9,
       "fat": 0.3,
       "carbs": 11.8,
-      "imageUrl": "https://about-tea.ru/wp-content/uploads/8/4/2/8426b8cbfa01c4d0e6dede13ab61a630.jpeg",
+      "imageUrl": "recipes_0207",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12219,7 +12621,9 @@
         "Шейк",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Морковь",
@@ -12262,7 +12666,7 @@
       "protein": 2.6,
       "fat": 3.2,
       "carbs": 15.4,
-      "imageUrl": "https://www.makfa.ru/upload/iblock/389/389a9517bfc0953cbec985dde8ba856d.jpg",
+      "imageUrl": "recipes_0208",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12326,7 +12730,7 @@
       "protein": 3.4,
       "fat": 1.8,
       "carbs": 16.2,
-      "imageUrl": "https://i.pinimg.com/736x/17/a3/be/17a3be315f51d0008dad61209710bdb9.jpg",
+      "imageUrl": "recipes_0209",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12338,7 +12742,10 @@
         "Завтрак",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "детское",
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Ягоды",
@@ -12372,7 +12779,7 @@
       "protein": 6.4,
       "fat": 6.8,
       "carbs": 22.4,
-      "imageUrl": "https://racion.net/uploads/posts/2013-04/1365173691_535235235.jpg",
+      "imageUrl": "recipes_0210",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12423,7 +12830,7 @@
       "protein": 7.4,
       "fat": 9.2,
       "carbs": 20.6,
-      "imageUrl": "https://vkusnoff.com/img/recepty/907/final.webp",
+      "imageUrl": "recipes_0211",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12435,7 +12842,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб цельнозерновой",
@@ -12485,7 +12894,7 @@
       "protein": 6.8,
       "fat": 2.4,
       "carbs": 16.8,
-      "imageUrl": "https://www.detkipodelki.ru/upload/027/u2754/e/b/kendi-korn-images-big.jpg",
+      "imageUrl": "recipes_0212",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12496,7 +12905,10 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "праздничное",
+        "Хэллоуин"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -12539,7 +12951,7 @@
       "protein": 7.8,
       "fat": 6.4,
       "carbs": 26.8,
-      "imageUrl": "https://cdn.7days.ru/pic/8d6/846757/281613/86.jpg",
+      "imageUrl": "recipes_0213",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12548,7 +12960,10 @@
         "Десерт",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "праздничное",
+        "Рождество"
+      ],
       "ingredients": [
         {
           "productName": "Хлеб пшеничный",
@@ -12603,7 +13018,7 @@
       "protein": 4.2,
       "fat": 8.6,
       "carbs": 46.4,
-      "imageUrl": "https://static.1000.menu/img/content-v2/4c/90/5579/obezyanii-xleb_1600125559_color_e8b011_vert.jpg",
+      "imageUrl": "recipes_0214",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12614,7 +13029,9 @@
         "Завтрак",
         "Десерт"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "праздничное"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -12669,7 +13086,7 @@
       "protein": 6.2,
       "fat": 5.8,
       "carbs": 23.4,
-      "imageUrl": "https://www.povarenok.ru/images/users/23_10_09/222368.jpg",
+      "imageUrl": "recipes_0215",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12729,7 +13146,7 @@
       "protein": 4.8,
       "fat": 7.6,
       "carbs": 22.4,
-      "imageUrl": "https://namenu.ru/upload/recipes/foto/3032.jpg",
+      "imageUrl": "recipes_0216",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12739,7 +13156,9 @@
         "Завтрак",
         "Перекус"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "на каждый день"
+      ],
       "ingredients": [
         {
           "productName": "Картофель",
@@ -12794,7 +13213,7 @@
       "protein": 3.4,
       "fat": 2.8,
       "carbs": 18.6,
-      "imageUrl": "https://img.povar.ru/main-micro/92/80/70/3f/mannaya_kasha_s_yablokami-618455.JPG",
+      "imageUrl": "recipes_0217",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12804,7 +13223,9 @@
         "Лёгкий",
         "Быстрое приготовление"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Овсяные хлопья",
@@ -12854,7 +13275,7 @@
       "protein": 7.2,
       "fat": 3.4,
       "carbs": 16.8,
-      "imageUrl": "https://www.mir-krup.ru/upload/medialibrary/e9e/bjfve0ccrt33fjmlh7fyrqkkgxa75bpg/boul_ris_2.jpg",
+      "imageUrl": "recipes_0218",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12864,7 +13285,9 @@
         "Перекус",
         "Лёгкий"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "летнее"
+      ],
       "ingredients": [
         {
           "productName": "Греческий йогурт",
@@ -12911,7 +13334,7 @@
       "protein": 3.8,
       "fat": 12.4,
       "carbs": 46.8,
-      "imageUrl": "https://img.tsn.ua/cached/133/tsn-71c6e1c5a35efa308f11e0ccf1aae45e/thumbs/1200x630/20/26/88a6acda13327580f1e6d30e1b7a2620.jpeg",
+      "imageUrl": "recipes_0219",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -12923,7 +13346,10 @@
         "Сладости",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "праздничное",
+        "Рождество"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -12978,7 +13404,7 @@
       "protein": 12.4,
       "fat": 2.8,
       "carbs": 10.6,
-      "imageUrl": "https://media.ovkuse.ru/images/recipes/f4749fb8-6c72-4c96-bc73-a882555995b8/f4749fb8-6c72-4c96-bc73-a882555995b8.jpg",
+      "imageUrl": "recipes_0220",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -13035,7 +13461,7 @@
       "protein": 4.6,
       "fat": 9.2,
       "carbs": 32.4,
-      "imageUrl": "https://kitchen.727go.com/wp-content/uploads/2019/12/photo_2021-05-03_10-36-39-1200x900.jpg",
+      "imageUrl": "recipes_0221",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -13097,7 +13523,7 @@
       "protein": 7.8,
       "fat": 5.4,
       "carbs": 17.6,
-      "imageUrl": "https://img.iamcook.ru/2024/upl/recipes/byusers/misc/155499775/9b1faa6ec076e81d46e55b895b8383da-2024.jpg",
+      "imageUrl": "recipes_0222",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -13108,7 +13534,10 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня",
+        "бобовые"
+      ],
       "ingredients": [
         {
           "productName": "Тортилья",
@@ -13167,7 +13596,7 @@
       "protein": 7.4,
       "fat": 10.2,
       "carbs": 64.8,
-      "imageUrl": "https://domashnyaya-kulinariya.ru/wp-content/uploads/2019/09/IMG_1173-825x549.jpg",
+      "imageUrl": "recipes_0223",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -13178,7 +13607,10 @@
         "Перекус",
         "Завтрак"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "перекус",
+        "осеннее"
+      ],
       "ingredients": [
         {
           "productName": "Мука пшеничная",
@@ -13225,7 +13657,7 @@
       "protein": 4.2,
       "fat": 3.6,
       "carbs": 18.4,
-      "imageUrl": "https://static.1000.menu/img/content-v2/de/5b/79899/polenta-klassicheskaya_1698975453_1_max.jpg",
+      "imageUrl": "recipes_0224",
       "isFavorite": false,
       "categoryNames": [
         "Вегетарианский",
@@ -13237,7 +13669,9 @@
         "Завтрак",
         "Обед"
       ],
-      "collectionTitles": [],
+      "collectionTitles": [
+        "мексиканская кухня"
+      ],
       "ingredients": [
         {
           "productName": "Полента",

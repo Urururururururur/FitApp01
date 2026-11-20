@@ -15,92 +15,118 @@ class RecipeSeeder(
         try {
             val recipeDao = database.recipeDao()
             val categoryDao = database.categoryDao()
+            val collectionDao = database.collectionDao()
 
-            // ИСПРАВЛЕНИЕ: Проверяем наличие категорий, а не рецептов!
-            // Если категории уже есть, значит база уже заполнялась.
+            // Проверяем, есть ли уже рецепты (если база заполнена, ничего не делаем)
             val existingCategories = categoryDao.getAllCategories().first()
             if (existingCategories.isNotEmpty()) {
-                Log.d("RecipeSeeder", "База уже заполнена (категорий: ${existingCategories.size}). Пропускаем.")
+                Log.d("RecipeSeeder", "База уже заполнена. Пропускаем.")
                 return@withContext
             }
 
-            Log.d("RecipeSeeder", "Начинаем загрузку рецептов из JSON...")
-
-            val jsonString = context.assets.open("recipes.json").bufferedReader().use { it.readText() }
-            val payload = Gson().fromJson(jsonString, RecipesPayload::class.java)
-
-            if (payload == null || payload.recipes.isEmpty()) {
-                Log.e("RecipeSeeder", "JSON пустой или не распарсился")
-                return@withContext
-            }
-
-            // 1. Вставляем категории
+            // Сюда мы будем сохранять ID существующих и только что созданных категорий/подборок
             val categoryIdMap = mutableMapOf<String, Long>()
-            payload.categories.forEach { jsonCat ->
-                val type = try { CategoryType.valueOf(jsonCat.type) } catch (e: Exception) { CategoryType.OTHER }
-                val id = categoryDao.insertCategory(CategoryEntity(name = jsonCat.name, type = type, icon = jsonCat.icon))
-                categoryIdMap[jsonCat.name] = id
-            }
-
-            // 2. Вставляем подборки
             val collectionIdMap = mutableMapOf<String, Long>()
-            payload.collections.forEach { jsonCol ->
-                val id = database.collectionDao().insertCollection(CollectionEntity(title = jsonCol.title, subtitle = jsonCol.subtitle, imageUrl = jsonCol.imageUrl))
-                collectionIdMap[jsonCol.title] = id
+
+            // 1. Сначала загружаем то, что УЖЕ есть в базе (на случай, если сидер запускался частично)
+            existingCategories.forEach { categoryIdMap[it.name] = it.id }
+            // Если у тебя есть метод получения всех подборок, можешь добавить и его сюда
+
+            // Список твоих JSON файлов. Просто добавляй новые сюда в будущем!
+            val jsonFiles = listOf("recipes.json", "recipes_part2.json")
+
+            for (fileName in jsonFiles) {
+                Log.d("RecipeSeeder", "Начинаем чтение файла: $fileName")
+                try {
+                    val jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
+                    val payload = Gson().fromJson(jsonString, RecipesPayload::class.java)
+
+                    if (payload == null || payload.recipes.isEmpty()) {
+                        Log.w("RecipeSeeder", "Файл $fileName пустой или не распарсился")
+                        continue
+                    }
+
+                    // 2. Обрабатываем категории из файла
+                    payload.categories?.forEach { jsonCat ->
+                        if (!categoryIdMap.containsKey(jsonCat.name)) {
+                            val type = try { CategoryType.valueOf(jsonCat.type) } catch (e: Exception) { CategoryType.OTHER }
+                            // Создаем категорию только если ее еще нет в мапе
+                            val newId = categoryDao.insertCategory(CategoryEntity(name = jsonCat.name, type = type, icon = jsonCat.icon))
+                            categoryIdMap[jsonCat.name] = newId
+                        }
+                    }
+
+                    // 3. Обрабатываем подборки из файла
+                    payload.collections?.forEach { jsonCol ->
+                        if (!collectionIdMap.containsKey(jsonCol.title)) {
+                            val newId = collectionDao.insertCollection(CollectionEntity(title = jsonCol.title, subtitle = jsonCol.subtitle, imageUrl = jsonCol.imageUrl))
+                            collectionIdMap[jsonCol.title] = newId
+                        }
+                    }
+
+                    // Списки для пакетной вставки
+                    val ingredientsToInsert = mutableListOf<RecipeIngredientEntity>()
+                    val recipeCategoriesToInsert = mutableListOf<RecipeCategoryCrossRef>()
+                    val collectionRecipesToInsert = mutableListOf<CollectionRecipeCrossRef>()
+
+                    // 4. Обрабатываем рецепты
+                    payload.recipes.forEach { jsonRecipe ->
+                        val recipeEntity = RecipeEntity(
+                            title = jsonRecipe.title,
+                            description = jsonRecipe.description,
+                            instructions = jsonRecipe.instructions.joinToString("\n"),
+                            cookTimeMinutes = jsonRecipe.cookTimeMinutes,
+                            servings = jsonRecipe.servings,
+                            totalWeightGrams = jsonRecipe.totalWeightGrams,
+                            calories = jsonRecipe.calories,
+                            protein = jsonRecipe.protein,
+                            fat = jsonRecipe.fat,
+                            carbs = jsonRecipe.carbs,
+                            // Конвертируем локальное имя картинки в системный URI для Android
+                            imageUrl = jsonRecipe.imageUrl?.let {
+                                "android.resource://${context.packageName}/drawable/${it.substringBefore(".")}"
+                            },
+                            isFavorite = jsonRecipe.isFavorite
+                        )
+
+                        val newRecipeId = recipeDao.insertRecipe(recipeEntity)
+
+                        // Ингредиенты
+                        jsonRecipe.ingredients.forEach { ing ->
+                            ingredientsToInsert.add(RecipeIngredientEntity(recipeId = newRecipeId, productName = ing.productName, grams = ing.grams))
+                        }
+
+                        // Категории
+                        jsonRecipe.categoryNames.forEach { catName ->
+                            categoryIdMap[catName]?.let { catId ->
+                                recipeCategoriesToInsert.add(RecipeCategoryCrossRef(recipeId = newRecipeId, categoryId = catId))
+                            }
+                        }
+
+                        // Подборки (новые)
+                        jsonRecipe.collectionTitles.forEach { colTitle ->
+                            collectionIdMap[colTitle]?.let { colId ->
+                                collectionRecipesToInsert.add(CollectionRecipeCrossRef(collectionId = colId, recipeId = newRecipeId))
+                            }
+                        }
+                    }
+
+                    // Массовая вставка связей для текущего файла
+                    if (ingredientsToInsert.isNotEmpty()) recipeDao.insertAllIngredients(ingredientsToInsert)
+                    if (recipeCategoriesToInsert.isNotEmpty()) recipeDao.insertAllRecipeCategories(recipeCategoriesToInsert)
+                    if (collectionRecipesToInsert.isNotEmpty()) recipeDao.insertAllCollectionRecipes(collectionRecipesToInsert)
+
+                    Log.d("RecipeSeeder", "Успешно загружено ${payload.recipes.size} рецептов из $fileName")
+
+                } catch (e: Exception) {
+                    Log.e("RecipeSeeder", "Ошибка при чтении $fileName", e)
+                }
             }
 
-            val ingredientsToInsert = mutableListOf<RecipeIngredientEntity>()
-            val recipeCategoriesToInsert = mutableListOf<RecipeCategoryCrossRef>()
-            val collectionRecipesToInsert = mutableListOf<CollectionRecipeCrossRef>()
-
-            // 3. Вставляем рецепты
-            payload.recipes.forEach { jsonRecipe ->
-                val recipeEntity = RecipeEntity(
-                    title = jsonRecipe.title,
-                    description = jsonRecipe.description,
-                    instructions = jsonRecipe.instructions.joinToString("\n"),
-                    cookTimeMinutes = jsonRecipe.cookTimeMinutes,
-                    servings = jsonRecipe.servings,
-                    totalWeightGrams = jsonRecipe.totalWeightGrams,
-                    calories = jsonRecipe.calories,
-                    protein = jsonRecipe.protein,
-                    fat = jsonRecipe.fat,
-                    carbs = jsonRecipe.carbs,
-                    imageUrl = jsonRecipe.imageUrl,
-                    isFavorite = jsonRecipe.isFavorite
-                )
-
-                val newRecipeId = recipeDao.insertRecipe(recipeEntity)
-
-                // Ингредиенты
-                jsonRecipe.ingredients.forEach { ing ->
-                    ingredientsToInsert.add(RecipeIngredientEntity(recipeId = newRecipeId, productName = ing.productName, grams = ing.grams))
-                }
-
-                // Категории
-                jsonRecipe.categoryNames.forEach { catName ->
-                    categoryIdMap[catName]?.let { catId ->
-                        recipeCategoriesToInsert.add(RecipeCategoryCrossRef(recipeId = newRecipeId, categoryId = catId))
-                    }
-                }
-
-                // Подборки
-                jsonRecipe.collectionTitles.forEach { colTitle ->
-                    collectionIdMap[colTitle]?.let { colId ->
-                        collectionRecipesToInsert.add(CollectionRecipeCrossRef(collectionId = colId, recipeId = newRecipeId))
-                    }
-                }
-            }
-
-            // 4. Массовая вставка связей
-            recipeDao.insertAllIngredients(ingredientsToInsert)
-            recipeDao.insertAllRecipeCategories(recipeCategoriesToInsert)
-            recipeDao.insertAllCollectionRecipes(collectionRecipesToInsert)
-
-            Log.d("RecipeSeeder", "Успешно загружено ${payload.recipes.size} рецептов!")
+            Log.d("RecipeSeeder", "Общая загрузка завершена!")
 
         } catch (e: Exception) {
-            Log.e("RecipeSeeder", "Ошибка при загрузке рецептов", e)
+            Log.e("RecipeSeeder", "Критическая ошибка при загрузке рецептов", e)
         }
     }
 }

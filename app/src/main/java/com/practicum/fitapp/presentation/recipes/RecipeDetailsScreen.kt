@@ -21,10 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.practicum.fitapp.ui.theme.PrimaryGreen
 import com.practicum.fitapp.ui.theme.TextPrimary
 import com.practicum.fitapp.ui.theme.TextSecondary
+import androidx.compose.foundation.Image
+import coil.compose.AsyncImage
+import com.practicum.fitapp.presentation.common.rememberDrawablePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,9 +88,7 @@ fun RecipeDetailsScreen(
                         AsyncImage(
                             model = recipe.imageUrl,
                             contentDescription = recipe.title,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(250.dp),
+                            modifier = Modifier.fillMaxWidth().height(250.dp),
                             contentScale = ContentScale.Crop
                         )
                     }

@@ -24,14 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.practicum.fitapp.FullWidthRecipeCard
-import com.practicum.fitapp.data.local.CategoryEntity
 import com.practicum.fitapp.data.local.RecipeEntity
 import com.practicum.fitapp.presentation.common.GlassCard
 import com.practicum.fitapp.ui.theme.*
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.practicum.fitapp.presentation.common.rememberDrawablePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -186,11 +188,15 @@ fun RecipeCarouselCard(recipe: RecipeEntity, onClick: () -> Unit, hazeState: Haz
     ) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(130.dp)) {
+                // Внутри Box, где выводится картинка:
                 AsyncImage(
                     model = recipe.imageUrl,
                     contentDescription = recipe.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    modifier = Modifier.fillMaxSize(), // или как было
+                    contentScale = ContentScale.Crop,
+                    // Добавляем заглушку, если картинка не загрузилась:
+                    error = painterResource(id = android.R.drawable.ic_menu_gallery),
+                    placeholder = painterResource(id = android.R.drawable.ic_menu_gallery)
                 )
                 // Иконка звезды
                 Box(

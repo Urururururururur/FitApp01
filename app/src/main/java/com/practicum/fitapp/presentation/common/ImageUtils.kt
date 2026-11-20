@@ -1,38 +1,28 @@
 package com.practicum.fitapp.presentation.common
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.util.Base64
-import java.io.ByteArrayOutputStream
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 
-object ImageUtils {
-    /**
-     * Конвертирует изображение (Uri) в строку Base64.
-     * Мы также сжимаем картинку, чтобы она не весила слишком много.
-     */
-    fun uriToBase64(context: Context, uri: Uri): String? {
-        return try {
-            // 1. Открываем поток данных из Uri
-            val inputStream = context.contentResolver.openInputStream(uri)
-            // 2. Декодируем в Bitmap
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
+@Composable
+fun rememberDrawablePainter(imageUrl: String?): Painter? {
+    if (imageUrl.isNullOrBlank()) return null
 
-            if (bitmap == null) return null
+    // Если это вдруг ссылка на сайт, не трогаем её (пусть грузится через Coil)
+    if (imageUrl.startsWith("http")) return null
 
-            // 3. Сжимаем картинку (уменьшаем качество и размер, чтобы не превысить лимиты API)
-            val outputStream = ByteArrayOutputStream()
-            // Сжимаем в JPEG с качеством 60% (для нейросети этого достаточно)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, outputStream)
-            val byteArray = outputStream.toByteArray()
+    val context = LocalContext.current
 
-            // 4. Кодируем в Base64
-            Base64.encodeToString(byteArray, Base64.NO_WRAP)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    // Берем имя файла без расширения и без пути
+    val drawableName = imageUrl.substringBefore(".").substringAfterLast("/")
+
+    // Ищем ID ресурса по имени
+    val resId = context.resources.getIdentifier(drawableName, "drawable", context.packageName)
+
+    return if (resId != 0) {
+        painterResource(id = resId)
+    } else {
+        null
     }
 }
